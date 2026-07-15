@@ -22,10 +22,22 @@
                  SEÇÃO E-MAIL · Brevo + identidade + reply-to
                  ============================================================ --}}
             @php
-                $brevoConectado = !empty($configuracoes['brevo_api_key'] ?? null);
+                $chaveBrevo = trim($configuracoes['brevo_api_key'] ?? '');
+                $brevoConectado = $chaveBrevo !== '';
                 $chaveMascarada = $brevoConectado
-                    ? '••••••••••••••••••••' . substr($configuracoes['brevo_api_key'], -4)
+                    ? '••••••••••••••••••••' . substr($chaveBrevo, -4)
                     : '';
+
+                // Detecta modo pelo prefixo da chave
+                if (str_starts_with($chaveBrevo, 'xkeysib-')) {
+                    $modoBrevo = 'API HTTP';
+                } elseif (str_starts_with($chaveBrevo, 'xsmtpsib-')) {
+                    $modoBrevo = 'SMTP Relay';
+                } elseif ($brevoConectado && !empty($configuracoes['brevo_smtp_login'])) {
+                    $modoBrevo = 'SMTP Relay';
+                } else {
+                    $modoBrevo = $brevoConectado ? 'API HTTP' : null;
+                }
             @endphp
             <div class="mb-10 border-b border-gray-100 pb-10">
                 <div class="flex items-start justify-between gap-4 mb-6">
@@ -39,41 +51,58 @@
                         </div>
                     </div>
 
-                    @if($brevoConectado)
-                        <span class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                            Brevo conectado
-                        </span>
-                    @else
-                        <span class="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
-                            Sem credencial
-                        </span>
-                    @endif
+                    <div class="flex items-center gap-2">
+                        @if($brevoConectado)
+                            <span class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                Brevo conectado
+                            </span>
+                            @if($modoBrevo)
+                                <span class="inline-flex items-center gap-1.5 bg-[#0A1128] text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                                    modo · {{ $modoBrevo }}
+                                </span>
+                            @endif
+                        @else
+                            <span class="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                                <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                                Sem credencial
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
-                {{-- Subseção 1 · Servidor SMTP --}}
+                {{-- Subseção 1 · Credencial Brevo --}}
                 <div class="bg-[#F4F5F7] rounded-2xl p-6 mb-4">
-                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8F9C] mb-4">Servidor SMTP · Brevo</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Login SMTP</label>
-                            <input type="text" name="brevo_smtp_login" value="{{ $configuracoes['brevo_smtp_login'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white" placeholder="usuario@dominio.com.br">
-                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">Login gerado em <span class="font-semibold">Brevo → SMTP & API → SMTP</span>.</p>
-                        </div>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8F9C] mb-4">Credencial Brevo</p>
 
-                        <div>
-                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Chave SMTP</label>
-                            <input type="password" name="brevo_api_key" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white font-mono text-sm" placeholder="{{ $brevoConectado ? $chaveMascarada : 'xsmtpsib-xxxxxxxxxxxxxxxxxxxx' }}">
-                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Chave Brevo</label>
+                        <input type="password" name="brevo_api_key" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white font-mono text-sm" placeholder="{{ $brevoConectado ? $chaveMascarada : 'xkeysib-xxxxxxxxxxxxxxxxxxxx' }}">
+                        <div class="mt-2 text-[11px] text-[#8A8F9C] space-y-1">
+                            <p>
                                 @if($brevoConectado)
                                     Chave já salva. Deixe em branco para <span class="font-semibold">manter a atual</span> ou digite uma nova para substituir.
                                 @else
                                     A chave nunca é exibida depois de salva.
                                 @endif
                             </p>
+                            <p>
+                                <span class="font-mono font-semibold text-[#0A1128]">xkeysib-…</span> = API HTTP (recomendado, dispensa login). <span class="font-mono font-semibold text-[#0A1128]">xsmtpsib-…</span> = SMTP Relay (precisa preencher o login abaixo).
+                            </p>
                         </div>
                     </div>
+
+                    <details class="group">
+                        <summary class="cursor-pointer text-[11px] font-bold uppercase tracking-widest text-[#8A8F9C] hover:text-[#0A1128] transition-colors inline-flex items-center gap-2">
+                            <svg class="w-3 h-3 group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                            Uso avançado · SMTP Relay
+                        </summary>
+                        <div class="mt-4">
+                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Login SMTP <span class="text-[#8A8F9C] font-normal normal-case">(apenas se estiver usando chave xsmtpsib-)</span></label>
+                            <input type="text" name="brevo_smtp_login" value="{{ $configuracoes['brevo_smtp_login'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white" placeholder="usuario@dominio.com.br">
+                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">Encontrado em <span class="font-semibold">Brevo → SMTP & API → aba SMTP</span>. Não é necessário se você estiver usando a chave API (xkeysib-).</p>
+                        </div>
+                    </details>
                 </div>
 
                 {{-- Subseção 2 · Identidade da mensagem --}}
