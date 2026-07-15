@@ -18,37 +18,117 @@
         <form action="{{ route('admin.configuracoes.store') }}" method="POST">
             @csrf
 
-            <!-- Seção Brevo -->
-            <div class="mb-8 border-b border-gray-100 pb-8">
-                <h3 class="text-lg font-bold text-[#0A1128] flex items-center gap-2 mb-4">
-                    <svg class="w-5 h-5 text-[#E63888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"></path></svg>
-                    Integração Brevo (E-mails Transacionais)
-                </h3>
-                <p class="text-sm text-[#8A8F9C] mb-6">
-                    A chave SMTP gerada no painel do Brevo será utilizada para disparar todas as notificações e e-mails do sistema via API segura do servidor.
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Login SMTP (Brevo Email)</label>
-                        <input type="text" name="brevo_smtp_login" value="{{ $configuracoes['brevo_smtp_login'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]" placeholder="seuemail@nc5.com.br">
+            {{-- ============================================================
+                 SEÇÃO E-MAIL · Brevo + identidade + reply-to
+                 ============================================================ --}}
+            @php
+                $brevoConectado = !empty($configuracoes['brevo_api_key'] ?? null);
+                $chaveMascarada = $brevoConectado
+                    ? '••••••••••••••••••••' . substr($configuracoes['brevo_api_key'], -4)
+                    : '';
+            @endphp
+            <div class="mb-10 border-b border-gray-100 pb-10">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#F4F5F7] flex items-center justify-center text-[#0A1128]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-[#0A1128] leading-tight">Envio de e-mails</h3>
+                            <p class="text-xs text-[#8A8F9C] mt-0.5">Servidor SMTP · identidade · caixa de resposta</p>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Chave SMTP (Brevo API)</label>
-                        <input type="password" name="brevo_api_key" value="{{ $configuracoes['brevo_api_key'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="xsmtpsib-xxxxxxxxxxxxxxxxxxxxxxx">
-                    </div>
+                    @if($brevoConectado)
+                        <span class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            Brevo conectado
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                            <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                            Sem credencial
+                        </span>
+                    @endif
+                </div>
 
-                    <div>
-                        <label class="block text-sm font-bold text-[#0A1128] mb-2">E-mail do Remetente (From)</label>
-                        <input type="email" name="mail_from_address" value="{{ $configuracoes['mail_from_address'] ?? 'contato@nc5.com.br' }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]" placeholder="contato@seudominio.com.br">
-                    </div>
+                {{-- Subseção 1 · Servidor SMTP --}}
+                <div class="bg-[#F4F5F7] rounded-2xl p-6 mb-4">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8F9C] mb-4">Servidor SMTP · Brevo</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Login SMTP</label>
+                            <input type="text" name="brevo_smtp_login" value="{{ $configuracoes['brevo_smtp_login'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white" placeholder="usuario@dominio.com.br">
+                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">Login gerado em <span class="font-semibold">Brevo → SMTP & API → SMTP</span>.</p>
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Nome do Remetente</label>
-                        <input type="text" name="mail_from_name" value="{{ $configuracoes['mail_from_name'] ?? 'NC5 Hub' }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]" placeholder="Ex: NC5 Hub">
+                        <div>
+                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Chave SMTP</label>
+                            <input type="password" name="brevo_api_key" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white font-mono text-sm" placeholder="{{ $brevoConectado ? $chaveMascarada : 'xsmtpsib-xxxxxxxxxxxxxxxxxxxx' }}">
+                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">
+                                @if($brevoConectado)
+                                    Chave já salva. Deixe em branco para <span class="font-semibold">manter a atual</span> ou digite uma nova para substituir.
+                                @else
+                                    A chave nunca é exibida depois de salva.
+                                @endif
+                            </p>
+                        </div>
                     </div>
                 </div>
+
+                {{-- Subseção 2 · Identidade da mensagem --}}
+                <div class="bg-[#F4F5F7] rounded-2xl p-6 mb-4">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8F9C] mb-4">Identidade do remetente · quem aparece como autor</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">E-mail (From)</label>
+                            <input type="email" name="mail_from_address" value="{{ $configuracoes['mail_from_address'] ?? 'contato@nc5.com.br' }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white" placeholder="contato@nc5.com.br">
+                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">Deve ser um domínio <span class="font-semibold">autenticado no Brevo</span> (SPF/DKIM), senão o e-mail vai para spam.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Nome de exibição</label>
+                            <input type="text" name="mail_from_name" value="{{ $configuracoes['mail_from_name'] ?? 'NC5 Hub' }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white" placeholder="Ex: NC5 Hub">
+                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">Aparece antes do e-mail na caixa de entrada.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Subseção 3 · Reply-To --}}
+                <div class="bg-[#F4F5F7] rounded-2xl p-6">
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8A8F9C]">Respostas do cliente · Reply-To</p>
+                            <p class="text-xs text-[#8A8F9C] mt-1 max-w-xl">Quando o cliente clicar em "Responder" no e-mail, a mensagem vai para <span class="font-semibold text-[#0A1128]">este endereço</span> em vez do remetente técnico. Deixe em branco para receber no próprio From.</p>
+                        </div>
+                        <span class="hidden sm:inline-flex bg-white border border-black/5 text-[10px] font-bold text-[#8A8F9C] uppercase tracking-wider px-2 py-1 rounded-full">Recomendado</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">E-mail para respostas</label>
+                            <input type="email" name="mail_reply_to" value="{{ $configuracoes['mail_reply_to'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white" placeholder="atendimento@nc5.com.br">
+                            <p class="mt-1.5 text-[11px] text-[#8A8F9C]">Use uma <span class="font-semibold">caixa monitorada</span> (ex.: atendimento@).</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-[#0A1128] mb-2 uppercase tracking-wider">Nome exibido nas respostas <span class="text-[#8A8F9C] font-normal normal-case">(opcional)</span></label>
+                            <input type="text" name="mail_reply_to_name" value="{{ $configuracoes['mail_reply_to_name'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] bg-white" placeholder="Ex: Atendimento NC5">
+                        </div>
+                    </div>
+                </div>
+
+                @if(!empty($configuracoes['mail_reply_to'] ?? null) || !empty($configuracoes['mail_from_address'] ?? null))
+                    <div class="mt-5 p-4 bg-[#0A1128] rounded-xl text-white text-xs">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-2">Prévia do cabeçalho</p>
+                        <div class="font-mono space-y-1 text-white/85">
+                            <div><span class="text-white/40">From:</span> {{ $configuracoes['mail_from_name'] ?? 'NC5 Hub' }} &lt;{{ $configuracoes['mail_from_address'] ?? '—' }}&gt;</div>
+                            @if(!empty($configuracoes['mail_reply_to'] ?? null))
+                                <div><span class="text-white/40">Reply-To:</span> {{ $configuracoes['mail_reply_to_name'] ?? ($configuracoes['mail_from_name'] ?? '') }} &lt;{{ $configuracoes['mail_reply_to'] }}&gt;</div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Motor BruceIA -->
