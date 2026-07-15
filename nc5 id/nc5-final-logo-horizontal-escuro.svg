@@ -1,0 +1,17 @@
+<svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .nc5 { font-family: 'Arial', 'Helvetica', sans-serif; font-weight: 700; font-size: 74px; fill: #F4F5F7; letter-spacing: -2px; }
+      .hub { font-family: 'Arial', 'Helvetica', sans-serif; font-weight: 500; font-size: 16px; fill: #8B92A8; letter-spacing: 4px; }
+    </style>
+  </defs>
+
+  <g transform="translate(10,10) scale(0.85)">
+    <path d="M 150.79 64.44 A 62 62 0 1 1 116.05 40.11" fill="none" stroke="#F4F5F7" stroke-width="7" stroke-linecap="round"/>
+    <line x1="135.56" y1="49.21" x2="150.47" y2="27.91" stroke="#F4F5F7" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="150.47" cy="27.91" r="9" fill="#F4F5F7"/>
+  </g>
+
+  <text x="196" y="116" class="nc5">NC5</text>
+  <text x="198" y="146" class="hub">HUB DIGITAL</text>
+</svg>

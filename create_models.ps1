@@ -1,0 +1,10 @@
+php artisan make:model Servico -m
+php artisan make:model Contrato -m
+php artisan make:model Fatura -m
+php artisan make:model Material -m
+php artisan make:model Relatorio -m
+php artisan make:model Ticket -m
+php artisan make:model TicketMensagem -m
+php artisan make:model Pagina -m
+php artisan make:model Post -m
+php artisan make:model PedidoServico -m
