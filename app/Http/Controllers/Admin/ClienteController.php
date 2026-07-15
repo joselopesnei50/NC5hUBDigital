@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContaClienteCriadaMail;
 use App\Models\Cliente;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ClienteController extends Controller
@@ -33,26 +36,40 @@ class ClienteController extends Controller
             'telefone' => 'nullable|string',
         ]);
 
-        // Criar o User de login pro cliente
-        $senha_padrao = Str::random(8); // Podemos enviar por email depois
+        // Cria o usuário de login com senha temporária
+        $senhaTemp = Str::random(10);
         $user = User::create([
-            'name' => $request->nome,
-            'email' => $request->email,
-            'password' => Hash::make($senha_padrao),
-            'role' => 'cliente'
+            'name'     => $request->nome,
+            'email'    => $request->email,
+            'password' => Hash::make($senhaTemp),
+            'role'     => 'cliente',
         ]);
 
-        // Criar os dados isolados do cliente
         Cliente::create([
-            'user_id' => $user->id,
-            'tipo_pessoa' => $request->tipo_pessoa,
-            'cpf_cnpj' => $request->cpf_cnpj,
+            'user_id'      => $user->id,
+            'tipo_pessoa'  => $request->tipo_pessoa,
+            'cpf_cnpj'     => $request->cpf_cnpj,
             'razao_social' => $request->razao_social,
-            'telefone' => $request->telefone,
-            'status' => 'ativo'
+            'telefone'     => $request->telefone,
+            'status'       => 'ativo',
         ]);
 
-        return redirect()->route('admin.clientes.index')->with('success', 'Cliente cadastrado com sucesso! A senha padrão é: ' . $senha_padrao);
+        // Envia e-mail de boas-vindas com a senha temporária
+        $emailEnviado = false;
+        try {
+            Mail::to($user->email)->send(new ContaClienteCriadaMail($user, $senhaTemp));
+            $emailEnviado = true;
+        } catch (\Throwable $e) {
+            Log::error('Falha ao enviar e-mail de boas-vindas para ' . $user->email . ': ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.clientes.index')
+            ->with('cliente_criado', [
+                'nome'         => $user->name,
+                'email'        => $user->email,
+                'senha'        => $senhaTemp,
+                'email_enviado'=> $emailEnviado,
+            ]);
     }
 
     public function show($id)

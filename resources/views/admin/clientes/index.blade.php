@@ -17,6 +17,57 @@
         </div>
     @endif
 
+    @if($cc = session('cliente_criado'))
+        <div x-data="{ copiado: false }" class="mb-6 relative overflow-hidden bg-[#0A1128] rounded-2xl p-6 lg:p-8 text-white shadow-xl shadow-[#0A1128]/10">
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-[#FF7A1A]/20 rounded-full blur-[80px] pointer-events-none"></div>
+
+            <div class="relative flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300">Cliente criado com sucesso</span>
+                    </div>
+                    <h3 class="text-xl font-bold leading-tight">{{ $cc['nome'] }}</h3>
+                    <p class="text-sm text-white/60 mt-1">{{ $cc['email'] }}</p>
+
+                    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Senha temporária</p>
+                            <div class="flex items-center gap-2">
+                                <p class="font-mono text-lg font-bold tracking-wider text-white select-all">{{ $cc['senha'] }}</p>
+                                <button type="button"
+                                        @click="navigator.clipboard.writeText('{{ $cc['senha'] }}'); copiado = true; setTimeout(() => copiado = false, 2000)"
+                                        class="ml-auto text-xs font-bold text-[#FF7A1A] hover:text-white transition-colors">
+                                    <span x-show="!copiado">Copiar</span>
+                                    <span x-show="copiado" style="display:none">Copiado ✓</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">E-mail de boas-vindas</p>
+                            @if($cc['email_enviado'])
+                                <p class="text-sm font-semibold text-emerald-300 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    Enviado ao cliente
+                                </p>
+                            @else
+                                <p class="text-sm font-semibold text-[#FF7A1A] flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M4.062 19h15.876c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L2.33 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Falha no envio — passe a senha manualmente
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if(!$cc['email_enviado'])
+                        <p class="mt-3 text-xs text-white/60">Confira em <span class="font-semibold text-white">Configurações → Envio de e-mails</span> se as credenciais do Brevo estão preenchidas e o domínio autenticado.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-left">
