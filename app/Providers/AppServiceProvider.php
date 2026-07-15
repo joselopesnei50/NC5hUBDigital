@@ -8,6 +8,7 @@ use Illuminate\Mail\MailManager;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,8 +20,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // Força HTTPS em URLs geradas por route() e url() quando estivermos
+        // atrás de proxy/SSL (produção). Evita link http:// no e-mail com SSL ativo.
+        if ($this->app->environment('production') || str_starts_with(config('app.url', ''), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         // Registra o transport 'brevo-api' no MailManager.
-        // O Laravel resolve isso quando a config aponta para transport: 'brevo-api'.
         $this->app->resolving('mail.manager', function (MailManager $manager) {
             $manager->extend('brevo-api', function (array $config) {
                 return new BrevoApiTransport($config['key'] ?? '');
