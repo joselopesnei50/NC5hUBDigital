@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContratoDisponivelMail;
 use App\Models\Contrato;
 use App\Models\Cliente;
 use App\Models\Servico;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ContratoController extends Controller
 {
@@ -33,7 +36,7 @@ class ContratoController extends Controller
             'data_fim'    => 'nullable|date',
         ]);
 
-        Contrato::create([
+        $contrato = Contrato::create([
             'cliente_id' => $request->cliente_id,
             'servico_id' => $request->servico_id ?: null,
             'data_inicio' => $request->data_inicio,
@@ -42,7 +45,17 @@ class ContratoController extends Controller
             'status'      => 'ativo',
         ]);
 
-        return redirect()->route('admin.contratos.index')->with('success', 'Contrato criado com sucesso!');
+        try {
+            $contrato->load(['cliente.user', 'servico']);
+            $email = $contrato->cliente->user->email ?? null;
+            if ($email) {
+                Mail::to($email)->send(new ContratoDisponivelMail($contrato));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Falha ao enviar e-mail de contrato #' . $contrato->id . ': ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.contratos.index')->with('success', 'Contrato criado e e-mail enviado ao cliente!');
     }
 
     public function show($id)
