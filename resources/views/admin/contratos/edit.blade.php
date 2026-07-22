@@ -1,3 +1,5 @@
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center gap-4">
@@ -8,8 +10,18 @@
         </div>
     </x-slot>
 
-    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 max-w-3xl">
-        <form action="{{ route('admin.contratos.update', $contrato->id) }}" method="POST">
+    @if($contrato->status_assinatura === 'assinado')
+        <div class="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div>
+                <p class="text-sm font-bold text-amber-800">Contrato já assinado pelo cliente</p>
+                <p class="text-xs text-amber-700 mt-0.5">Alterações no corpo do contrato após a assinatura devem ser comunicadas ao cliente. O registro de assinatura original permanece preservado.</p>
+            </div>
+        </div>
+    @endif
+
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 max-w-5xl">
+        <form action="{{ route('admin.contratos.update', $contrato->id) }}" method="POST" id="contrato-form">
             @csrf
             @method('PUT')
 
@@ -50,6 +62,13 @@
                         @endforeach
                     </select>
                 </div>
+
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Corpo do Contrato</label>
+                    <p class="text-xs text-[#8A8F9C] mb-3">Este texto será exibido ao cliente no portal antes da assinatura.</p>
+                    <div id="quill-editor" class="rounded-xl border border-gray-300 bg-white" style="min-height: 400px;"></div>
+                    <textarea name="conteudo" id="conteudo" class="hidden"></textarea>
+                </div>
             </div>
 
             <div class="mt-8 flex items-center justify-end gap-4">
@@ -66,3 +85,28 @@
         </div>
     </div>
 </x-admin-layout>
+
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script>
+    var quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Digite as cláusulas e termos do contrato aqui...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'indent': '-1' }, { 'indent': '+1' }],
+                ['clean']
+            ]
+        }
+    });
+
+    @if($contrato->conteudo)
+        quill.clipboard.dangerouslyPasteHTML({!! json_encode($contrato->conteudo) !!});
+    @endif
+
+    document.getElementById('contrato-form').addEventListener('submit', function () {
+        document.getElementById('conteudo').value = quill.root.innerHTML;
+    });
+</script>

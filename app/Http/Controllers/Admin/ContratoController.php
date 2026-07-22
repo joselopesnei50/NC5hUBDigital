@@ -37,6 +37,7 @@ class ContratoController extends Controller
             'servico_id' => $request->servico_id,
             'data_inicio' => $request->data_inicio,
             'data_fim' => $request->data_fim,
+            'conteudo' => $request->conteudo,
             'status' => 'ativo'
         ]);
 
@@ -70,7 +71,7 @@ class ContratoController extends Controller
         ]);
 
         $contrato->update($request->only([
-            'cliente_id', 'servico_id', 'data_inicio', 'data_fim', 'status'
+            'cliente_id', 'servico_id', 'data_inicio', 'data_fim', 'status', 'conteudo'
         ]));
 
         return redirect()->route('admin.contratos.index')->with('success', 'Contrato atualizado.');

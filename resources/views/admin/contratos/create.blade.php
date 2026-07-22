@@ -1,3 +1,5 @@
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+
 <x-admin-layout>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-[#0A1128] leading-tight tracking-tight">
@@ -5,8 +7,8 @@
         </h2>
     </x-slot>
 
-    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 max-w-3xl">
-        <form action="{{ route('admin.contratos.store') }}" method="POST">
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 max-w-5xl">
+        <form action="{{ route('admin.contratos.store') }}" method="POST" id="contrato-form">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -39,6 +41,13 @@
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Data de Término (Opcional)</label>
                     <input type="date" name="data_fim" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
                 </div>
+
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Corpo do Contrato</label>
+                    <p class="text-xs text-[#8A8F9C] mb-3">Escreva as cláusulas, termos e condições do contrato. O cliente verá este texto antes de assinar.</p>
+                    <div id="quill-editor" class="rounded-xl border border-gray-300 bg-white" style="min-height: 400px;"></div>
+                    <textarea name="conteudo" id="conteudo" class="hidden"></textarea>
+                </div>
             </div>
 
             <div class="mt-8 flex items-center justify-end gap-4">
@@ -50,3 +59,24 @@
         </form>
     </div>
 </x-admin-layout>
+
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script>
+    var quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Digite as cláusulas e termos do contrato aqui...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                [{ 'indent': '-1' }, { 'indent': '+1' }],
+                ['clean']
+            ]
+        }
+    });
+
+    document.getElementById('contrato-form').addEventListener('submit', function () {
+        document.getElementById('conteudo').value = quill.root.innerHTML;
+    });
+</script>

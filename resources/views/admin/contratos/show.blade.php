@@ -62,4 +62,17 @@
             @endif
         </div>
     </div>
+
+    @if($contrato->conteudo)
+        <div class="mt-6 bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+            <h3 class="text-lg font-bold text-[#0A1128] mb-6">Corpo do Contrato</h3>
+            <div class="prose prose-sm max-w-none text-[#0A1128] leading-relaxed ql-editor" style="padding: 0;">
+                {!! $contrato->conteudo !!}
+            </div>
+        </div>
+    @else
+        <div class="mt-6 bg-white border border-dashed border-gray-300 rounded-2xl p-8 text-center">
+            <p class="text-sm text-[#8A8F9C]">Nenhum corpo de contrato redigido. <a href="{{ route('admin.contratos.edit', $contrato->id) }}" class="font-bold text-[#0A1128] hover:text-[#FF7A1A]">Editar para adicionar</a>.</p>
+        </div>
+    @endif
 </x-admin-layout>

@@ -73,6 +73,18 @@
                             
                             <div class="mt-2 text-sm text-[#8A8F9C] space-y-4">
                                 <p>Você está prestes a assinar o contrato referente ao serviço: <strong>{{ $contrato->servico->nome ?? 'Serviço' }}</strong>.</p>
+
+                                @if($contrato->conteudo)
+                                    <div class="bg-[#F4F5F7] rounded-xl border border-gray-200 overflow-hidden">
+                                        <div class="px-4 py-2 border-b border-gray-200 bg-white">
+                                            <p class="text-xs font-bold text-[#0A1128] uppercase tracking-wider">Leia o contrato antes de assinar</p>
+                                        </div>
+                                        <div class="p-4 max-h-60 overflow-y-auto text-xs text-[#0A1128] leading-relaxed ql-editor" style="padding: 1rem;">
+                                            {!! $contrato->conteudo !!}
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <div class="bg-[#F4F5F7] p-4 rounded-xl border border-gray-200">
                                     <p class="font-medium text-[#0A1128] mb-1">Declaração de Aceite:</p>
                                     <p class="italic text-xs">"Declaro que li e concordo com os termos propostos para a prestação do serviço. Reconheço esta assinatura digital como válida."</p>
