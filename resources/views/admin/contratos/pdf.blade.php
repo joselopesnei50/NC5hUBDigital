@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <title>Contrato #{{ $contrato->id }}</title>
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11px; color: #1a1a2e; line-height: 1.6; }
-    .header { background: #0A1128; color: #fff; padding: 28px 40px; }
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11px; color: #1a1a2e; line-height: 1.6; margin: 0; padding: 0; }
+    .header { background-color: #0A1128; color: #fff; padding: 28px 40px; }
     .header-label { font-size: 9px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; color: #E63888; margin-bottom: 6px; }
     .header-title { font-size: 22px; font-weight: bold; color: #fff; }
     .body { padding: 32px 40px; }
@@ -85,7 +84,7 @@
             <div style="margin-top:8px;">
                 <div class="sig-info"><strong>Data/Hora:</strong> {{ $sig['timestamp'] ?? '—' }}</div>
                 <div class="sig-info"><strong>IP:</strong> {{ $sig['ip'] ?? '—' }}</div>
-                <div class="sig-info"><strong>Dispositivo:</strong> {{ Str::limit($sig['user_agent'] ?? '—', 80) }}</div>
+                <div class="sig-info"><strong>Dispositivo:</strong> {{ \Illuminate\Support\Str::limit($sig['user_agent'] ?? '—', 80) }}</div>
             </div>
             @if(!empty($sig['signature_image']))
                 <br>
