@@ -72,7 +72,7 @@
                 </div>
             </div>
 
-            <div class="mt-8 flex items-center justify-end gap-4">
+            <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-end gap-4 sticky bottom-0 bg-white py-4 -mx-8 px-8 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
                 <a href="{{ route('admin.contratos.index') }}" class="text-[#8A8F9C] hover:text-[#0A1128] font-bold text-sm">Cancelar</a>
                 <button type="submit" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg">Salvar</button>
             </div>
