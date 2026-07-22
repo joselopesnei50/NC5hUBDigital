@@ -15,7 +15,7 @@
             <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             <div>
                 <p class="text-sm font-bold text-amber-800">Contrato já assinado pelo cliente</p>
-                <p class="text-xs text-amber-700 mt-0.5">Alterações no corpo do contrato após a assinatura devem ser comunicadas ao cliente. O registro de assinatura original permanece preservado.</p>
+                <p class="text-xs text-amber-700 mt-0.5">Alterações após a assinatura devem ser comunicadas ao cliente. O registro original permanece preservado.</p>
             </div>
         </div>
     @endif
@@ -36,8 +36,9 @@
                 </div>
 
                 <div class="col-span-2">
-                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Serviço</label>
-                    <select name="servico_id" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Serviço (opcional)</label>
+                    <select name="servico_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                        <option value="">— Contrato avulso / sem serviço vinculado —</option>
                         @foreach($servicos as $s)
                             <option value="{{ $s->id }}" @selected($contrato->servico_id == $s->id)>{{ $s->nome }} — R$ {{ number_format($s->preco, 2, ',', '.') }}</option>
                         @endforeach
@@ -46,12 +47,12 @@
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Data de Início</label>
-                    <input type="date" name="data_inicio" value="{{ old('data_inicio', optional($contrato->data_inicio)->format('Y-m-d') ?? $contrato->data_inicio) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="date" name="data_inicio" value="{{ old('data_inicio', optional($contrato->data_inicio)->format('Y-m-d')) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Data Final (opcional)</label>
-                    <input type="date" name="data_fim" value="{{ old('data_fim', optional($contrato->data_fim)->format('Y-m-d') ?? $contrato->data_fim) }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="date" name="data_fim" value="{{ old('data_fim', optional($contrato->data_fim)->format('Y-m-d')) }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
                 </div>
 
                 <div class="col-span-2">

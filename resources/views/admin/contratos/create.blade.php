@@ -23,9 +23,9 @@
                 </div>
 
                 <div class="col-span-2">
-                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Serviço a Contratar</label>
-                    <select name="servico_id" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
-                        <option value="">Selecione o Serviço do Catálogo...</option>
+                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Serviço (opcional)</label>
+                    <select name="servico_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
+                        <option value="">— Contrato avulso / sem serviço vinculado —</option>
                         @foreach($servicos as $servico)
                             <option value="{{ $servico->id }}">{{ $servico->nome }} — R$ {{ number_format($servico->preco, 2, ',', '.') }}</option>
                         @endforeach
@@ -44,7 +44,7 @@
 
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Corpo do Contrato</label>
-                    <p class="text-xs text-[#8A8F9C] mb-3">Escreva as cláusulas, termos e condições do contrato. O cliente verá este texto antes de assinar.</p>
+                    <p class="text-xs text-[#8A8F9C] mb-3">Escreva as cláusulas, termos e condições. O cliente verá este texto antes de assinar.</p>
                     <div id="quill-editor" class="rounded-xl border border-gray-300 bg-white" style="min-height: 400px;"></div>
                     <textarea name="conteudo" id="conteudo" class="hidden"></textarea>
                 </div>
@@ -75,7 +75,6 @@
             ]
         }
     });
-
     document.getElementById('contrato-form').addEventListener('submit', function () {
         document.getElementById('conteudo').value = quill.root.innerHTML;
     });

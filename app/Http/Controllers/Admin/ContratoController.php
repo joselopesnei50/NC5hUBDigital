@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Contrato;
 use App\Models\Cliente;
 use App\Models\Servico;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class ContratoController extends Controller
@@ -27,18 +28,18 @@ class ContratoController extends Controller
     {
         $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
-            'servico_id' => 'required|exists:servicos,id',
+            'servico_id' => 'nullable|exists:servicos,id',
             'data_inicio' => 'required|date',
-            'data_fim' => 'nullable|date',
+            'data_fim'    => 'nullable|date',
         ]);
 
         Contrato::create([
             'cliente_id' => $request->cliente_id,
-            'servico_id' => $request->servico_id,
+            'servico_id' => $request->servico_id ?: null,
             'data_inicio' => $request->data_inicio,
-            'data_fim' => $request->data_fim,
-            'conteudo' => $request->conteudo,
-            'status' => 'ativo'
+            'data_fim'    => $request->data_fim,
+            'conteudo'    => $request->conteudo,
+            'status'      => 'ativo',
         ]);
 
         return redirect()->route('admin.contratos.index')->with('success', 'Contrato criado com sucesso!');
@@ -64,15 +65,16 @@ class ContratoController extends Controller
 
         $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
-            'servico_id' => 'required|exists:servicos,id',
+            'servico_id' => 'nullable|exists:servicos,id',
             'data_inicio' => 'required|date',
-            'data_fim' => 'nullable|date',
-            'status' => 'required|in:ativo,inativo,pendente,cancelado',
+            'data_fim'    => 'nullable|date',
+            'status'      => 'required|in:ativo,inativo,pendente,cancelado',
         ]);
 
-        $contrato->update($request->only([
-            'cliente_id', 'servico_id', 'data_inicio', 'data_fim', 'status', 'conteudo'
-        ]));
+        $data = $request->only(['cliente_id', 'data_inicio', 'data_fim', 'status', 'conteudo']);
+        $data['servico_id'] = $request->servico_id ?: null;
+
+        $contrato->update($data);
 
         return redirect()->route('admin.contratos.index')->with('success', 'Contrato atualizado.');
     }
@@ -81,5 +83,12 @@ class ContratoController extends Controller
     {
         Contrato::findOrFail($id)->delete();
         return redirect()->route('admin.contratos.index')->with('success', 'Contrato removido.');
+    }
+
+    public function downloadPdf($id)
+    {
+        $contrato = Contrato::with(['cliente.user', 'servico'])->findOrFail($id);
+        $pdf = Pdf::loadView('admin.contratos.pdf', compact('contrato'))->setPaper('a4');
+        return $pdf->download("contrato-{$contrato->id}.pdf");
     }
 }

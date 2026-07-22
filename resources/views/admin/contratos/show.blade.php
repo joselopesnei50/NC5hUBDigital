@@ -7,10 +7,17 @@
                 </a>
                 <div>
                     <h2 class="font-bold text-2xl text-[#0A1128] leading-tight tracking-tight">Contrato #{{ $contrato->id }}</h2>
-                    <p class="text-sm text-[#8A8F9C] mt-1">{{ $contrato->servico->nome ?? 'Serviço' }}</p>
+                    <p class="text-sm text-[#8A8F9C] mt-1">{{ $contrato->servico->nome ?? 'Contrato Avulso' }}</p>
                 </div>
             </div>
-            <a href="{{ route('admin.contratos.edit', $contrato->id) }}" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg">Editar</a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.contratos.pdf', $contrato->id) }}" target="_blank"
+                   class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Baixar PDF
+                </a>
+                <a href="{{ route('admin.contratos.edit', $contrato->id) }}" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg">Editar</a>
+            </div>
         </div>
     </x-slot>
 
@@ -24,7 +31,7 @@
                 </div>
                 <div>
                     <dt class="text-xs font-bold text-[#8A8F9C] uppercase tracking-wider">Serviço</dt>
-                    <dd class="mt-1 text-sm font-semibold text-[#0A1128]">{{ $contrato->servico->nome ?? '—' }}</dd>
+                    <dd class="mt-1 text-sm font-semibold text-[#0A1128]">{{ $contrato->servico->nome ?? 'Contrato Avulso' }}</dd>
                 </div>
                 <div>
                     <dt class="text-xs font-bold text-[#8A8F9C] uppercase tracking-wider">Início</dt>
@@ -34,10 +41,12 @@
                     <dt class="text-xs font-bold text-[#8A8F9C] uppercase tracking-wider">Término</dt>
                     <dd class="mt-1 text-sm font-semibold text-[#0A1128]">{{ $contrato->data_fim ? \Carbon\Carbon::parse($contrato->data_fim)->format('d/m/Y') : 'Vigente' }}</dd>
                 </div>
+                @if($contrato->servico)
                 <div>
                     <dt class="text-xs font-bold text-[#8A8F9C] uppercase tracking-wider">Valor</dt>
-                    <dd class="mt-1 text-sm font-semibold text-[#0A1128]">R$ {{ number_format($contrato->servico->preco ?? 0, 2, ',', '.') }}</dd>
+                    <dd class="mt-1 text-sm font-semibold text-[#0A1128]">R$ {{ number_format($contrato->servico->preco, 2, ',', '.') }}</dd>
                 </div>
+                @endif
                 <div>
                     <dt class="text-xs font-bold text-[#8A8F9C] uppercase tracking-wider">Assinatura</dt>
                     <dd class="mt-1">
@@ -55,9 +64,16 @@
             <p class="text-xs text-[#8A8F9C] mt-2">Criado em {{ $contrato->created_at->format('d/m/Y') }}</p>
 
             @if($contrato->assinatura_url)
+                @php $sig = json_decode($contrato->assinatura_url, true); @endphp
                 <div class="mt-6 pt-6 border-t border-gray-100">
                     <p class="text-xs font-bold text-[#8A8F9C] uppercase tracking-wider mb-2">Registro de Assinatura</p>
-                    <pre class="text-[10px] bg-[#F4F5F7] p-3 rounded-xl overflow-x-auto">{{ $contrato->assinatura_url }}</pre>
+                    <p class="text-[11px] text-[#0A1128]">{{ $sig['timestamp'] ?? '' }}</p>
+                    <p class="text-[11px] text-[#8A8F9C]">IP: {{ $sig['ip'] ?? '' }}</p>
+                    @if(!empty($sig['signature_image']))
+                        <div class="mt-3 border border-gray-200 rounded-xl overflow-hidden bg-white p-2">
+                            <img src="{{ $sig['signature_image'] }}" alt="Assinatura" class="w-full">
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>

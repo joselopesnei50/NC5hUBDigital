@@ -37,6 +37,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('clientes/{cliente}/briefings', [\App\Http\Controllers\Admin\BriefingController::class, 'store'])->name('clientes.briefings.store');
     
     Route::resource('contratos', \App\Http\Controllers\Admin\ContratoController::class);
+    Route::get('contratos/{id}/pdf', [\App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('contratos.pdf');
     Route::resource('faturas', \App\Http\Controllers\Admin\FaturaController::class);
     Route::resource('materiais', \App\Http\Controllers\Admin\MaterialController::class);
     
@@ -61,6 +62,7 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('/', [CustomerController::class, 'index'])->name('customer.index');
     Route::get('/contratos', [CustomerController::class, 'contracts'])->name('customer.contracts');
     Route::post('/contratos/{id}/assinar', [CustomerController::class, 'signContract'])->name('customer.contracts.sign');
+    Route::get('/contratos/{id}/pdf', [CustomerController::class, 'downloadContract'])->name('customer.contracts.pdf');
     Route::get('/faturas', [CustomerController::class, 'invoices'])->name('customer.invoices');
     Route::get('/materiais', [CustomerController::class, 'materiais'])->name('customer.materiais');
     Route::get('/briefings', [CustomerController::class, 'briefings'])->name('customer.briefings');

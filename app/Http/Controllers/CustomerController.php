@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,9 +40,10 @@ class CustomerController extends Controller
         }
 
         $signatureData = [
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'timestamp' => now()->toDateTimeString(),
+            'ip'              => $request->ip(),
+            'user_agent'      => $request->userAgent(),
+            'timestamp'       => now()->toDateTimeString(),
+            'signature_image' => $request->signature_image ?: null,
         ];
 
         // Guardamos o registro de assinatura na URL (como string JSON) apenas para auditoria, 
@@ -53,6 +55,14 @@ class CustomerController extends Controller
         ]);
 
         return back()->with('success', 'Contrato assinado digitalmente com sucesso!');
+    }
+
+    public function downloadContract($id)
+    {
+        $cliente = Auth::user()->cliente;
+        $contrato = $cliente->contratos()->with(['servico', 'cliente.user'])->findOrFail($id);
+        $pdf = Pdf::loadView('admin.contratos.pdf', compact('contrato'))->setPaper('a4');
+        return $pdf->download("contrato-{$contrato->id}.pdf");
     }
 
     public function invoices()
