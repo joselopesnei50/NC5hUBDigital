@@ -58,10 +58,9 @@
             <div class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-mist">
                 <!-- Mobile Bar -->
                 <header class="bg-ink text-white border-b border-white/10 z-10 p-4 flex justify-between items-center md:hidden">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-bruce to-magenta flex items-center justify-center font-bold text-white text-sm">NC5</div>
-                        <span class="font-display font-extrabold text-base tracking-tight">NC5 HUB Portal</span>
-                    </div>
+                    <a href="{{ route('customer.index') }}" class="flex items-center gap-2">
+                        <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Hub Digital" class="h-7 w-auto">
+                    </a>
                     <button @click="sidebarOpen = true" class="text-white hover:text-bruce p-2 focus:outline-none">
                         <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>

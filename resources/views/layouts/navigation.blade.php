@@ -4,13 +4,8 @@
         <!-- Logo & Client Brand -->
         <div class="h-16 flex items-center px-3 mb-6 border-b border-white/10">
             <a href="{{ route('customer.index') }}" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-bruce via-magenta to-bruceDark flex items-center justify-center font-display font-extrabold text-white text-xl shadow-bruceGlow">
-                    NC5
-                </div>
-                <div>
-                    <span class="font-display font-extrabold text-lg text-white tracking-tight">NC5 HUB</span>
-                    <span class="block text-[10px] font-bold text-magenta uppercase tracking-widest">Área do Cliente</span>
-                </div>
+                <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Hub Digital" class="h-8 w-auto">
+                <span class="text-[9px] font-extrabold text-magenta uppercase tracking-widest bg-magenta/10 px-2 py-0.5 rounded-md border border-magenta/20">Cliente</span>
             </a>
         </div>
 

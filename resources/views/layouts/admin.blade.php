@@ -64,13 +64,8 @@
                 <!-- Logo & Brand -->
                 <div class="h-16 flex items-center px-3 mb-6 border-b border-white/10">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-magenta via-bruce to-bruceDark flex items-center justify-center font-display font-extrabold text-white text-xl shadow-bruceGlow">
-                            NC5
-                        </div>
-                        <div>
-                            <span class="font-display font-extrabold text-lg text-white tracking-tight">NC5 HUB</span>
-                            <span class="block text-[10px] font-bold text-bruce uppercase tracking-widest">Super Admin</span>
-                        </div>
+                        <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Hub Digital" class="h-8 w-auto">
+                        <span class="text-[9px] font-extrabold text-bruce uppercase tracking-widest bg-bruce/10 px-2 py-0.5 rounded-md border border-bruce/20">Admin</span>
                     </a>
                 </div>
 
@@ -147,10 +142,9 @@
         <main class="flex-1 flex flex-col overflow-hidden bg-mist">
             <!-- Top Mobile Bar -->
             <header class="bg-ink text-white border-b border-white/10 z-10 p-4 flex justify-between items-center md:hidden">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-magenta to-bruce flex items-center justify-center font-bold text-white text-sm">NC5</div>
-                    <span class="font-display font-extrabold text-base tracking-tight">NC5 HUB Admin</span>
-                </div>
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
+                    <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Hub Digital" class="h-7 w-auto">
+                </a>
                 <button @click="sidebarOpen = true" class="text-white hover:text-bruce p-2 focus:outline-none">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
