@@ -120,18 +120,56 @@
                 <h2 class="font-display font-extrabold text-3xl md:text-5xl text-[#0A1128] leading-tight">Do briefing ao pixel, um único fluxo acelerado.</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                @foreach([
-                    ['n' => '01', 't' => 'Diagnóstico', 'd' => 'Auditoria de marca, funil e mercado. Encontramos a alavanca de crescimento.'],
-                    ['n' => '02', 't' => 'Estratégia', 'd' => 'Posicionamento, oferta, criativos e canais desenhados sob medida.'],
-                    ['n' => '03', 't' => 'Execução', 'd' => 'Design, tecnologia e mídia rodando na mesma cadência de alta produção.'],
-                    ['n' => '04', 't' => 'Escala', 'd' => 'Otimização contínua guiada por dashboards e esteira de testes.'],
-                ] as $step)
-                    <div class="group bg-white border border-slate-200/80 rounded-3xl p-8 hover:-translate-y-2 hover:shadow-xl transition-all duration-500">
-                        <p class="font-display font-black text-5xl text-slate-300 group-hover:text-[#FF7A1A] transition-colors">{{ $step['n'] }}</p>
-                        <h3 class="mt-6 font-extrabold text-lg text-[#0A1128]">{{ $step['t'] }}</h3>
-                        <p class="mt-2 text-xs leading-relaxed text-slate-600 font-medium">{{ $step['d'] }}</p>
+            <!-- Mapa Mental de Conexão com Setas -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+                @php
+                    $steps = [
+                        ['n' => '01', 't' => 'Diagnóstico', 'd' => 'Auditoria de marca, funil e mercado. Encontramos a alavanca de crescimento.'],
+                        ['n' => '02', 't' => 'Estratégia', 'd' => 'Posicionamento, oferta, criativos e canais desenhados sob medida.'],
+                        ['n' => '03', 't' => 'Execução', 'd' => 'Design, tecnologia e mídia rodando na mesma cadência de alta produção.'],
+                        ['n' => '04', 't' => 'Escala', 'd' => 'Otimização contínua guiada por dashboards e esteira de testes.'],
+                    ];
+                @endphp
+
+                @foreach($steps as $index => $step)
+                    <div class="relative flex flex-col justify-between group bg-white border border-slate-200/80 rounded-3xl p-8 hover:-translate-y-2 hover:shadow-xl transition-all duration-500 z-10">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <p class="font-display font-black text-5xl text-slate-300 group-hover:text-[#FF7A1A] transition-colors">{{ $step['n'] }}</p>
+                                @if(!$loop->last)
+                                    <!-- Seta de Conexão Horizontal (Desktop) -->
+                                    <div class="hidden md:flex items-center justify-center w-9 h-9 rounded-full bg-[#F8FAFC] border border-slate-200 text-[#FF7A1A] font-bold text-sm shadow-sm group-hover:bg-[#FF7A1A] group-hover:text-white transition-all transform group-hover:translate-x-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    </div>
+                                @endif
+                            </div>
+                            <h3 class="mt-6 font-extrabold text-lg text-[#0A1128]">{{ $step['t'] }}</h3>
+                            <p class="mt-2 text-xs leading-relaxed text-slate-600 font-medium">{{ $step['d'] }}</p>
+                        </div>
+
+                        <!-- Indicador de fluxo / Mapa mental -->
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                            <span>Fase {{ $step['n'] }}</span>
+                            @if(!$loop->last)
+                                <span class="text-[#FF7A1A] font-bold flex items-center gap-1">
+                                    Próximo passo
+                                    <svg class="w-3 h-3 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                    <svg class="w-3 h-3 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </span>
+                            @else
+                                <span class="text-emerald-600 font-bold">✓ Entrega final</span>
+                            @endif
+                        </div>
                     </div>
+
+                    @if(!$loop->last)
+                        <!-- Seta Vertical de Conexão (Mobile) -->
+                        <div class="flex md:hidden justify-center my-[-10px] z-20">
+                            <div class="w-8 h-8 rounded-full bg-[#FF7A1A] text-white flex items-center justify-center shadow-md">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                            </div>
+                        </div>
+                    @endif
                 @endforeach
             </div>
         </div>
