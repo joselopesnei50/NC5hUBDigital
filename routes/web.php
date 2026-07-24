@@ -65,6 +65,7 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('/contratos/{id}/pdf', [CustomerController::class, 'downloadContract'])->name('customer.contracts.pdf');
     Route::get('/faturas', [CustomerController::class, 'invoices'])->name('customer.invoices');
     Route::get('/materiais', [CustomerController::class, 'materiais'])->name('customer.materiais');
+    Route::post('/materiais/{id}/avaliar', [CustomerController::class, 'evaluateMaterial'])->name('customer.materiais.evaluate');
     Route::get('/briefings', [CustomerController::class, 'briefings'])->name('customer.briefings');
     Route::post('/briefings/{id}/responder', [CustomerController::class, 'answerBriefing'])->name('customer.briefings.answer');
     

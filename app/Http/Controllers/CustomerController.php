@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\MaterialAvaliadoMail;
 
 class CustomerController extends Controller
 {
@@ -167,5 +170,41 @@ class CustomerController extends Controller
         $cliente = Auth::user()->cliente;
         $materiais = $cliente->materiais()->latest()->get();
         return view('customer.materiais', compact('materiais'));
+    }
+
+    public function evaluateMaterial(Request $request, $id)
+    {
+        $request->validate([
+            'status_aprovacao' => 'required|in:aprovado,ajustes_solicitados,reprovado',
+            'comentario_cliente' => 'nullable|string',
+            'anexo_cliente' => 'nullable|file|max:25600',
+        ]);
+
+        $cliente = Auth::user()->cliente;
+        $material = $cliente->materiais()->findOrFail($id);
+
+        $anexoPath = $material->anexo_cliente_path;
+        if ($request->hasFile('anexo_cliente')) {
+            $anexoPath = $request->file('anexo_cliente')->store('materials_feedback', 'public');
+        }
+
+        $material->update([
+            'status_aprovacao' => $request->status_aprovacao,
+            'comentario_cliente' => $request->comentario_cliente,
+            'anexo_cliente_path' => $anexoPath,
+            'data_resposta' => now(),
+        ]);
+
+        // Notifica a equipe Admin por e-mail
+        try {
+            $adminEmail = \App\Models\Configuracao::get('admin_email') ?: config('mail.from.address');
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new MaterialAvaliadoMail($material));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Falha ao enviar e-mail de avaliação do material #' . $material->id . ': ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Sua avaliação e observações foram enviadas com sucesso para a equipe NC5 Hub!');
     }
 }
