@@ -8,14 +8,11 @@
          HERO SECTION · BRUCE IA
          ============================================================ --}}
     <section class="relative overflow-hidden bg-[#0A1128] text-white pt-24 lg:pt-32 pb-20 lg:pb-32">
-        <!-- Luzes sutis (Aura) -->
         <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-[#FF7A1A]/10 rounded-full blur-[150px] pointer-events-none translate-x-1/3 -translate-y-1/3"></div>
         <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#E63888]/10 rounded-full blur-[150px] pointer-events-none -translate-x-1/3 translate-y-1/3"></div>
 
         <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-
-                <!-- Coluna Esquerda: Texto -->
                 <div class="lg:col-span-7">
                     <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold text-white uppercase tracking-widest backdrop-blur-sm mb-8">
                         <span class="w-1.5 h-1.5 bg-[#FF7A1A] rounded-full animate-pulse"></span>
@@ -27,7 +24,7 @@
                     </h1>
 
                     <p class="text-lg text-white/70 leading-relaxed max-w-xl font-normal mb-8">
-                        Conheça o <strong class="text-white font-semibold">BruceIA</strong>. Treinado pelos estrategistas da NC5, ele analisa sua marca, site ou perfil social e devolve um parecer premium em minutos.
+                        Conheça o <strong class="text-white font-semibold">BruceIA</strong>. Treinado pelos estrategistas da NC5, ele cruza seus dados com as dores do seu negócio e devolve um parecer premium em minutos.
                     </p>
 
                     <div class="flex flex-wrap gap-6 text-sm font-semibold text-white/80">
@@ -42,9 +39,7 @@
                     </div>
                 </div>
 
-                <!-- Coluna Direita: Motor IA / Logo -->
                 <div class="lg:col-span-5 relative">
-                    <!-- Motor Box Glass -->
                     <div class="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden">
                         <div class="absolute -top-20 -right-20 w-40 h-40 bg-white/10 rounded-full blur-[50px]"></div>
                         
@@ -64,37 +59,37 @@
                                 <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </span>
-                                Diagnóstico de UX, oferta e posicionamento
+                                Alinhamento de Oferta e Demanda
                             </li>
                             <li class="flex items-start gap-3">
                                 <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </span>
-                                Pontos fortes e oportunidades críticas
+                                Identificação de gargalos de conversão
                             </li>
                             <li class="flex items-start gap-3">
                                 <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </span>
-                                Parecer estratégico da agência
+                                Parecer estratégico focado em vendas
                             </li>
                         </ul>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
 
     {{-- ============================================================
-         FORMULÁRIO MINIMALISTA
+         FORMULÁRIO ESTRATÉGICO
          ============================================================ --}}
     <section class="relative py-24 bg-[#F8FAFC]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ loading: false, tipo: 'site' }">
 
             <div class="text-center mb-16">
-                <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#FF7A1A] mb-3 block">Processamento de Dados</span>
-                <h2 class="font-display font-extrabold text-3xl md:text-5xl text-[#0A1128] leading-tight">Envie seus dados.</h2>
+                <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#FF7A1A] mb-3 block">Dados Estratégicos</span>
+                <h2 class="font-display font-extrabold text-3xl md:text-5xl text-[#0A1128] leading-tight">Onde está doendo?</h2>
+                <p class="mt-4 text-slate-500 font-medium">Forneça o cenário real para a Inteligência Artificial ser precisa no diagnóstico.</p>
             </div>
 
             @if(session('error'))
@@ -122,7 +117,7 @@
                         <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="IA Processando" class="w-12 h-12 relative z-10 animate-bruce-logo">
                     </div>
                     <h3 class="font-display text-2xl font-extrabold text-[#0A1128] tracking-tight">O Bruce está analisando...</h3>
-                    <p class="text-sm font-medium text-slate-500 mt-2 max-w-xs text-center leading-relaxed">Cruzando dados e formatando insights. Isso leva em torno de 30 segundos.</p>
+                    <p class="text-sm font-medium text-slate-500 mt-2 max-w-xs text-center leading-relaxed">Cruzando seus dados e desafios reais para formular um plano de ação. Aguarde até 30 segundos.</p>
                 </div>
 
                 <!-- Formulário -->
@@ -153,46 +148,63 @@
 
                     <div class="h-px bg-slate-100 mb-12 w-full"></div>
 
-                    <!-- Dados da Análise -->
+                    <!-- Dados Estratégicos -->
                     <div class="mb-12">
                         <h3 class="text-lg font-extrabold text-[#0A1128] mb-6 flex items-center gap-3">
                             <span class="w-6 h-6 rounded-full bg-[#0A1128] text-white flex items-center justify-center text-xs">2</span>
-                            Alvo da Análise
+                            Cenário de Negócio
                         </h3>
                         
                         <div class="mb-8">
                             <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-3">O que devemos analisar?</label>
                             
-                            <!-- Opções customizadas de rádio para um visual mais limpo -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <label class="relative flex cursor-pointer rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 focus:outline-none hover:border-slate-300 transition-colors has-[:checked]:border-[#FF7A1A] has-[:checked]:bg-orange-50/50 has-[:checked]:ring-1 has-[:checked]:ring-[#FF7A1A]">
                                     <input type="radio" name="tipo_analise" value="site" x-model="tipo" class="sr-only">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-bold text-[#0A1128]">Site / Landing Page</span>
-                                        <span class="text-xs text-slate-500 mt-1 font-medium">Análise de página web</span>
+                                        <span class="text-xs text-slate-500 mt-1 font-medium">Geração de Leads e Vendas</span>
                                     </div>
                                 </label>
                                 <label class="relative flex cursor-pointer rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 focus:outline-none hover:border-slate-300 transition-colors has-[:checked]:border-[#FF7A1A] has-[:checked]:bg-orange-50/50 has-[:checked]:ring-1 has-[:checked]:ring-[#FF7A1A]">
                                     <input type="radio" name="tipo_analise" value="redes_sociais" x-model="tipo" class="sr-only">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-bold text-[#0A1128]">Rede Social</span>
-                                        <span class="text-xs text-slate-500 mt-1 font-medium">Análise de perfil Insta</span>
+                                        <span class="text-xs text-slate-500 mt-1 font-medium">Posicionamento e Instagram</span>
                                     </div>
                                 </label>
                                 <label class="relative flex cursor-pointer rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 focus:outline-none hover:border-slate-300 transition-colors has-[:checked]:border-[#FF7A1A] has-[:checked]:bg-orange-50/50 has-[:checked]:ring-1 has-[:checked]:ring-[#FF7A1A]">
                                     <input type="radio" name="tipo_analise" value="marca" x-model="tipo" class="sr-only">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-bold text-[#0A1128]">Marca</span>
-                                        <span class="text-xs text-slate-500 mt-1 font-medium">Análise de posicionamento</span>
+                                        <span class="text-xs text-slate-500 mt-1 font-medium">Diferencial competitivo</span>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
                         <!-- Campos Condicionais: SITE -->
-                        <div x-show="tipo === 'site'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;">
-                            <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">URL da Página</label>
-                            <input type="url" name="url_site" :required="tipo === 'site'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="https://suaempresa.com.br">
+                        <div x-show="tipo === 'site'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;" class="space-y-6">
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">URL da Página</label>
+                                <input type="url" name="url_site" :required="tipo === 'site'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="https://suaempresa.com.br">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Objetivo Principal desta Página</label>
+                                <select name="objetivo_site" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128]">
+                                    <option value="Gerar Leads (Formulário/WhatsApp)">Gerar Leads (Formulário/WhatsApp)</option>
+                                    <option value="Venda Direta (Checkout/E-commerce)">Venda Direta (Checkout/E-commerce)</option>
+                                    <option value="Apresentação Institucional (Autoridade)">Apresentação Institucional (Autoridade)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Qual o maior problema hoje?</label>
+                                <select name="dor_site" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128]">
+                                    <option value="Tenho tráfego (visitas), mas as pessoas não convertem/compram">Tenho tráfego (visitas), mas as pessoas não convertem/compram</option>
+                                    <option value="Pouco tráfego, ninguém acessa">Pouco tráfego, ninguém acessa</option>
+                                    <option value="O design está ultrapassado e não passa confiança">O design está ultrapassado e não passa confiança</option>
+                                </select>
+                            </div>
                         </div>
 
                         <!-- Campos Condicionais: REDES SOCIAIS -->
@@ -202,12 +214,20 @@
                                 <input type="text" name="url_social" :required="tipo === 'redes_sociais'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="@sua_marca">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Sua Bio atual (copie e cole)</label>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Sua Bio atual (copie exatamente como está hoje)</label>
                                 <textarea name="bio_social" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Especialistas em..."></textarea>
                             </div>
                             <div>
-                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">O que você vende?</label>
-                                <textarea name="produto_social" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Consultoria empresarial para indústrias."></textarea>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Qual produto/serviço de maior valor você vende?</label>
+                                <input type="text" name="produto_social" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Consultoria B2B (Ticket 5k)">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Qual o seu maior desafio no Instagram?</label>
+                                <select name="dor_social" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128]">
+                                    <option value="Atrair seguidores qualificados (público pagante)">Atrair seguidores qualificados (público pagante)</option>
+                                    <option value="Converter os seguidores atuais em clientes (não compram)">Converter os seguidores atuais em clientes (não compram)</option>
+                                    <option value="Posicionamento amador que afasta clientes premium">Posicionamento amador que afasta clientes premium</option>
+                                </select>
                             </div>
                         </div>
 
@@ -219,11 +239,15 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Promessa Principal (Slogan/Pitch)</label>
-                                <textarea name="promessa_marca" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Transformamos... em..."></textarea>
+                                <input type="text" name="promessa_marca" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Transformamos... em...">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Público Alvo</label>
-                                <textarea name="publico_marca" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Pessoas que buscam..."></textarea>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Quem é o cliente ideal?</label>
+                                <input type="text" name="publico_marca" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Diretores de indústrias...">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Por que compram de você e não do concorrente?</label>
+                                <textarea name="diferencial_marca" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Qual o diferencial real?"></textarea>
                             </div>
                         </div>
                     </div>
@@ -233,9 +257,6 @@
                             Gerar diagnóstico agora
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
                         </button>
-                        <p class="text-xs text-slate-400 font-medium mt-4 text-center max-w-sm">
-                            Ao prosseguir, você concorda em receber o resultado por e-mail e eventuais comunicações corporativas da NC5 Hub.
-                        </p>
                     </div>
                 </form>
             </div>

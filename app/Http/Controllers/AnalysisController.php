@@ -23,19 +23,26 @@ class AnalysisController extends Controller
             'email' => 'required|email|max:255',
             'whatsapp' => 'required|string|max:20',
             'tipo_analise' => 'required|in:marca,site,redes_sociais',
+            // Site
             'url_site' => 'required_if:tipo_analise,site',
+            'objetivo_site' => 'nullable|string',
+            'dor_site' => 'nullable|string',
+            // Redes Sociais
             'url_social' => 'required_if:tipo_analise,redes_sociais',
             'bio_social' => 'nullable|string',
             'produto_social' => 'nullable|string',
+            'dor_social' => 'nullable|string',
+            // Marca
             'url_marca' => 'required_if:tipo_analise,marca',
             'promessa_marca' => 'nullable|string',
             'publico_marca' => 'nullable|string',
+            'diferencial_marca' => 'nullable|string',
         ]);
 
         $apiKey = Configuracao::get('deepseek_api_key');
 
         if (empty($apiKey)) {
-            return back()->with('error', 'O motor de análise BruceIA está temporariamente indisponível. Tente novamente em instantes.');
+            return back()->with('error', 'O motor de análise BruceIA não encontrou a chave da API (deepseek_api_key) configurada no painel.');
         }
 
         // Obter a URL principal para salvar no banco
@@ -46,6 +53,7 @@ class AnalysisController extends Controller
             default => '',
         };
 
+        // Salva o lead
         $lead = Lead::create([
             'nome' => $request->nome,
             'email' => $request->email,
@@ -58,60 +66,69 @@ class AnalysisController extends Controller
         $promptContext = '';
 
         if ($request->tipo_analise === 'site') {
-            $promptContext = "Você vai analisar o site enviado. Foque em UX/UI, clareza da proposta de valor, hierarquia de informação, prova social, CTA principal e SEO básico.";
+            $promptContext = "Você vai analisar o site enviado focando em CONVERSÃO. O cliente relatou uma dor específica. Use isso para provar que o site atual dele falha nisso e mostre como uma agência profissional resolve.";
+            $contextoExtra = "\n\nDados Estratégicos Fornecidos:\n" .
+                             "- URL do Site: " . $urlAnalise . "\n" .
+                             "- Objetivo Principal: " . $request->objetivo_site . "\n" .
+                             "- Maior Problema (DOR): " . $request->dor_site;
+
             if ($this->pareceUrl($urlAnalise)) {
                 $conteudoSite = $this->capturarConteudoSite($urlAnalise);
                 if (!empty($conteudoSite)) {
-                    $contextoExtra = "\n\nConteúdo extraído via scraper do site (analise o copy e estrutura baseada nisso):\n---\n" . $conteudoSite . "\n---";
+                    $contextoExtra .= "\n\nConteúdo extraído do site (via raspagem básica):\n---\n" . $conteudoSite . "\n---";
+                } else {
+                    $contextoExtra .= "\n\n[Nota: Não foi possível raspar o texto do site. Faça a análise focando puramente no problema (DOR) e objetivo reportado, e como um site ideal para esse nicho deveria ser.]";
                 }
             }
         } elseif ($request->tipo_analise === 'redes_sociais') {
-            $promptContext = "Você vai analisar a rede social do cliente com base nos textos que ele forneceu. Foque no posicionamento visual que a bio transmite, o quão atrativo é o produto/serviço e se a promessa condiz com uma agência premium.";
-            $contextoExtra = "\n\nDados fornecidos pelo cliente sobre o Instagram:\n" .
+            $promptContext = "Você vai analisar o perfil do cliente focando em POSICIONAMENTO E VENDAS. O cliente relatou uma dor específica. Use isso para mostrar como a bio atual ou falta de estratégia estão causando essa dor, e como uma agência premium conserta.";
+            $contextoExtra = "\n\nDados Estratégicos Fornecidos:\n" .
                              "- Usuário: " . $request->url_social . "\n" .
-                             "- Bio exata do perfil: " . $request->bio_social . "\n" .
-                             "- Principal produto/serviço vendido: " . $request->produto_social;
+                             "- Bio exata atual: " . $request->bio_social . "\n" .
+                             "- Produto/Serviço principal: " . $request->produto_social . "\n" .
+                             "- Maior Desafio (DOR): " . $request->dor_social;
         } else {
-            $promptContext = "Você vai analisar a marca do cliente baseada na sua promessa e público. Foque em posicionamento de mercado, tom de voz adequado para esse público e diferenciação competitiva.";
-            $contextoExtra = "\n\nDados fornecidos pelo cliente sobre a Marca:\n" .
+            $promptContext = "Você vai analisar a marca do cliente focando em DIFERENCIAÇÃO COMPETITIVA. O cliente relatou um diferencial. Avalie se esse diferencial é forte o suficiente ou genérico, e como uma agência pode escalar isso.";
+            $contextoExtra = "\n\nDados Estratégicos Fornecidos:\n" .
                              "- Nome da Marca: " . $request->url_marca . "\n" .
                              "- Promessa/Slogan: " . $request->promessa_marca . "\n" .
-                             "- Público-alvo: " . $request->publico_marca;
+                             "- Público-alvo: " . $request->publico_marca . "\n" .
+                             "- Diferencial (Por que compram): " . $request->diferencial_marca;
         }
 
         $systemPrompt = <<<PROMPT
-Você é o Bruce (BruceIA), consultor sênior de marketing e performance da agência NC5 Hub — premium, direto e focado em conversão.
+Você é o Bruce (BruceIA), consultor sênior de marketing e performance da agência NC5 Hub — premium, altamente persuasivo, analítico e focado em fechar negócios.
 
-Sua tarefa é analisar o que o cliente enviou de forma profissional, honesta e valiosa.
+Sua tarefa é analisar os dados que o cliente enviou e entregar um laudo focado no GARGALO (Dor) que ele apontou. O objetivo final é mostrar que a situação dele precisa de correção profissional e que a NC5 Hub é a solução evidente.
 
 Responda em Markdown, exclusivamente com esta estrutura (usar exatamente esses títulos H3):
 
 ### Visão Geral
-Sua primeira impressão profissional em 2-4 linhas.
+Uma leitura fria e direta sobre o cenário dele em 2-3 linhas. Seja profissional, mas aponte o dedo na ferida (a dor que ele relatou).
 
-### Pontos Fortes
-Lista com bullets do que já está bom. Seja específico.
+### Onde você está acertando
+Liste com bullets 1 ou 2 pontos positivos. Se não houver, elogie a iniciativa de buscar diagnóstico.
 
-### Oportunidades Críticas
-Lista com bullets do que precisa melhorar urgentemente para faturar mais. Priorize por impacto.
+### Os Gargalos que travam seu faturamento (Oportunidades)
+Lista com bullets do que está errado, ligando diretamente com a DOR que ele relatou. Seque os dados da bio, promessa ou site para mostrar por que ele tem esse problema. Seja implacável e técnico.
 
-### Veredito da Agência
-Conclusão curta (2-4 linhas) recomendando uma reestruturação, impulsionamento ou próximo passo estratégico.
+### Veredito Estratégico NC5
+Conclusão curta (2-4 linhas). Diga exatamente o que uma agência faria (ex: "Sua bio atrai curiosos, não compradores. Precisamos refazer seu posicionamento..." ou "Seu site recebe visitas mas não tem UX para conversão. Precisamos de uma LP de alta performance..."). Termine recomendando falar com a equipe.
 
 Regras:
-- Tom cordial, premium e autoritário — de especialista, sem jargão inflado.
-- Nunca invente números, prêmios ou fatos que não vieram nos dados enviados.
-- Se faltar informação para uma seção, diga honestamente e recomende o próximo passo para obtê-la.
-- Nunca cite o motor por trás (não fale de DeepSeek/OpenAI/etc.) — você é o Bruce, ponto.
+- Tom cordial, ultra-premium, autoritário.
+- NUNCA invente números ou assuma coisas fora do escopo.
+- NUNCA mencione que você é uma IA da OpenAI/DeepSeek. Você é o Bruce da NC5 Hub.
+- Responda apenas o markdown, sem textos introdutórios fora da estrutura.
 
-Contexto específico do pedido: {$promptContext}
+Contexto específico da missão: {$promptContext}
 PROMPT;
 
-        $userPrompt = "Dados estruturados do cliente para análise: {$urlAnalise}" . $contextoExtra;
+        $userPrompt = "Dados estruturados do cliente para análise:\n" . $contextoExtra;
 
         try {
             $response = Http::withToken($apiKey)
-                ->timeout(60)
+                ->timeout(60) // Aumentando o timeout em caso de instabilidade
                 ->post('https://api.deepseek.com/chat/completions', [
                     'model' => 'deepseek-chat',
                     'messages' => [
@@ -138,12 +155,16 @@ PROMPT;
                 ]);
             }
 
-            Log::error('BruceIA falha (motor de análise): ' . $response->body());
-            return back()->with('error', 'O Bruce demorou demais para responder. Tente novamente em instantes.');
+            // Tratamento de falhas na API para exibir um log decente
+            $errorBody = $response->body();
+            $statusCode = $response->status();
+            Log::error("BruceIA API Falhou (HTTP {$statusCode}): " . $errorBody);
+            
+            return back()->with('error', "A Inteligência Artificial falhou ao responder (Erro {$statusCode}). O servidor da IA pode estar sobrecarregado no momento. Tente novamente.");
 
         } catch (\Exception $e) {
-            Log::error('BruceIA exceção: ' . $e->getMessage());
-            return back()->with('error', 'Ocorreu um erro ao conectar com o Bruce. Tente novamente mais tarde.');
+            Log::error('BruceIA exceção de conexão: ' . $e->getMessage());
+            return back()->with('error', 'Ocorreu um erro de conexão (timeout) com o servidor da IA. A análise demora cerca de 30 segundos, tente novamente em instantes.');
         }
     }
 
@@ -155,7 +176,7 @@ PROMPT;
     private function capturarConteudoSite(string $url): string
     {
         try {
-            $resposta = Http::timeout(10)
+            $resposta = Http::timeout(8) // Reduzido o timeout de scraping para sobrar mais tempo pra IA
                 ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; BruceIA/1.0; +https://nc5hub.com/bruce)'])
                 ->get($url);
 
@@ -180,7 +201,7 @@ PROMPT;
             $limpo = preg_replace('/<script\b[^>]*>.*?<\/script>/is', ' ', $html);
             $limpo = preg_replace('/<style\b[^>]*>.*?<\/style>/is', ' ', $limpo);
             $texto = trim(preg_replace('/\s+/', ' ', strip_tags($limpo)));
-            $texto = Str::limit($texto, 3000, '…');
+            $texto = Str::limit($texto, 2500, '…'); // Limite reduzido
 
             return trim("Título: {$titulo}\nDescrição meta: {$metaDesc}\nConteúdo visível (recorte): {$texto}");
         } catch (\Exception $e) {
