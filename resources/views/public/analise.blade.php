@@ -5,259 +5,241 @@
 @section('content')
 
     {{-- ============================================================
-         BANNER PREMIUM BRUCEIA
+         HERO SECTION · BRUCE IA
          ============================================================ --}}
-    <section class="relative overflow-hidden bg-bruceInk text-white pt-16 lg:pt-20 pb-14 lg:pb-20">
-        <!-- glow laranja no fundo -->
-        <div class="absolute -top-40 right-1/4 w-[700px] h-[500px] bg-bruce/15 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute -bottom-40 -left-32 w-[500px] h-[500px] bg-bruce/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <!-- padrão sutil de grade -->
-        <div class="absolute inset-0 opacity-[0.04] pointer-events-none"
-             style="background-image: linear-gradient(#FF7A1A 1px, transparent 1px), linear-gradient(90deg, #FF7A1A 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <section class="relative overflow-hidden bg-[#0A1128] text-white pt-24 lg:pt-32 pb-20 lg:pb-32">
+        <!-- Luzes sutis (Aura) -->
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-[#FF7A1A]/10 rounded-full blur-[150px] pointer-events-none translate-x-1/3 -translate-y-1/3"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#E63888]/10 rounded-full blur-[150px] pointer-events-none -translate-x-1/3 translate-y-1/3"></div>
 
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+        <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
 
-                <!-- lado esquerdo: identidade Bruce -->
+                <!-- Coluna Esquerda: Texto -->
                 <div class="lg:col-span-7">
-                    <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 backdrop-blur-sm px-4 py-1.5 rounded-full mb-8">
-                        <span class="w-2 h-2 bg-bruce rounded-full animate-pulse"></span>
-                        <span class="text-[11px] font-bold uppercase tracking-widest text-white/70">Inteligência Artificial NC5</span>
+                    <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold text-white uppercase tracking-widest backdrop-blur-sm mb-8">
+                        <span class="w-1.5 h-1.5 bg-[#FF7A1A] rounded-full animate-pulse"></span>
+                        Diagnóstico Inteligente
                     </div>
 
-                    <div class="flex items-center gap-5 mb-8">
-                        <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="w-20 h-20 lg:w-24 lg:h-24 flex-shrink-0 drop-shadow-[0_0_40px_rgba(255,122,26,0.35)]">
-                        <div>
-                            <p class="text-[11px] font-bold uppercase tracking-[0.3em] text-bruce mb-1">Conheça</p>
-                            <h1 class="font-display font-black text-5xl lg:text-7xl leading-none tracking-tight text-white">
-                                Bruce<span class="text-bruce">IA</span>
-                            </h1>
-                        </div>
-                    </div>
+                    <h1 class="font-display font-extrabold text-5xl lg:text-7xl leading-[1.05] tracking-tight text-white mb-6">
+                        Descubra o que <em class="not-italic text-[#FF7A1A]">trava</em> suas conversões.
+                    </h1>
 
-                    <p class="font-display text-2xl lg:text-4xl leading-tight text-white mb-6">
-                        O consultor de <em class="not-italic text-bruce">performance</em> que nunca dorme.
+                    <p class="text-lg text-white/70 leading-relaxed max-w-xl font-normal mb-8">
+                        Conheça o <strong class="text-white font-semibold">BruceIA</strong>. Treinado pelos estrategistas da NC5, ele analisa sua marca, site ou perfil social e devolve um parecer premium em minutos.
                     </p>
 
-                    <p class="text-white/60 text-base lg:text-lg leading-relaxed max-w-xl">
-                        Treinado pelos estrategistas da NC5, o Bruce lê sua marca, site ou perfil social e devolve um parecer premium em minutos — direto ao ponto e pronto para virar plano de ação.
-                    </p>
-
-                    <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm">
-                        <div class="flex items-center gap-2 text-white/70">
-                            <svg class="w-4 h-4 text-bruce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <div class="flex flex-wrap gap-6 text-sm font-semibold text-white/80">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                             100% gratuito
                         </div>
-                        <div class="flex items-center gap-2 text-white/70">
-                            <svg class="w-4 h-4 text-bruce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                            Sem cartão de crédito
-                        </div>
-                        <div class="flex items-center gap-2 text-white/70">
-                            <svg class="w-4 h-4 text-bruce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                            Resultado em ~30 segundos
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                            Resultado em 30s
                         </div>
                     </div>
                 </div>
 
-                <!-- lado direito: card com stats + ícone gigante -->
-                <div class="lg:col-span-5">
-                    <div class="relative bg-[#FF7A1A] rounded-3xl p-8 lg:p-10 shadow-2xl shadow-[#FF7A1A]/30 overflow-hidden">
-                        <div class="absolute -top-16 -right-16 w-64 h-64 bg-white/10 rounded-full blur-[60px] pointer-events-none"></div>
-
-                        <div class="relative">
-                            <div class="flex items-start justify-between mb-8">
-                                <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-bruceInk/80 mb-2">Motor de análise</p>
-                                    <p class="font-display font-black text-3xl text-bruceInk leading-none">Bruce<span class="text-white">IA</span> · v1</p>
-                                </div>
-                                <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="" class="w-14 h-14 flex-shrink-0">
+                <!-- Coluna Direita: Motor IA / Logo -->
+                <div class="lg:col-span-5 relative">
+                    <!-- Motor Box Glass -->
+                    <div class="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden">
+                        <div class="absolute -top-20 -right-20 w-40 h-40 bg-white/10 rounded-full blur-[50px]"></div>
+                        
+                        <div class="flex justify-between items-start mb-10">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-[#FF7A1A] mb-2">Motor de Análise</p>
+                                <p class="font-display font-extrabold text-3xl text-white leading-none">Bruce<span class="text-white/40">IA</span></p>
                             </div>
-
-                            <ul class="space-y-3 text-sm text-bruceInk font-medium">
-                                <li class="flex items-start gap-3 bg-white/25 backdrop-blur-sm rounded-xl px-4 py-3">
-                                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"></path></svg>
-                                    <span>Diagnóstico de UX, oferta e posicionamento</span>
-                                </li>
-                                <li class="flex items-start gap-3 bg-white/25 backdrop-blur-sm rounded-xl px-4 py-3">
-                                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"></path></svg>
-                                    <span>Pontos fortes e oportunidades críticas</span>
-                                </li>
-                                <li class="flex items-start gap-3 bg-white/25 backdrop-blur-sm rounded-xl px-4 py-3">
-                                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"></path></svg>
-                                    <span>Parecer estratégico da agência</span>
-                                </li>
-                            </ul>
-
-                            <div class="mt-8 pt-6 border-t border-bruceInk/15 flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-bruceInk/70">Treinado por</span>
-                                <span class="text-bruceInk font-bold text-sm">Estrategistas NC5 Hub</span>
+                            <div class="relative w-16 h-16 flex items-center justify-center">
+                                <div class="absolute inset-0 bg-[#FF7A1A]/30 rounded-full blur-[20px] animate-bruce-aura"></div>
+                                <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="w-12 h-12 animate-bruce-logo relative z-10">
                             </div>
                         </div>
+
+                        <ul class="space-y-4 text-sm text-white/90 font-medium">
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </span>
+                                Diagnóstico de UX, oferta e posicionamento
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </span>
+                                Pontos fortes e oportunidades críticas
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </span>
+                                Parecer estratégico da agência
+                            </li>
+                        </ul>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
 
     {{-- ============================================================
-         FORMULÁRIO
+         FORMULÁRIO MINIMALISTA
          ============================================================ --}}
-    <section class="relative py-16 lg:py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ loading: false }">
+    <section class="relative py-24 bg-[#F8FAFC]">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ loading: false, tipo: 'site' }">
 
-            <div class="text-center mb-12">
-                <p class="text-[11px] font-bold uppercase tracking-[0.3em] text-bruce mb-4">Gere sua análise</p>
-                <h2 class="font-display font-bold text-4xl md:text-5xl text-ink leading-tight tracking-tight">
-                    Descubra em 30s o que <em class="not-italic text-bruce">trava</em> sua conversão.
-                </h2>
-                <p class="mt-5 text-lg text-slate max-w-2xl mx-auto">Preencha os dados e o Bruce devolve um parecer premium sobre marca, site ou perfil social — direto e valioso.</p>
+            <div class="text-center mb-16">
+                <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#FF7A1A] mb-3 block">Processamento de Dados</span>
+                <h2 class="font-display font-extrabold text-3xl md:text-5xl text-[#0A1128] leading-tight">Envie seus dados.</h2>
             </div>
 
             @if(session('error'))
-                <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6 text-center font-medium">
+                <div class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-8 text-center text-sm font-semibold">
                     {{ session('error') }}
                 </div>
             @endif
 
             @if($errors->any())
-                <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6">
-                    <ul class="list-disc list-inside text-sm space-y-1">
+                <div class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-8">
+                    <ul class="list-disc list-inside text-sm space-y-1 font-medium">
                         @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
                     </ul>
                 </div>
             @endif
 
-            <div class="bg-white rounded-3xl shadow-2xl shadow-bruceInk/10 overflow-hidden flex flex-col md:flex-row border border-black/5 relative">
-
-                <div x-show="loading" style="display: none;" class="absolute inset-0 z-10 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center px-8">
-                    <div class="relative w-20 h-20 mb-6">
-                        <div class="absolute inset-0 border-4 border-mist border-t-bruce rounded-full animate-spin"></div>
-                        <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="" class="absolute inset-2 w-16 h-16">
+            <div class="relative bg-white rounded-[2rem] shadow-xl border border-slate-200/60 overflow-hidden">
+                
+                <!-- Overlay de Loading Premium -->
+                <div x-show="loading" style="display: none;" class="absolute inset-0 z-50 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center">
+                    <div class="relative w-24 h-24 mb-8 flex items-center justify-center">
+                        <div class="absolute inset-0 border-[3px] border-slate-100 rounded-full"></div>
+                        <div class="absolute inset-0 border-[3px] border-transparent border-t-[#FF7A1A] rounded-full animate-spin"></div>
+                        <div class="absolute inset-0 bg-[#FF7A1A]/10 rounded-full blur-xl animate-pulse"></div>
+                        <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="IA Processando" class="w-12 h-12 relative z-10 animate-bruce-logo">
                     </div>
-                    <h3 class="font-display text-2xl font-bold text-ink text-center">O Bruce está analisando…</h3>
-                    <p class="text-slate mt-3 text-center max-w-sm">Estamos varrendo os dados enviados para montar seu diagnóstico premium. Isso pode levar até 30 segundos.</p>
+                    <h3 class="font-display text-2xl font-extrabold text-[#0A1128] tracking-tight">O Bruce está analisando...</h3>
+                    <p class="text-sm font-medium text-slate-500 mt-2 max-w-xs text-center leading-relaxed">Cruzando dados e formatando insights. Isso leva em torno de 30 segundos.</p>
                 </div>
 
-                <!-- coluna form -->
-                <div class="p-8 md:p-12 md:w-3/5" x-data="{ tipo: 'site' }">
-                    <form action="{{ route('analise.process') }}" method="POST" @submit="loading = true">
-                        @csrf
+                <!-- Formulário -->
+                <form action="{{ route('analise.process') }}" method="POST" @submit="loading = true" class="p-8 md:p-12">
+                    @csrf
 
-                        <h3 class="font-display text-xl font-bold text-ink mb-6">Seus dados</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                    <!-- Dados Pessoais -->
+                    <div class="mb-12">
+                        <h3 class="text-lg font-extrabold text-[#0A1128] mb-6 flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-[#0A1128] text-white flex items-center justify-center text-xs">1</span>
+                            Identificação
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Nome</label>
-                                <input type="text" name="nome" value="{{ old('nome') }}" required class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="Ex: João Silva">
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Seu Nome</label>
+                                <input type="text" name="nome" value="{{ old('nome') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: João Silva">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">WhatsApp</label>
-                                <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" required class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="(11) 99999-9999">
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">WhatsApp</label>
+                                <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="(11) 99999-9999">
                             </div>
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">E-mail corporativo</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="voce@suaempresa.com.br">
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">E-mail Corporativo</label>
+                                <input type="email" name="email" value="{{ old('email') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="voce@suaempresa.com.br">
                             </div>
                         </div>
+                    </div>
 
-                        <h3 class="font-display text-xl font-bold text-ink mb-6">O que vamos analisar?</h3>
-                        <div class="space-y-5">
-                            <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Tipo</label>
-                                <select name="tipo_analise" x-model="tipo" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist">
-                                    <option value="site">Meu site / landing page</option>
-                                    <option value="redes_sociais">Meu perfil no Instagram / rede social</option>
-                                    <option value="marca">Minha marca (vou descrevê-la)</option>
-                                </select>
-                            </div>
+                    <div class="h-px bg-slate-100 mb-12 w-full"></div>
+
+                    <!-- Dados da Análise -->
+                    <div class="mb-12">
+                        <h3 class="text-lg font-extrabold text-[#0A1128] mb-6 flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-[#0A1128] text-white flex items-center justify-center text-xs">2</span>
+                            Alvo da Análise
+                        </h3>
+                        
+                        <div class="mb-8">
+                            <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-3">O que devemos analisar?</label>
                             
-                            <!-- Campos para SITE -->
-                            <div x-show="tipo === 'site'" x-transition>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">URL do Site</label>
-                                <input type="text" name="url_site" :required="tipo === 'site'" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="https://seudominio.com.br">
-                                <p class="text-xs text-slate mt-2">O Bruce acessará o link para ler o conteúdo.</p>
+                            <!-- Opções customizadas de rádio para um visual mais limpo -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <label class="relative flex cursor-pointer rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 focus:outline-none hover:border-slate-300 transition-colors has-[:checked]:border-[#FF7A1A] has-[:checked]:bg-orange-50/50 has-[:checked]:ring-1 has-[:checked]:ring-[#FF7A1A]">
+                                    <input type="radio" name="tipo_analise" value="site" x-model="tipo" class="sr-only">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-[#0A1128]">Site / Landing Page</span>
+                                        <span class="text-xs text-slate-500 mt-1 font-medium">Análise de página web</span>
+                                    </div>
+                                </label>
+                                <label class="relative flex cursor-pointer rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 focus:outline-none hover:border-slate-300 transition-colors has-[:checked]:border-[#FF7A1A] has-[:checked]:bg-orange-50/50 has-[:checked]:ring-1 has-[:checked]:ring-[#FF7A1A]">
+                                    <input type="radio" name="tipo_analise" value="redes_sociais" x-model="tipo" class="sr-only">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-[#0A1128]">Rede Social</span>
+                                        <span class="text-xs text-slate-500 mt-1 font-medium">Análise de perfil Insta</span>
+                                    </div>
+                                </label>
+                                <label class="relative flex cursor-pointer rounded-xl border border-slate-200/80 bg-[#F8FAFC] p-4 focus:outline-none hover:border-slate-300 transition-colors has-[:checked]:border-[#FF7A1A] has-[:checked]:bg-orange-50/50 has-[:checked]:ring-1 has-[:checked]:ring-[#FF7A1A]">
+                                    <input type="radio" name="tipo_analise" value="marca" x-model="tipo" class="sr-only">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-[#0A1128]">Marca</span>
+                                        <span class="text-xs text-slate-500 mt-1 font-medium">Análise de posicionamento</span>
+                                    </div>
+                                </label>
                             </div>
-
-                            <!-- Campos para REDES SOCIAIS -->
-                            <div x-show="tipo === 'redes_sociais'" x-transition style="display: none;">
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Seu @ do Instagram</label>
-                                        <input type="text" name="url_social" :required="tipo === 'redes_sociais'" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="@sua_agencia">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Cole sua Bio atual exatamente como está</label>
-                                        <textarea name="bio_social" rows="2" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="Ajudamos empresas a faturarem o triplo..."></textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Qual o principal serviço/produto que você vende?</label>
-                                        <textarea name="produto_social" rows="2" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="Consultoria B2B e Mentoria"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Campos para MARCA -->
-                            <div x-show="tipo === 'marca'" x-transition style="display: none;">
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Nome da Marca</label>
-                                        <input type="text" name="url_marca" :required="tipo === 'marca'" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="Ex: Acme Corp">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Qual a sua promessa principal (Slogan/Pitch)?</label>
-                                        <textarea name="promessa_marca" rows="2" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="Nós somos a única empresa que..."></textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Quem é o seu público alvo?</label>
-                                        <textarea name="publico_marca" rows="2" class="w-full rounded-xl border-gray-200 focus:border-bruce focus:ring-bruce bg-mist" placeholder="Mulheres de 25 a 35 anos..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
 
-                        <button type="submit" class="group w-full mt-10 bg-bruceInk hover:bg-bruce text-white py-4 rounded-2xl font-bold text-base transition-all shadow-xl shadow-bruceInk/20 inline-flex items-center justify-center gap-3">
-                            <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="" class="w-6 h-6 group-hover:hidden">
-                            <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="" class="w-6 h-6 hidden group-hover:block">
-                            Gerar análise agora com o Bruce
+                        <!-- Campos Condicionais: SITE -->
+                        <div x-show="tipo === 'site'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;">
+                            <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">URL da Página</label>
+                            <input type="url" name="url_site" :required="tipo === 'site'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="https://suaempresa.com.br">
+                        </div>
+
+                        <!-- Campos Condicionais: REDES SOCIAIS -->
+                        <div x-show="tipo === 'redes_sociais'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;" class="space-y-6">
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Seu @ do Instagram</label>
+                                <input type="text" name="url_social" :required="tipo === 'redes_sociais'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="@sua_marca">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Sua Bio atual (copie e cole)</label>
+                                <textarea name="bio_social" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Especialistas em..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">O que você vende?</label>
+                                <textarea name="produto_social" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Consultoria empresarial para indústrias."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Campos Condicionais: MARCA -->
+                        <div x-show="tipo === 'marca'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;" class="space-y-6">
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Nome da Marca</label>
+                                <input type="text" name="url_marca" :required="tipo === 'marca'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Sua Empresa LTDA">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Promessa Principal (Slogan/Pitch)</label>
+                                <textarea name="promessa_marca" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Transformamos... em..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Público Alvo</label>
+                                <textarea name="publico_marca" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Pessoas que buscam..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex flex-col items-center">
+                        <button type="submit" class="w-full md:w-auto min-w-[300px] bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-8 py-4 rounded-xl font-bold text-sm transition-all shadow-lg shadow-[#FF7A1A]/20 flex items-center justify-center gap-3 transform hover:-translate-y-0.5">
+                            Gerar diagnóstico agora
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
                         </button>
-
-                        <p class="text-center text-xs text-slate mt-4">Ao enviar, você concorda em receber comunicações da NC5 Hub. Prometemos não enviar spam.</p>
-                    </form>
-                </div>
-
-                <!-- coluna Bruce -->
-                <div class="bg-bruceInk text-white p-8 md:p-12 md:w-2/5 flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute -top-20 -right-20 w-60 h-60 bg-bruce/20 rounded-full blur-[80px] pointer-events-none"></div>
-
-                    <div class="relative">
-                        <img src="{{ asset('images/bruce/bruceia-logo-fundo-escuro.svg') }}" alt="BruceIA" class="h-9 mb-8">
-                        <h3 class="font-display text-2xl font-bold mb-4 leading-tight">O que você recebe do Bruce.</h3>
-                        <ul class="space-y-3 text-sm text-white/80">
-                            <li class="flex items-start gap-2">
-                                <svg class="w-4 h-4 text-bruce mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                <span>Visão geral (primeira impressão profissional)</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <svg class="w-4 h-4 text-bruce mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                <span>Pontos fortes que já funcionam</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <svg class="w-4 h-4 text-bruce mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                <span>Oportunidades críticas para faturar mais</span>
-                            </li>
-                            <li class="flex items-start gap-2">
-                                <svg class="w-4 h-4 text-bruce mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                <span>Veredito estratégico da agência</span>
-                            </li>
-                        </ul>
+                        <p class="text-xs text-slate-400 font-medium mt-4 text-center max-w-sm">
+                            Ao prosseguir, você concorda em receber o resultado por e-mail e eventuais comunicações corporativas da NC5 Hub.
+                        </p>
                     </div>
-
-                    <div class="relative mt-10 pt-6 border-t border-white/10">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-white/40">Ecossistema</p>
-                        <p class="text-sm text-white/80 mt-1">Bruce faz parte da esteira NC5 Hub — do briefing ao pixel.</p>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </section>
+
 @endsection
