@@ -28,7 +28,7 @@
     }" class="space-y-8">
 
         <!-- Banner Explicativo Premium -->
-        <div class="bg-gradient-to-r from-ink via-inkLight to-bruceInk text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+        <div class="bg-[#0A1128] text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
             <div class="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-gradient-to-br from-magenta/20 to-bruce/20 blur-3xl pointer-events-none"></div>
             <div class="relative z-10 max-w-3xl">
                 <span class="px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest bg-white/10 rounded-full text-bruce inline-block mb-3 border border-white/10">
@@ -129,14 +129,14 @@
                     <div class="mt-6 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
                         <div class="flex flex-wrap items-center gap-3">
                             @if($material->arquivo_path)
-                                <a href="{{ $material->arquivo_path }}" target="_blank" class="bg-gradient-to-r from-bruce to-bruceDark text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-bruceGlow flex items-center gap-2 hover:opacity-95 transition-opacity">
+                                <a href="{{ $material->arquivo_path }}" target="_blank" class="bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-md flex items-center gap-2 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                     Visualizar Material (Figma / Drive / Link)
                                 </a>
                             @endif
 
                             @if($material->anexo_admin_path)
-                                <a href="{{ asset('storage/' . $material->anexo_admin_path) }}" target="_blank" class="bg-ink text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-md flex items-center gap-2 hover:bg-magenta transition-colors">
+                                <a href="{{ asset('storage/' . $material->anexo_admin_path) }}" target="_blank" class="bg-[#0A1128] text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-md flex items-center gap-2 hover:bg-[#E63888] transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     Baixar Arquivo Anexo
                                 </a>
@@ -144,7 +144,7 @@
                         </div>
 
                         <!-- Botão Avaliar / Adicionar Observações -->
-                        <button @click="openModal({{ $jsonMaterial }})" class="bg-gradient-to-r from-ink via-magenta to-bruce text-white px-6 py-3 rounded-2xl text-xs font-extrabold shadow-glow hover:opacity-95 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                        <button @click="openModal({{ $jsonMaterial }})" class="bg-[#0A1128] hover:bg-[#E63888] text-white px-6 py-3 rounded-2xl text-xs font-extrabold shadow-md transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             {{ $material->status_aprovacao === 'pendente' ? 'Avaliar & Enviar Observações' : 'Alterar Observações / Status' }}
                         </button>
@@ -220,7 +220,7 @@
                         <button type="button" @click="modalOpen = false" class="text-slateText hover:text-ink font-bold text-sm transition-colors px-4 py-2">
                             Cancelar
                         </button>
-                        <button type="submit" class="bg-gradient-to-r from-bruce to-bruceDark hover:from-bruceDark hover:to-bruce text-white px-8 py-3.5 rounded-2xl text-sm font-bold shadow-bruceGlow transition-all transform hover:-translate-y-0.5">
+                        <button type="submit" class="bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-8 py-3.5 rounded-2xl text-sm font-bold shadow-md transition-all transform hover:-translate-y-0.5">
                             Enviar Observações para a NC5
                         </button>
                     </div>

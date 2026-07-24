@@ -22,7 +22,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @forelse($posts as $post)
                     <a href="{{ route('blog.post', $post->slug) }}" class="group flex flex-col">
-                        <div class="aspect-[4/3] rounded-3xl bg-gradient-to-br from-mist via-white to-mist border border-black/5 flex items-center justify-center overflow-hidden mb-5 group-hover:shadow-2xl group-hover:shadow-ink/5 transition-all relative">
+                        <div class="aspect-[4/3] rounded-3xl bg-mist border border-slate-200/80 flex items-center justify-center overflow-hidden mb-5 group-hover:shadow-xl transition-all relative">
                             <span class="font-display font-black text-7xl text-slate/20 group-hover:scale-110 group-hover:text-bruce/50 transition-all">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>

@@ -7,7 +7,7 @@
                 </h2>
                 <p class="text-slateText text-sm mt-1">Gerencie a esteira de aprovação de materiais, peças e criativos junto aos clientes.</p>
             </div>
-            <a href="{{ route('admin.materiais.create') }}" class="bg-gradient-to-r from-bruce to-bruceDark hover:from-bruceDark hover:to-bruce text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-bruceGlow flex items-center gap-2 transform hover:-translate-y-0.5">
+            <a href="{{ route('admin.materiais.create') }}" class="bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-md flex items-center gap-2 transform hover:-translate-y-0.5">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Enviar Novo Material
             </a>

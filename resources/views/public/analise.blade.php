@@ -61,7 +61,7 @@
 
                 <!-- lado direito: card com stats + ícone gigante -->
                 <div class="lg:col-span-5">
-                    <div class="relative bg-gradient-to-br from-bruce to-bruceDark rounded-3xl p-8 lg:p-10 shadow-2xl shadow-bruce/30 overflow-hidden">
+                    <div class="relative bg-[#FF7A1A] rounded-3xl p-8 lg:p-10 shadow-2xl shadow-[#FF7A1A]/30 overflow-hidden">
                         <div class="absolute -top-16 -right-16 w-64 h-64 bg-white/10 rounded-full blur-[60px] pointer-events-none"></div>
 
                         <div class="relative">

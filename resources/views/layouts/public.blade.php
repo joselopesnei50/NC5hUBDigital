@@ -94,10 +94,10 @@
 
                 <div class="flex items-center gap-3">
                     @auth
-                        <a href="{{ route('dashboard') }}" class="hidden sm:inline-flex bg-ink hover:bg-bruce text-white px-4 py-2 rounded-full text-sm font-bold transition-colors">Meu Painel</a>
+                        <a href="{{ route('dashboard') }}" class="hidden sm:inline-flex bg-[#0A1128] hover:bg-[#E63888] text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">Meu Painel</a>
                     @else
-                        <a href="{{ route('login') }}" class="hidden sm:inline text-sm font-semibold text-ink hover:text-bruce transition-colors">Entrar</a>
-                        <a href="{{ route('analise.index') }}" class="hidden md:inline-flex items-center gap-2 bg-ink hover:bg-bruce text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-ink/20">
+                        <a href="{{ route('login') }}" class="hidden sm:inline text-sm font-semibold text-[#0A1128] hover:text-[#FF7A1A] transition-colors px-3 py-2">Entrar</a>
+                        <a href="{{ route('analise.index') }}" class="hidden md:inline-flex items-center gap-2 bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-[#FF7A1A]/20">
                             Análise Gratuita
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                         </a>

@@ -77,7 +77,7 @@
             <!-- Botões de Ação -->
             <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">
                 <a href="{{ route('admin.materiais.index') }}" class="text-slateText hover:text-ink font-bold text-sm transition-colors">Cancelar</a>
-                <button type="submit" class="bg-gradient-to-r from-bruce to-bruceDark hover:from-bruceDark hover:to-bruce text-white px-8 py-3.5 rounded-2xl text-sm font-bold transition-all shadow-bruceGlow transform hover:-translate-y-0.5">
+                <button type="submit" class="bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-8 py-3.5 rounded-2xl text-sm font-bold transition-all shadow-md transform hover:-translate-y-0.5">
                     Enviar para Aprovação do Cliente
                 </button>
             </div>
