@@ -50,22 +50,40 @@
         <style>
             body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
             .font-display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
-            .gradient-text {
-                background: linear-gradient(120deg, #0A1128 0%, #E63888 55%, #ff8ac2 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
             .glass {
                 backdrop-filter: saturate(180%) blur(14px);
                 -webkit-backdrop-filter: saturate(180%) blur(14px);
                 background-color: rgba(255,255,255,0.72);
             }
-            .noise::before {
-                content: "";
-                position: absolute; inset: 0;
-                background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence baseFrequency='0.9' /></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/></svg>");
-                opacity: 0.05; pointer-events: none;
+            
+            @keyframes bruceFloat {
+                0%, 100% {
+                    transform: translateY(0px) rotate(0deg) scale(1);
+                }
+                50% {
+                    transform: translateY(-18px) rotate(1.5deg) scale(1.03);
+                }
+            }
+
+            @keyframes bruceAura {
+                0%, 100% {
+                    transform: scale(0.95);
+                    opacity: 0.4;
+                    filter: blur(80px);
+                }
+                50% {
+                    transform: scale(1.15);
+                    opacity: 0.85;
+                    filter: blur(120px);
+                }
+            }
+
+            .animate-bruce-logo {
+                animation: bruceFloat 6s ease-in-out infinite;
+            }
+
+            .animate-bruce-aura {
+                animation: bruceAura 5s ease-in-out infinite;
             }
         </style>
     </head>
