@@ -114,17 +114,17 @@
                 ]);
             @endphp
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 @foreach($servicosList as $index => $servico)
-                    <a href="{{ route('servicos') }}" class="group relative bg-[#F8FAFC] border border-slate-200/80 rounded-3xl p-8 flex flex-col overflow-hidden hover:bg-[#0A1128] hover:text-white transition-all duration-500 hover:shadow-xl">
-                        <div class="flex items-start justify-between mb-8">
-                            <span class="w-12 h-12 rounded-2xl bg-white group-hover:bg-[#FF7A1A] group-hover:text-white text-[#0A1128] font-display font-bold flex items-center justify-center text-lg shadow-sm transition-colors">
+                    <a href="{{ route('servicos') }}" class="group relative bg-[#F8FAFC] border border-slate-200/80 rounded-[1.25rem] p-6 flex flex-col overflow-hidden hover:bg-[#0A1128] hover:text-white transition-all duration-500 hover:shadow-xl">
+                        <div class="flex items-start justify-between mb-5">
+                            <span class="w-10 h-10 rounded-xl bg-white group-hover:bg-[#FF7A1A] group-hover:text-white text-[#0A1128] font-display font-bold flex items-center justify-center text-base shadow-sm transition-colors">
                                 0{{ $index + 1 }}
                             </span>
-                            <svg class="w-5 h-5 text-slate-400 group-hover:text-white group-hover:-translate-y-1 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-white group-hover:-translate-y-1 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                         </div>
-                        <h3 class="font-display text-2xl font-extrabold leading-tight mb-3">{{ $servico->nome }}</h3>
-                        <p class="text-sm leading-relaxed opacity-75 line-clamp-3">{{ $servico->descricao }}</p>
+                        <h3 class="font-display text-xl font-extrabold leading-tight mb-2">{{ $servico->nome }}</h3>
+                        <p class="text-[13px] leading-relaxed opacity-75 line-clamp-3">{{ $servico->descricao }}</p>
                     </a>
                 @endforeach
             </div>

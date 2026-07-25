@@ -46,20 +46,20 @@
                 ]);
             @endphp
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 @foreach($servicosList as $index => $servico)
-                    <div class="group relative bg-white border border-black/5 rounded-3xl p-8 flex flex-col overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-ink/5">
-                        <div class="flex items-start justify-between mb-8">
-                            <span class="font-display font-black text-5xl text-mist group-hover:text-[#FF7A1A] transition-colors">
+                    <div class="group relative bg-white border border-black/5 rounded-[1.25rem] p-6 flex flex-col overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-ink/5">
+                        <div class="flex items-start justify-between mb-5">
+                            <span class="font-display font-black text-4xl text-mist group-hover:text-[#FF7A1A] transition-colors">
                                 {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                             </span>
-                            <span class="w-10 h-10 rounded-full bg-mist group-hover:bg-[#0A1128] group-hover:text-white text-[#0A1128] flex items-center justify-center transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            <span class="w-8 h-8 rounded-full bg-mist group-hover:bg-[#0A1128] group-hover:text-white text-[#0A1128] flex items-center justify-center transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </span>
                         </div>
 
-                        <h3 class="font-display text-2xl font-bold text-[#0A1128] mb-3 leading-tight">{{ $servico->nome }}</h3>
-                        <p class="text-slate text-sm leading-relaxed flex-grow">{{ $servico->descricao }}</p>
+                        <h3 class="font-display text-xl font-bold text-[#0A1128] mb-2 leading-tight">{{ $servico->nome }}</h3>
+                        <p class="text-slate text-[13px] leading-relaxed flex-grow">{{ $servico->descricao }}</p>
                     </div>
                 @endforeach
             </div>
