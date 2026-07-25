@@ -89,8 +89,33 @@
                 </a>
             </div>
 
+            @php
+                $servicosList = $servicos->isEmpty() ? collect([
+                    (object)[
+                        'nome' => 'Automação WhatsApp com API Oficial', 
+                        'descricao' => 'Escalabilidade e automação no atendimento usando a API Oficial do WhatsApp, chatbots inteligentes e integração direta com seu funil de vendas.'
+                    ],
+                    (object)[
+                        'nome' => 'Desenvolvimento Web', 
+                        'descricao' => 'Criação de websites premium, landing pages de alta performance e plataformas personalizadas com foco absoluto em conversão e velocidade.'
+                    ],
+                    (object)[
+                        'nome' => 'Desenvolvimento de Marca', 
+                        'descricao' => 'Construção de posicionamento estratégico, identidade visual premium e diretrizes que elevam a percepção de valor da sua empresa no mercado.'
+                    ],
+                    (object)[
+                        'nome' => 'Servidor AWS', 
+                        'descricao' => 'Arquitetura em nuvem, hospedagem de alta disponibilidade, segurança e escalabilidade garantida utilizando o ecossistema Amazon Web Services.'
+                    ],
+                    (object)[
+                        'nome' => 'CRM Customizado', 
+                        'descricao' => 'Implantação de CRM inteligente com gestão visual por cards, automação de pipeline de vendas e rastreamento completo da jornada do lead.'
+                    ],
+                ]) : $servicos;
+            @endphp
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @forelse($servicos as $index => $servico)
+                @foreach($servicosList as $index => $servico)
                     <a href="{{ route('servicos') }}" class="group relative bg-[#F8FAFC] border border-slate-200/80 rounded-3xl p-8 flex flex-col overflow-hidden hover:bg-[#0A1128] hover:text-white transition-all duration-500 hover:shadow-xl">
                         <div class="flex items-start justify-between mb-8">
                             <span class="w-12 h-12 rounded-2xl bg-white group-hover:bg-[#FF7A1A] group-hover:text-white text-[#0A1128] font-display font-bold flex items-center justify-center text-lg shadow-sm transition-colors">
@@ -101,11 +126,7 @@
                         <h3 class="font-display text-2xl font-extrabold leading-tight mb-3">{{ $servico->nome }}</h3>
                         <p class="text-sm leading-relaxed opacity-75 line-clamp-3">{{ $servico->descricao }}</p>
                     </a>
-                @empty
-                    <div class="col-span-3 text-center py-16 text-slate-500">
-                        <p class="text-base font-semibold text-[#0A1128]">Catálogo de Serviços NC5 Hub Digital</p>
-                    </div>
-                @endforelse
+                @endforeach
             </div>
         </div>
     </section>
