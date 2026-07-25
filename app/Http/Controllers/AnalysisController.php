@@ -130,7 +130,7 @@ PROMPT;
             $response = Http::withToken($apiKey)
                 ->timeout(60) // Aumentando o timeout em caso de instabilidade
                 ->post('https://api.deepseek.com/chat/completions', [
-                    'model' => 'deepseek-chat',
+                    'model' => 'deepseek-v4-flash',
                     'messages' => [
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user',   'content' => $userPrompt],
@@ -158,9 +158,11 @@ PROMPT;
             // Tratamento de falhas na API para exibir um log decente
             $errorBody = $response->body();
             $statusCode = $response->status();
+            $errorJson = $response->json();
+            $errorMsg = $errorJson['error']['message'] ?? $errorBody;
             Log::error("BruceIA API Falhou (HTTP {$statusCode}): " . $errorBody);
             
-            return back()->with('error', "A Inteligência Artificial falhou ao responder (Erro {$statusCode}). O servidor da IA pode estar sobrecarregado no momento. Tente novamente.");
+            return back()->with('error', "A Inteligência Artificial falhou ao responder (Erro {$statusCode}: {$errorMsg}). Tente novamente.");
 
         } catch (\Exception $e) {
             Log::error('BruceIA exceção de conexão: ' . $e->getMessage());
