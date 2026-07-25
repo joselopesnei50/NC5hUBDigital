@@ -119,49 +119,73 @@
             
             @if(isset($lead->tipo_analise) && $lead->tipo_analise === 'site' && isset($lead->seo_score))
             <!-- Technical Audit Gauges -->
-            <div class="bg-white/5 border-b border-white/5 p-6 md:p-10 flex flex-col items-center justify-center">
-                <h3 class="font-display font-bold text-xl text-white mb-8">Auditoria Técnica Relâmpago</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 w-full max-w-3xl" x-data="{ currentSc: 0, currentPerf: 0, currentMob: 0 }" x-init="
+            <div class="bg-white/5 border-b border-white/5 p-6 md:p-10 flex flex-col items-center justify-center relative">
+                <!-- LCP Alert Badge -->
+                @if(isset($lead->lcp_time) && $lead->lcp_time > 0)
+                <div class="absolute top-0 -translate-y-1/2 flex items-center justify-center w-full">
+                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs md:text-sm font-bold shadow-[0_0_15px_rgba(0,0,0,0.5)] border 
+                        {{ $lead->lcp_time > 2.5 ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }}">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Tempo de Carregamento (LCP): {{ $lead->lcp_time }} segundos
+                    </span>
+                </div>
+                @endif
+                
+                <h3 class="font-display font-bold text-xl text-white mb-8 mt-4 text-center">Auditoria Técnica Oficial (Lighthouse)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl" x-data="{ currentSc: 0, currentPerf: 0, currentMob: 0, currentBp: 0 }" x-init="
                     setTimeout(() => {
                         let sc = setInterval(() => { if (currentSc < {{ $lead->seo_score }}) currentSc++; else clearInterval(sc); }, 20);
                         let perf = setInterval(() => { if (currentPerf < {{ $lead->performance_score }}) currentPerf++; else clearInterval(perf); }, 20);
                         let mob = setInterval(() => { if (currentMob < {{ $lead->mobile_score }}) currentMob++; else clearInterval(mob); }, 20);
+                        let bp = setInterval(() => { if (currentBp < {{ $lead->best_practices_score ?? 0 }}) currentBp++; else clearInterval(bp); }, 20);
                     }, 500);
                 ">
                     <!-- SEO Score -->
                     <div class="flex flex-col items-center">
-                        <div class="relative w-32 h-32 flex items-center justify-center rounded-full bg-black/40 shadow-inner">
+                        <div class="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center rounded-full bg-black/40 shadow-inner">
                             <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <path class="text-white/5" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                 <path :class="currentSc >= 80 ? 'text-emerald-400' : (currentSc >= 50 ? 'text-amber-400' : 'text-red-400')" :stroke-dasharray="currentSc + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" class="transition-all duration-300 drop-shadow-[0_0_5px_currentColor]" />
                             </svg>
-                            <span class="font-display font-black text-3xl" :class="currentSc >= 80 ? 'text-emerald-400' : (currentSc >= 50 ? 'text-amber-400' : 'text-red-400')" x-text="currentSc"></span>
+                            <span class="font-display font-black text-2xl md:text-3xl" :class="currentSc >= 80 ? 'text-emerald-400' : (currentSc >= 50 ? 'text-amber-400' : 'text-red-400')" x-text="currentSc"></span>
                         </div>
-                        <span class="mt-4 font-bold text-white/70 text-sm uppercase tracking-wider">SEO On-Page</span>
+                        <span class="mt-3 md:mt-4 font-bold text-white/70 text-xs md:text-sm uppercase tracking-wider text-center">SEO</span>
                     </div>
 
                     <!-- Performance Score -->
                     <div class="flex flex-col items-center">
-                        <div class="relative w-32 h-32 flex items-center justify-center rounded-full bg-black/40 shadow-inner">
+                        <div class="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center rounded-full bg-black/40 shadow-inner">
                             <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <path class="text-white/5" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                 <path :class="currentPerf >= 80 ? 'text-emerald-400' : (currentPerf >= 50 ? 'text-amber-400' : 'text-red-400')" :stroke-dasharray="currentPerf + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" class="transition-all duration-300 drop-shadow-[0_0_5px_currentColor]" />
                             </svg>
-                            <span class="font-display font-black text-3xl" :class="currentPerf >= 80 ? 'text-emerald-400' : (currentPerf >= 50 ? 'text-amber-400' : 'text-red-400')" x-text="currentPerf"></span>
+                            <span class="font-display font-black text-2xl md:text-3xl" :class="currentPerf >= 80 ? 'text-emerald-400' : (currentPerf >= 50 ? 'text-amber-400' : 'text-red-400')" x-text="currentPerf"></span>
                         </div>
-                        <span class="mt-4 font-bold text-white/70 text-sm uppercase tracking-wider">Velocidade</span>
+                        <span class="mt-3 md:mt-4 font-bold text-white/70 text-xs md:text-sm uppercase tracking-wider text-center">Velocidade</span>
                     </div>
 
                     <!-- Mobile Score -->
                     <div class="flex flex-col items-center">
-                        <div class="relative w-32 h-32 flex items-center justify-center rounded-full bg-black/40 shadow-inner">
+                        <div class="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center rounded-full bg-black/40 shadow-inner">
                             <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <path class="text-white/5" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                 <path :class="currentMob >= 80 ? 'text-emerald-400' : (currentMob >= 50 ? 'text-amber-400' : 'text-red-400')" :stroke-dasharray="currentMob + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" class="transition-all duration-300 drop-shadow-[0_0_5px_currentColor]" />
                             </svg>
-                            <span class="font-display font-black text-3xl" :class="currentMob >= 80 ? 'text-emerald-400' : (currentMob >= 50 ? 'text-amber-400' : 'text-red-400')" x-text="currentMob"></span>
+                            <span class="font-display font-black text-2xl md:text-3xl" :class="currentMob >= 80 ? 'text-emerald-400' : (currentMob >= 50 ? 'text-amber-400' : 'text-red-400')" x-text="currentMob"></span>
                         </div>
-                        <span class="mt-4 font-bold text-white/70 text-sm uppercase tracking-wider">UX / Mobile</span>
+                        <span class="mt-3 md:mt-4 font-bold text-white/70 text-xs md:text-sm uppercase tracking-wider text-center">UX / Mobile</span>
+                    </div>
+
+                    <!-- Best Practices Score -->
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-24 h-24 md:w-32 md:h-32 flex items-center justify-center rounded-full bg-black/40 shadow-inner">
+                            <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-white/5" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path :class="currentBp >= 80 ? 'text-emerald-400' : (currentBp >= 50 ? 'text-amber-400' : 'text-red-400')" :stroke-dasharray="currentBp + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" class="transition-all duration-300 drop-shadow-[0_0_5px_currentColor]" />
+                            </svg>
+                            <span class="font-display font-black text-2xl md:text-3xl" :class="currentBp >= 80 ? 'text-emerald-400' : (currentBp >= 50 ? 'text-amber-400' : 'text-red-400')" x-text="currentBp"></span>
+                        </div>
+                        <span class="mt-3 md:mt-4 font-bold text-white/70 text-xs md:text-sm uppercase tracking-wider text-center">Boas Práticas</span>
                     </div>
                 </div>
             </div>

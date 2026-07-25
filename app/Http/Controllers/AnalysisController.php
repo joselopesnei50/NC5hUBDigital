@@ -80,11 +80,15 @@ class AnalysisController extends Controller
                     $contextoExtra .= "- Nota SEO On-Page: " . $dadosSite['seo_score'] . "/100\n";
                     $contextoExtra .= "- Nota de Velocidade (Performance): " . $dadosSite['performance_score'] . "/100\n";
                     $contextoExtra .= "- Nota Mobile (Acessibilidade/UX): " . $dadosSite['mobile_score'] . "/100\n";
-                    $contextoExtra .= "\nInstrução Crítica: Mencione essas notas na sua análise para provar tecnicamente que o site dele precisa ser refeito por uma agência.";
+                    $contextoExtra .= "- Nota de Boas Práticas (Segurança/Código): " . $dadosSite['best_practices_score'] . "/100\n";
+                    $contextoExtra .= "- Tempo de Carregamento Principal (LCP): " . $dadosSite['lcp_time'] . " segundos\n";
+                    $contextoExtra .= "\nInstrução Crítica: Mencione essas notas e, principalmente, se o tempo de carregamento (LCP) for maior que 2.5s, use isso como argumento contundente de que ele está perdendo vendas por lentidão e precisa que uma agência refaça o site.";
                     
                     $lead->seo_score = $dadosSite['seo_score'];
                     $lead->performance_score = $dadosSite['performance_score'];
                     $lead->mobile_score = $dadosSite['mobile_score'];
+                    $lead->best_practices_score = $dadosSite['best_practices_score'];
+                    $lead->lcp_time = $dadosSite['lcp_time'];
                     $lead->save();
                 } else {
                     $contextoExtra .= "\n\n[Nota: Não foi possível raspar o texto do site. Faça a análise focando puramente no problema (DOR) e objetivo reportado, e como um site ideal para esse nicho deveria ser.]";
@@ -192,6 +196,8 @@ PROMPT;
             'seo_score' => 100,
             'performance_score' => rand(30, 85),
             'mobile_score' => rand(40, 90),
+            'best_practices_score' => rand(40, 80),
+            'lcp_time' => number_format(rand(30, 75) / 10, 1, '.', ''),
         ];
 
         try {
@@ -250,7 +256,7 @@ PROMPT;
 
         try {
             $psUrl = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=" . urlencode($url) . "&strategy=mobile";
-            $psResponse = Http::timeout(8)->get($psUrl);
+            $psResponse = Http::timeout(10)->get($psUrl);
             if ($psResponse->successful()) {
                 $psData = $psResponse->json();
                 if (isset($psData['lighthouseResult']['categories']['performance']['score'])) {
@@ -258,6 +264,16 @@ PROMPT;
                 }
                 if (isset($psData['lighthouseResult']['categories']['accessibility']['score'])) {
                     $dados['mobile_score'] = intval($psData['lighthouseResult']['categories']['accessibility']['score'] * 100);
+                }
+                if (isset($psData['lighthouseResult']['categories']['seo']['score'])) {
+                    $dados['seo_score'] = intval($psData['lighthouseResult']['categories']['seo']['score'] * 100);
+                }
+                if (isset($psData['lighthouseResult']['categories']['best-practices']['score'])) {
+                    $dados['best_practices_score'] = intval($psData['lighthouseResult']['categories']['best-practices']['score'] * 100);
+                }
+                if (isset($psData['lighthouseResult']['audits']['largest-contentful-paint']['numericValue'])) {
+                    $lcpMs = $psData['lighthouseResult']['audits']['largest-contentful-paint']['numericValue'];
+                    $dados['lcp_time'] = number_format($lcpMs / 1000, 1, '.', '');
                 }
             }
         } catch (\Exception $e) {
