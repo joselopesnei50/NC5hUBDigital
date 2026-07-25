@@ -4,9 +4,6 @@
 
 @section('content')
     <article class="pt-24 lg:pt-32 pb-24 relative overflow-hidden">
-        <!-- Glow suave no fundo -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#FF7A1A]/10 blur-[120px] rounded-full pointer-events-none"></div>
-        
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
             <a href="{{ route('blog') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-[#FF7A1A] transition-colors mb-10 group">
