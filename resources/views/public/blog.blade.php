@@ -5,10 +5,10 @@
 @section('content')
     <!-- Header -->
     <section class="relative overflow-hidden">
-        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-magenta/10 rounded-full blur-[130px] pointer-events-none"></div>
+        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-bruce/10 rounded-full blur-[130px] pointer-events-none"></div>
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 lg:pt-32">
-            <p class="text-xs font-bold uppercase tracking-widest text-magenta mb-4">Insights & Estratégia</p>
+            <p class="text-xs font-bold uppercase tracking-widest text-bruce mb-4">Insights & Estratégia</p>
             <h1 class="font-display font-bold text-5xl md:text-7xl text-ink leading-[0.95] tracking-tight max-w-3xl">
                 Nosso <em class="not-italic gradient-text">radar</em> sobre marca, mídia e IA.
             </h1>
@@ -26,7 +26,7 @@
                             <span class="font-display font-black text-7xl text-slate/20 group-hover:scale-110 group-hover:text-bruce/50 transition-all">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         </div>
-                        <p class="text-xs font-bold text-magenta uppercase tracking-widest">{{ $post->created_at->format('d M Y') }}</p>
+                        <p class="text-xs font-bold text-bruce uppercase tracking-widest">{{ $post->created_at->format('d M Y') }}</p>
                         <h3 class="mt-2 font-display font-bold text-2xl text-ink group-hover:text-bruce transition-colors leading-tight line-clamp-2">{{ $post->titulo }}</h3>
                         <p class="mt-3 text-sm text-slate line-clamp-3">{{ Str::limit(strip_tags($post->conteudo), 150) }}</p>
                         <div class="mt-5 inline-flex items-center gap-2 text-sm font-bold text-ink group-hover:gap-3 transition-all">

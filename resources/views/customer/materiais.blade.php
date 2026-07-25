@@ -29,7 +29,7 @@
 
         <!-- Banner Explicativo Premium -->
         <div class="bg-[#0A1128] text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
-            <div class="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-gradient-to-br from-magenta/20 to-bruce/20 blur-3xl pointer-events-none"></div>
+            <div class="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-bruce/20 blur-3xl pointer-events-none"></div>
             <div class="relative z-10 max-w-3xl">
                 <span class="px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest bg-white/10 rounded-full text-bruce inline-block mb-3 border border-white/10">
                     Aprovação em Tempo Real
@@ -136,7 +136,7 @@
                             @endif
 
                             @if($material->anexo_admin_path)
-                                <a href="{{ asset('storage/' . $material->anexo_admin_path) }}" target="_blank" class="bg-[#0A1128] text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-md flex items-center gap-2 hover:bg-[#E63888] transition-colors">
+                                <a href="{{ asset('storage/' . $material->anexo_admin_path) }}" target="_blank" class="bg-[#0A1128] text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-md flex items-center gap-2 hover:bg-[#FF7A1A] transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     Baixar Arquivo Anexo
                                 </a>
@@ -144,7 +144,7 @@
                         </div>
 
                         <!-- Botão Avaliar / Adicionar Observações -->
-                        <button @click="openModal({{ $jsonMaterial }})" class="bg-[#0A1128] hover:bg-[#E63888] text-white px-6 py-3 rounded-2xl text-xs font-extrabold shadow-md transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                        <button @click="openModal({{ $jsonMaterial }})" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-6 py-3 rounded-2xl text-xs font-extrabold shadow-md transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             {{ $material->status_aprovacao === 'pendente' ? 'Avaliar & Enviar Observações' : 'Alterar Observações / Status' }}
                         </button>

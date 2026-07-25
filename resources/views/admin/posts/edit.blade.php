@@ -18,17 +18,17 @@
             <div class="grid grid-cols-1 gap-6">
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Título</label>
-                    <input type="text" name="titulo" value="{{ old('titulo', $post->titulo) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="text" name="titulo" value="{{ old('titulo', $post->titulo) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Conteúdo</label>
-                    <textarea name="conteudo" rows="18" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">{{ old('conteudo', $post->conteudo) }}</textarea>
+                    <textarea name="conteudo" rows="18" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">{{ old('conteudo', $post->conteudo) }}</textarea>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Status</label>
-                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         <option value="publicado" @selected($post->status == 'publicado')>Publicado</option>
                         <option value="rascunho" @selected($post->status == 'rascunho')>Rascunho</option>
                     </select>

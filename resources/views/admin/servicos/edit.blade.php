@@ -15,22 +15,22 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Nome</label>
-                    <input type="text" name="nome" value="{{ old('nome', $servico->nome) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="text" name="nome" value="{{ old('nome', $servico->nome) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Descrição</label>
-                    <textarea name="descricao" rows="4" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">{{ old('descricao', $servico->descricao) }}</textarea>
+                    <textarea name="descricao" rows="4" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">{{ old('descricao', $servico->descricao) }}</textarea>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Preço (R$)</label>
-                    <input type="number" step="0.01" name="preco" value="{{ old('preco', $servico->preco) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="number" step="0.01" name="preco" value="{{ old('preco', $servico->preco) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Status</label>
-                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         <option value="ativo" @selected($servico->status == 'ativo')>Ativo</option>
                         <option value="inativo" @selected($servico->status == 'inativo')>Inativo</option>
                     </select>

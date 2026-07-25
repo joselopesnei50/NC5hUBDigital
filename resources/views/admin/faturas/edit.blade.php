@@ -15,7 +15,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Cliente</label>
-                    <select name="cliente_id" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="cliente_id" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         @foreach($clientes as $c)
                             <option value="{{ $c->id }}" @selected($fatura->cliente_id == $c->id)>{{ $c->razao_social }}</option>
                         @endforeach
@@ -24,22 +24,22 @@
 
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Descrição</label>
-                    <input type="text" name="descricao" value="{{ old('descricao', $fatura->descricao) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="text" name="descricao" value="{{ old('descricao', $fatura->descricao) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Valor (R$)</label>
-                    <input type="number" step="0.01" name="valor" value="{{ old('valor', $fatura->valor) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="number" step="0.01" name="valor" value="{{ old('valor', $fatura->valor) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Vencimento</label>
-                    <input type="date" name="vencimento" value="{{ old('vencimento', optional($fatura->vencimento)->format('Y-m-d') ?? $fatura->vencimento) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="date" name="vencimento" value="{{ old('vencimento', optional($fatura->vencimento)->format('Y-m-d') ?? $fatura->vencimento) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Status</label>
-                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         @foreach(['pendente','pago','atrasado','cancelado'] as $st)
                             <option value="{{ $st }}" @selected($fatura->status == $st)>{{ ucfirst($st) }}</option>
                         @endforeach

@@ -28,7 +28,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Cliente</label>
-                    <select name="cliente_id" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="cliente_id" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         @foreach($clientes as $c)
                             <option value="{{ $c->id }}" @selected($contrato->cliente_id == $c->id)>{{ $c->razao_social }}</option>
                         @endforeach
@@ -37,7 +37,7 @@
 
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Serviço (opcional)</label>
-                    <select name="servico_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="servico_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         <option value="">— Contrato avulso / sem serviço vinculado —</option>
                         @foreach($servicos as $s)
                             <option value="{{ $s->id }}" @selected($contrato->servico_id == $s->id)>{{ $s->nome }} — R$ {{ number_format($s->preco, 2, ',', '.') }}</option>
@@ -47,17 +47,17 @@
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Data de Início</label>
-                    <input type="date" name="data_inicio" value="{{ old('data_inicio', optional($contrato->data_inicio)->format('Y-m-d')) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="date" name="data_inicio" value="{{ old('data_inicio', optional($contrato->data_inicio)->format('Y-m-d')) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Data Final (opcional)</label>
-                    <input type="date" name="data_fim" value="{{ old('data_fim', optional($contrato->data_fim)->format('Y-m-d')) }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="date" name="data_fim" value="{{ old('data_fim', optional($contrato->data_fim)->format('Y-m-d')) }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Status</label>
-                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         @foreach(['ativo','pendente','inativo','cancelado'] as $st)
                             <option value="{{ $st }}" @selected($contrato->status == $st)>{{ ucfirst($st) }}</option>
                         @endforeach

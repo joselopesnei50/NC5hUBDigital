@@ -5,7 +5,7 @@
         <div class="h-16 flex items-center px-3 mb-6 border-b border-white/10">
             <a href="{{ route('customer.index') }}" class="flex items-center gap-3">
                 <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Hub Digital" class="h-8 w-auto">
-                <span class="text-[9px] font-extrabold text-magenta uppercase tracking-widest bg-magenta/10 px-2 py-0.5 rounded-md border border-magenta/20">Cliente</span>
+                <span class="text-[9px] font-extrabold text-bruce uppercase tracking-widest bg-bruce/10 px-2 py-0.5 rounded-md border border-bruce/20">Cliente</span>
             </a>
         </div>
 
@@ -41,12 +41,12 @@
     <!-- Client User Card Footer -->
     <div class="p-4 border-t border-white/10 flex-shrink-0 bg-inkLight/50">
         <div class="flex items-center gap-3 px-2 py-2 mb-2">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-bruce to-magenta flex items-center justify-center text-sm font-bold text-white shadow-md">
+            <div class="w-10 h-10 rounded-xl bg-bruce flex items-center justify-center text-sm font-bold text-white shadow-md">
                 {{ substr(Auth::user()->name ?? 'C', 0, 1) }}
             </div>
             <div class="overflow-hidden">
                 <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name ?? 'Cliente' }}</p>
-                <p class="text-[10px] text-magenta font-bold uppercase tracking-wider">Conta Corporativa</p>
+                <p class="text-[10px] text-bruce font-bold uppercase tracking-wider">Conta Corporativa</p>
             </div>
         </div>
         <form method="POST" action="{{ route('logout') }}">

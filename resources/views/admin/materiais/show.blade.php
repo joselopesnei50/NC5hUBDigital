@@ -10,7 +10,7 @@
                     <p class="text-xs text-slateText font-medium mt-0.5">ID #{{ $material->id }} · Cadastrado em {{ $material->created_at->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
-            <a href="{{ route('admin.materiais.edit', $material->id) }}" class="bg-ink hover:bg-magenta text-white px-6 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-md">
+            <a href="{{ route('admin.materiais.edit', $material->id) }}" class="bg-ink hover:bg-bruce text-white px-6 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-md">
                 Editar Material
             </a>
         </div>
@@ -77,7 +77,7 @@
                             @endif
 
                             @if($material->anexo_admin_path)
-                                <a href="{{ asset('storage/' . $material->anexo_admin_path) }}" target="_blank" class="bg-ink text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-md flex items-center gap-2 hover:bg-magenta transition-colors">
+                                <a href="{{ asset('storage/' . $material->anexo_admin_path) }}" target="_blank" class="bg-ink text-white px-5 py-3 rounded-2xl text-xs font-bold shadow-md flex items-center gap-2 hover:bg-bruce transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     Baixar Anexo NC5
                                 </a>
@@ -90,7 +90,7 @@
             <!-- Card Feedback / Observações do Cliente -->
             <div class="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-premium">
                 <h3 class="font-display font-bold text-lg text-ink mb-4 flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-magenta"></span>
+                    <span class="w-3 h-3 rounded-full bg-bruce"></span>
                     Observações e Feedback do Cliente
                 </h3>
 

@@ -12,7 +12,7 @@
             </a>
 
             <header class="mb-12">
-                <p class="text-xs font-bold uppercase tracking-widest text-magenta mb-4">{{ $post->created_at->translatedFormat('d \d\e F \d\e Y') }}</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-bruce mb-4">{{ $post->created_at->translatedFormat('d \d\e F \d\e Y') }}</p>
                 <h1 class="font-display font-bold text-4xl md:text-6xl text-ink leading-[1.05] tracking-tight">{{ $post->titulo }}</h1>
             </header>
 
@@ -20,7 +20,7 @@
                 <span class="font-display font-black text-8xl text-slate/20">NC5</span>
             </div>
 
-            <div class="prose prose-lg max-w-none prose-headings:font-display prose-headings:text-ink prose-a:text-magenta prose-strong:text-ink text-slate leading-relaxed">
+            <div class="prose prose-lg max-w-none prose-headings:font-display prose-headings:text-ink prose-a:text-bruce prose-strong:text-ink text-slate leading-relaxed">
                 {!! nl2br(e($post->conteudo)) !!}
             </div>
 

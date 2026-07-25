@@ -20,6 +20,10 @@ Route::get('/blog/{slug}', [PublicController::class, 'post'])->name('blog.post')
 Route::get('/analise-gratuita', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analise.index');
 Route::post('/analise-gratuita/processar', [\App\Http\Controllers\AnalysisController::class, 'process'])->name('analise.process');
 
+// Contato Público
+Route::get('/contato', [\App\Http\Controllers\ContatoController::class, 'index'])->name('contato.index');
+Route::post('/contato', [\App\Http\Controllers\ContatoController::class, 'store'])->name('contato.store');
+
 // Dashboard padrão do Breeze (redireciona por role)
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'admin') {
@@ -55,6 +59,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Configurações Globais
     Route::get('configuracoes', [\App\Http\Controllers\Admin\ConfiguracaoController::class, 'index'])->name('configuracoes.index');
     Route::post('configuracoes', [\App\Http\Controllers\Admin\ConfiguracaoController::class, 'store'])->name('configuracoes.store');
+
+    // Contatos recebidos
+    Route::get('/contatos', [\App\Http\Controllers\Admin\ContatoController::class, 'index'])->name('contatos.index');
+    Route::get('/contatos/{contato}', [\App\Http\Controllers\Admin\ContatoController::class, 'show'])->name('contatos.show');
+    Route::put('/contatos/{contato}/status', [\App\Http\Controllers\Admin\ContatoController::class, 'updateStatus'])->name('contatos.status');
+    Route::delete('/contatos/{contato}', [\App\Http\Controllers\Admin\ContatoController::class, 'destroy'])->name('contatos.destroy');
 });
 
 // Área do Cliente (Isolamento via Role)

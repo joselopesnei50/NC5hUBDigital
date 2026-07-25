@@ -86,6 +86,7 @@
                 animation: bruceAura 5s ease-in-out infinite;
             }
         </style>
+        @stack('styles')
     </head>
     <body class="bg-mist text-ink flex flex-col min-h-screen" x-data="{ mobileNav: false }">
 
@@ -102,6 +103,7 @@
                         ['route' => 'servicos', 'label' => 'O que fazemos'],
                         ['route' => 'blog', 'label' => 'Insights'],
                         ['route' => 'analise.index', 'label' => 'Análise com IA'],
+                        ['route' => 'contato.index', 'label' => 'Contato'],
                     ]; @endphp
                     @foreach($items as $item)
                         <a href="{{ route($item['route']) }}" class="px-4 py-2 rounded-full transition-colors {{ request()->routeIs($item['route']) ? 'bg-ink text-white' : 'text-ink hover:bg-black/5' }}">
@@ -112,7 +114,7 @@
 
                 <div class="flex items-center gap-3">
                     @auth
-                        <a href="{{ route('dashboard') }}" class="hidden sm:inline-flex bg-[#0A1128] hover:bg-[#E63888] text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">Meu Painel</a>
+                        <a href="{{ route('dashboard') }}" class="hidden sm:inline-flex bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">Meu Painel</a>
                     @else
                         <a href="{{ route('login') }}" class="hidden sm:inline text-sm font-semibold text-[#0A1128] hover:text-[#FF7A1A] transition-colors px-3 py-2">Entrar</a>
                         <a href="{{ route('analise.index') }}" class="hidden md:inline-flex items-center gap-2 bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-[#FF7A1A]/20">

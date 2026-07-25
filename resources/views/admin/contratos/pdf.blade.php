@@ -6,7 +6,7 @@
 <style>
     body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11px; color: #1a1a2e; line-height: 1.6; margin: 0; padding: 0; }
     .header { background-color: #0A1128; color: #fff; padding: 28px 40px; }
-    .header-label { font-size: 9px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; color: #E63888; margin-bottom: 6px; }
+    .header-label { font-size: 9px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; color: #FF7A1A; margin-bottom: 6px; }
     .header-title { font-size: 22px; font-weight: bold; color: #fff; }
     .body { padding: 32px 40px; }
     .section-title { font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #8A8F9C; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }

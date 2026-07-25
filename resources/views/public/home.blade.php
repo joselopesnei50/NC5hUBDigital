@@ -11,7 +11,7 @@
 
         <!-- Luzes sutis de ambiente (Sem grade) -->
         <div class="absolute -top-32 right-1/4 w-[600px] h-[450px] bg-[#FF7A1A]/10 rounded-full blur-[160px] pointer-events-none"></div>
-        <div class="absolute -bottom-32 -left-32 w-[500px] h-[450px] bg-[#E63888]/10 rounded-full blur-[160px] pointer-events-none"></div>
+        <div class="absolute -bottom-32 -left-32 w-[500px] h-[450px] bg-[#FF7A1A]/10 rounded-full blur-[160px] pointer-events-none"></div>
 
         <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -48,7 +48,7 @@
                         </div>
                         <span class="text-white/20">•</span>
                         <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#E63888]"></span> Esteira de Aprovação Restrita
+                            <span class="w-2 h-2 rounded-full bg-[#FF7A1A]"></span> Esteira de Aprovação Restrita
                         </div>
                         <span class="text-white/20">•</span>
                         <div class="flex items-center gap-2">

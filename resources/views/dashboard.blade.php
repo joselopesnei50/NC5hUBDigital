@@ -11,7 +11,7 @@
                 <a href="{{ route('customer.materiais') }}" class="bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-md flex items-center gap-2">
                     Aprovar Materiais
                 </a>
-                <a href="{{ route('customer.support') }}" class="bg-[#0A1128] hover:bg-[#E63888] text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-md">
+                <a href="{{ route('customer.support') }}" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-md">
                     Abrir Chamado
                 </a>
             </div>

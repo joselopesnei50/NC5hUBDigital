@@ -57,7 +57,7 @@
                 @csrf
                 <div class="relative">
                     <textarea name="mensagem" required rows="3" class="w-full rounded-xl border-gray-300 focus:border-[#0A1128] focus:ring-[#0A1128] pr-24 resize-none shadow-sm" placeholder="Digite sua mensagem..."></textarea>
-                    <button type="submit" class="absolute bottom-3 right-3 bg-[#E63888] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-opacity-90 transition-colors shadow-md">
+                    <button type="submit" class="absolute bottom-3 right-3 bg-[#FF7A1A] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-opacity-90 transition-colors shadow-md">
                         Enviar
                     </button>
                 </div>

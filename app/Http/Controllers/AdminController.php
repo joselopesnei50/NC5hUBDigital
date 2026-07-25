@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use App\Models\Contato;
 use App\Models\Contrato;
 use App\Models\Fatura;
 use App\Models\Ticket;
@@ -24,6 +25,7 @@ class AdminController extends Controller
         $faturasPendentes = Fatura::where('status', 'pendente')->count();
 
         $ticketsAbertos = Ticket::where('status', 'aberto')->count();
+        $contatosNovos = Contato::where('status', 'novo')->count();
 
         $ultimosClientes = Cliente::with('user')->latest()->take(5)->get();
         $ultimosLeads = Lead::latest()->take(5)->get();
@@ -34,6 +36,7 @@ class AdminController extends Controller
             'faturamentoMes',
             'faturasPendentes',
             'ticketsAbertos',
+            'contatosNovos',
             'ultimosClientes',
             'ultimosLeads'
         ));

@@ -20,7 +20,7 @@
                         <p class="text-sm text-[#8A8F9C]">Enviado em {{ $briefing->created_at->format('d/m/Y') }} pela agência</p>
                     </div>
                     @if($briefing->status === 'pendente')
-                        <span class="bg-[#E63888] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        <span class="bg-[#FF7A1A] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                             Pendente de Resposta
                         </span>
                     @else
@@ -36,7 +36,7 @@
 
                     @if($briefing->anexo_admin_path)
                         <div class="mt-4 pt-4 border-t border-gray-200">
-                            <a href="{{ Storage::url($briefing->anexo_admin_path) }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-[#E63888] hover:text-[#0A1128] transition-colors">
+                            <a href="{{ Storage::url($briefing->anexo_admin_path) }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-[#FF7A1A] hover:text-[#0A1128] transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                                 Baixar Anexo da Agência
                             </a>

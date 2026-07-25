@@ -19,7 +19,7 @@
                         colors: { 
                             ink: '#0A1128', 
                             inkLight: '#141D38',
-                            magenta: '#E63888', 
+                            magenta: '#FF7A1A', 
                             mist: '#F8FAFC', 
                             slateText: '#64748B', 
                             bruce: '#FF7A1A', 

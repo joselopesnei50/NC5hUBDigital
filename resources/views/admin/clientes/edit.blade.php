@@ -31,12 +31,12 @@
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Nome do Responsável</label>
-                    <input type="text" name="nome" value="{{ old('nome', $cliente->user->name) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="text" name="nome" value="{{ old('nome', $cliente->user->name) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">E-mail de Acesso</label>
-                    <input type="email" name="email" value="{{ old('email', $cliente->user->email) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="email" name="email" value="{{ old('email', $cliente->user->email) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div class="col-span-2 mt-4">
@@ -45,7 +45,7 @@
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Tipo de Pessoa</label>
-                    <select name="tipo_pessoa" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="tipo_pessoa" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         <option value="PJ" @selected(old('tipo_pessoa', $cliente->tipo_pessoa) == 'PJ')>Pessoa Jurídica (CNPJ)</option>
                         <option value="PF" @selected(old('tipo_pessoa', $cliente->tipo_pessoa) == 'PF')>Pessoa Física (CPF)</option>
                     </select>
@@ -53,22 +53,22 @@
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">CPF / CNPJ</label>
-                    <input type="text" name="cpf_cnpj" value="{{ old('cpf_cnpj', $cliente->cpf_cnpj) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="text" name="cpf_cnpj" value="{{ old('cpf_cnpj', $cliente->cpf_cnpj) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div class="col-span-2">
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Razão Social / Nome Fantasia</label>
-                    <input type="text" name="razao_social" value="{{ old('razao_social', $cliente->razao_social) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="text" name="razao_social" value="{{ old('razao_social', $cliente->razao_social) }}" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Telefone / WhatsApp</label>
-                    <input type="text" name="telefone" value="{{ old('telefone', $cliente->telefone) }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <input type="text" name="telefone" value="{{ old('telefone', $cliente->telefone) }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Status</label>
-                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#E63888] focus:ring-[#E63888]">
+                    <select name="status" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#FF7A1A] focus:ring-[#FF7A1A]">
                         <option value="ativo" @selected(old('status', $cliente->status) == 'ativo')>Ativo</option>
                         <option value="inativo" @selected(old('status', $cliente->status) == 'inativo')>Inativo</option>
                     </select>

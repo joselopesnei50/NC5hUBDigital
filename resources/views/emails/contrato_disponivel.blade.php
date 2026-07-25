@@ -14,7 +14,7 @@
 
                 <tr>
                     <td style="background-color:#0A1128;padding:32px 40px;">
-                        <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#E63888;">NC5 Hub</p>
+                        <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#FF7A1A;">NC5 Hub</p>
                         <h1 style="margin:8px 0 0 0;font-size:26px;font-weight:800;color:#ffffff;line-height:1.2;">Contrato disponível para assinatura.</h1>
                     </td>
                 </tr>
@@ -44,7 +44,7 @@
                             <tr>
                                 <td align="center" style="padding:8px 0 12px 0;">
                                     <a href="{{ $painelUrl }}"
-                                       style="display:inline-block;background-color:#E63888;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 32px;border-radius:999px;">
+                                       style="display:inline-block;background-color:#FF7A1A;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 32px;border-radius:999px;">
                                         Ver e Assinar Contrato
                                     </a>
                                 </td>

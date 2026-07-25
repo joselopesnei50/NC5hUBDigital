@@ -107,7 +107,7 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="inline-flex items-center gap-2">
-                                    <a href="{{ route('admin.materiais.show', $material->id) }}" class="bg-ink hover:bg-magenta text-white px-3.5 py-1.5 rounded-xl font-bold text-xs transition-colors shadow-sm">
+                                    <a href="{{ route('admin.materiais.show', $material->id) }}" class="bg-ink hover:bg-bruce text-white px-3.5 py-1.5 rounded-xl font-bold text-xs transition-colors shadow-sm">
                                         Detalhes / Ficha
                                     </a>
                                     <a href="{{ route('admin.materiais.edit', $material->id) }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-semibold text-xs transition-colors">

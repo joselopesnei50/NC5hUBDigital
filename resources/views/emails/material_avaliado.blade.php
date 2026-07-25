@@ -14,7 +14,7 @@
 
                 <tr>
                     <td style="background-color:#0A1128;padding:32px 40px;">
-                        <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#E63888;">NC5 Hub — Alerta de Produção</p>
+                        <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#FF7A1A;">NC5 Hub — Alerta de Produção</p>
                         <h1 style="margin:8px 0 0 0;font-size:24px;font-weight:800;color:#ffffff;line-height:1.2;">Cliente avaliou o material!</h1>
                     </td>
                 </tr>

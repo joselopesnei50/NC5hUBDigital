@@ -47,7 +47,7 @@
                 @if($contrato->status_assinatura === 'assinado')
                     <div class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">Assinado</div>
                 @else
-                    <div class="absolute top-0 right-0 bg-[#E63888] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">Pendente</div>
+                    <div class="absolute top-0 right-0 bg-[#FF7A1A] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">Pendente</div>
                 @endif
 
                 <div class="w-12 h-12 bg-[#F4F5F7] rounded-xl flex items-center justify-center mb-4 text-[#0A1128]">
@@ -97,8 +97,8 @@
                         <div x-show="modalAssinatura" x-transition
                              class="relative bg-white rounded-3xl shadow-xl w-full max-w-lg p-8 z-10 max-h-screen overflow-y-auto">
 
-                            <div class="w-12 h-12 rounded-full bg-[#E63888]/10 flex items-center justify-center mb-4">
-                                <svg class="w-6 h-6 text-[#E63888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <div class="w-12 h-12 rounded-full bg-[#FF7A1A]/10 flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </div>
 
                             <h3 class="text-2xl font-extrabold text-[#0A1128] mb-1">Assinatura Eletrônica</h3>

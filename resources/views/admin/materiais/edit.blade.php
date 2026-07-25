@@ -96,7 +96,7 @@
 
                 <div class="flex items-center gap-4">
                     <a href="{{ route('admin.materiais.index') }}" class="text-slateText hover:text-ink font-bold text-sm transition-colors">Cancelar</a>
-                    <button type="submit" class="bg-ink hover:bg-magenta text-white px-8 py-3.5 rounded-2xl text-sm font-bold transition-all shadow-md">
+                    <button type="submit" class="bg-ink hover:bg-bruce text-white px-8 py-3.5 rounded-2xl text-sm font-bold transition-all shadow-md">
                         Salvar Alterações
                     </button>
                 </div>
