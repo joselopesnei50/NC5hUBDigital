@@ -7,139 +7,69 @@
     {{-- =====================================================
          HERO · Primeiro Bloco Minimalista & Moderno
          ===================================================== --}}
-    <section class="relative min-h-[calc(100vh-4rem)] bg-[#0A1128] text-white overflow-hidden flex items-center">
-
-        <!-- Luzes sutis de ambiente (Sem grade) -->
-        <div class="absolute -top-32 right-1/4 w-[600px] h-[450px] bg-[#FF7A1A]/10 rounded-full blur-[160px] pointer-events-none"></div>
-        <div class="absolute -bottom-32 -left-32 w-[500px] h-[450px] bg-[#FF7A1A]/10 rounded-full blur-[160px] pointer-events-none"></div>
-
-        <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-
-                <!-- COLUNA ESQUERDA · Conteúdo Principal Minimalista -->
-                <div class="lg:col-span-7 space-y-8">
-                    
-                    <h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-7xl leading-[1.04] tracking-tight text-white">
-                        Estratégia, <span class="text-[#FF7A1A]">design</span> e inteligência para escalar marcas.
+    <section class="relative min-h-screen bg-[#0A1128] text-white flex items-center overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-32">
+        <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 items-center">
+                
+                <!-- COLUNA ESQUERDA · Tipografia Massiva (Ref: Nixtio / Let's Talk) -->
+                <div class="lg:col-span-7">
+                    <h1 class="font-display font-black text-[15vw] sm:text-[10vw] lg:text-[7rem] leading-[0.9] tracking-tighter text-white mb-8 lg:mb-12">
+                        Estratégia.<br>
+                        <span class="text-[#FF7A1A]">Design.</span><br>
+                        Escala.
                     </h1>
 
-                    <p class="text-base sm:text-lg text-white/70 leading-relaxed max-w-xl font-normal">
-                        Conheça o <strong class="text-white font-semibold">BruceIA</strong>. Alinhamos posicionamento de marca, produção de conteúdo e mídia paga em uma esteira única de alta performance.
+                    <p class="text-xl sm:text-2xl text-white/70 leading-relaxed font-normal max-w-xl">
+                        Alinhamos posicionamento de marca, produção de conteúdo e inteligência artificial em uma esteira única de alta performance.
                     </p>
 
-                    <!-- Botões com Cores Sólidas (Sem Degradê) -->
-                    <div class="pt-2 flex flex-col sm:flex-row gap-4">
-                        <a href="{{ route('servicos') }}" class="group inline-flex items-center justify-center gap-3 bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-8 py-4 rounded-2xl text-base font-bold transition-all shadow-lg shadow-[#FF7A1A]/20 transform hover:-translate-y-0.5">
-                            Ver o que fazemos
-                            <span class="w-7 h-7 bg-white/20 group-hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors">
-                                <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                            </span>
-                        </a>
-
-                        <a href="#metodologia" class="inline-flex items-center justify-center gap-3 text-white/90 hover:text-white border border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 px-8 py-4 rounded-2xl text-base font-bold transition-all backdrop-blur-sm">
-                            Como o Bruce funciona
-                        </a>
-                    </div>
-
-                    <!-- Recursos / Prova Sólida -->
-                    <div class="pt-8 border-t border-white/10 flex flex-wrap gap-4 text-xs font-semibold text-white/80">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> API Oficial WhatsApp
+                    <div class="flex flex-wrap gap-12 mt-12 pt-8 border-t border-white/10 max-w-xl">
+                        <div>
+                            <p class="text-white font-bold text-sm">Integração Oficial</p>
+                            <p class="text-white/50 text-xs mt-1">API WhatsApp Business</p>
                         </div>
-                        <span class="text-white/20">•</span>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#FF7A1A]"></span> Esteira de Aprovação Restrita
-                        </div>
-                        <span class="text-white/20">•</span>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-[#FF7A1A]"></span> BruceIA Motor de Análise
+                        <div>
+                            <p class="text-white font-bold text-sm">Tecnologia Proprietária</p>
+                            <p class="text-white/50 text-xs mt-1">BruceIA Engine</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- COLUNA DIREITA · Interface Mockup Premium -->
-                <div class="lg:col-span-5 relative flex items-center justify-center min-h-[380px] lg:min-h-[520px]">
-                    <!-- Elementos flutuantes / UI Mockup -->
-                    <div class="relative w-full max-w-sm sm:max-w-md">
+                <!-- COLUNA DIREITA · Card Clean Branco (Ref: Let's Talk) -->
+                <div class="lg:col-span-5 relative">
+                    <!-- Fundo sutil para destacar o card branco -->
+                    <div class="absolute -inset-4 bg-[#FF7A1A]/5 rounded-[2.5rem] blur-xl"></div>
+                    
+                    <div class="bg-white rounded-[2rem] p-8 sm:p-10 w-full lg:max-w-md ml-auto shadow-2xl relative z-10">
+                        <h3 class="font-display text-3xl font-extrabold text-[#0A1128] leading-tight mb-4">
+                            Descubra onde sua marca perde vendas.
+                        </h3>
+                        <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium">
+                            Nossa IA cruza seus dados reais de mercado e entrega um diagnóstico completo com as alavancas exatas de crescimento.
+                        </p>
                         
-                        <!-- Decoração sutil de fundo (sem degradê) -->
-                        <div class="absolute inset-0 bg-[#FF7A1A]/5 rounded-3xl transform rotate-6 scale-105 border border-[#FF7A1A]/10"></div>
-                        <div class="absolute inset-0 bg-[#1e293b]/40 rounded-3xl transform -rotate-3 scale-105 border border-slate-800"></div>
-
-                        <!-- Card Principal (Fundo Sólido Escuro, Borda Sutil) -->
-                        <div class="bg-[#0f172a] border border-slate-700/60 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative z-10 transform transition-transform duration-500 hover:-translate-y-2">
-                            <!-- Header do Card -->
-                            <div class="flex items-center justify-between mb-6 pb-5 border-b border-slate-800/80">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-[#FF7A1A]/10 flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                    </div>
-                                    <div>
-                                        <div class="text-white text-sm font-bold">Motor de Análise</div>
-                                        <div class="text-slate-400 text-xs">BruceIA Engine</div>
-                                    </div>
-                                </div>
-                                <div class="flex gap-1.5">
-                                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                </div>
+                        <div class="space-y-0 mb-8">
+                            <div class="flex items-center gap-4 border-b border-slate-100 py-4">
+                                <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-sm font-bold text-[#0A1128]">Auditoria de Posicionamento</span>
                             </div>
-                            
-                            <!-- Linhas de Dados -->
-                            <div class="space-y-5">
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-slate-400 text-xs font-mono uppercase tracking-wider">Saúde da Marca</span>
-                                        <span class="text-emerald-400 text-xs font-mono font-bold">Otimizado</span>
-                                    </div>
-                                    <div class="w-full bg-slate-800 rounded-full h-1.5">
-                                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-slate-400 text-xs font-mono uppercase tracking-wider">Geração de Leads</span>
-                                        <span class="text-[#FF7A1A] text-xs font-mono font-bold">+124%</span>
-                                    </div>
-                                    <div class="w-full bg-slate-800 rounded-full h-1.5">
-                                        <div class="bg-[#FF7A1A] h-1.5 rounded-full" style="width: 85%"></div>
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-slate-400 text-xs font-mono uppercase tracking-wider">Custo por Aquisição</span>
-                                        <span class="text-emerald-400 text-xs font-mono font-bold">-32%</span>
-                                    </div>
-                                    <div class="w-full bg-slate-800 rounded-full h-1.5">
-                                        <div class="bg-slate-500 h-1.5 rounded-full" style="width: 20%"></div>
-                                    </div>
-                                </div>
+                            <div class="flex items-center gap-4 border-b border-slate-100 py-4">
+                                <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-sm font-bold text-[#0A1128]">Otimização de Conversão (CRO)</span>
+                            </div>
+                            <div class="flex items-center gap-4 py-4">
+                                <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-sm font-bold text-[#0A1128]">Roadmap de Crescimento</span>
                             </div>
                         </div>
 
-                        <!-- Card Secundário Flutuante -->
-                        <div class="absolute -bottom-5 -left-4 sm:-left-8 bg-[#1e293b] border border-slate-700 rounded-xl p-4 shadow-xl z-20">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                </div>
-                                <div>
-                                    <div class="text-white text-xs font-bold">Estratégia Ativa</div>
-                                    <div class="text-slate-400 text-[10px] mt-0.5">Mídia & Conteúdo</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Card Terciário Flutuante -->
-                        <div class="absolute -top-6 -right-4 sm:-right-6 bg-[#FF7A1A] rounded-xl p-5 shadow-[0_10px_30px_rgba(255,122,26,0.3)] z-20 transform rotate-3 hover:rotate-0 transition-transform">
-                            <div class="text-white font-display font-black text-3xl leading-none">NC5</div>
-                            <div class="text-white/90 text-[10px] font-bold uppercase tracking-widest mt-1">Hub Digital</div>
-                        </div>
+                        <a href="{{ route('analise.index') }}" class="w-full flex items-center justify-center gap-3 bg-[#0A1128] hover:bg-black text-white px-6 py-4 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                            Gerar Diagnóstico Gratuito
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
