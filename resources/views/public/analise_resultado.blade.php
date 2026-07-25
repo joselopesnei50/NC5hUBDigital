@@ -10,8 +10,7 @@
         to { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-up {
-        animation: fadeUp 0.6s ease-out forwards;
-        opacity: 0;
+        animation: fadeUp 0.6s ease-out both;
     }
     .delay-100 { animation-delay: 100ms; }
     .delay-200 { animation-delay: 200ms; }
