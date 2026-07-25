@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('leads', function (Blueprint $table) {
-            //
+            $table->integer('best_practices_score')->nullable()->after('mobile_score');
+            $table->string('lcp_time')->nullable()->after('best_practices_score');
         });
     }
 
@@ -26,7 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('leads', function (Blueprint $table) {
-            //
+            $table->dropColumn(['best_practices_score', 'lcp_time']);
         });
     }
 };

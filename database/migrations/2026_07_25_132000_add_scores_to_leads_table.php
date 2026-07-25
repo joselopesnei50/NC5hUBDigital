@@ -17,8 +17,6 @@ return new class extends Migration
             $table->integer('seo_score')->nullable()->after('resultado_ia');
             $table->integer('performance_score')->nullable()->after('seo_score');
             $table->integer('mobile_score')->nullable()->after('performance_score');
-            $table->integer('best_practices_score')->nullable()->after('mobile_score');
-            $table->string('lcp_time')->nullable()->after('best_practices_score');
         });
     }
 
@@ -30,7 +28,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('leads', function (Blueprint $table) {
-            $table->dropColumn(['seo_score', 'performance_score', 'mobile_score', 'best_practices_score', 'lcp_time']);
+            $table->dropColumn(['seo_score', 'performance_score', 'mobile_score']);
         });
     }
 };
