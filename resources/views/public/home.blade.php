@@ -57,16 +57,87 @@
                     </div>
                 </div>
 
-                <!-- COLUNA DIREITA · Logo Animado Bruce IA -->
+                <!-- COLUNA DIREITA · Interface Mockup Premium -->
                 <div class="lg:col-span-5 relative flex items-center justify-center min-h-[380px] lg:min-h-[520px]">
-                    <!-- Aura Animada atrás do Logo -->
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="w-[300px] h-[300px] lg:w-[420px] lg:h-[420px] bg-[#FF7A1A]/30 rounded-full animate-bruce-aura"></div>
-                    </div>
+                    <!-- Elementos flutuantes / UI Mockup -->
+                    <div class="relative w-full max-w-sm sm:max-w-md">
+                        
+                        <!-- Decoração sutil de fundo (sem degradê) -->
+                        <div class="absolute inset-0 bg-[#FF7A1A]/5 rounded-3xl transform rotate-6 scale-105 border border-[#FF7A1A]/10"></div>
+                        <div class="absolute inset-0 bg-[#1e293b]/40 rounded-3xl transform -rotate-3 scale-105 border border-slate-800"></div>
 
-                    <!-- Logo Bruce IA Animado -->
-                    <div class="relative flex justify-center items-center">
-                        <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA NC5" class="w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 animate-bruce-logo relative z-10 filter drop-shadow-[0_15px_50px_rgba(255,122,26,0.35)]">
+                        <!-- Card Principal (Fundo Sólido Escuro, Borda Sutil) -->
+                        <div class="bg-[#0f172a] border border-slate-700/60 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative z-10 transform transition-transform duration-500 hover:-translate-y-2">
+                            <!-- Header do Card -->
+                            <div class="flex items-center justify-between mb-6 pb-5 border-b border-slate-800/80">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-[#FF7A1A]/10 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <div class="text-white text-sm font-bold">Motor de Análise</div>
+                                        <div class="text-slate-400 text-xs">BruceIA Engine</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-1.5">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Linhas de Dados -->
+                            <div class="space-y-5">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-slate-400 text-xs font-mono uppercase tracking-wider">Saúde da Marca</span>
+                                        <span class="text-emerald-400 text-xs font-mono font-bold">Otimizado</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-1.5">
+                                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-slate-400 text-xs font-mono uppercase tracking-wider">Geração de Leads</span>
+                                        <span class="text-[#FF7A1A] text-xs font-mono font-bold">+124%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-1.5">
+                                        <div class="bg-[#FF7A1A] h-1.5 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-slate-400 text-xs font-mono uppercase tracking-wider">Custo por Aquisição</span>
+                                        <span class="text-emerald-400 text-xs font-mono font-bold">-32%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-1.5">
+                                        <div class="bg-slate-500 h-1.5 rounded-full" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Secundário Flutuante -->
+                        <div class="absolute -bottom-5 -left-4 sm:-left-8 bg-[#1e293b] border border-slate-700 rounded-xl p-4 shadow-xl z-20">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="text-white text-xs font-bold">Estratégia Ativa</div>
+                                    <div class="text-slate-400 text-[10px] mt-0.5">Mídia & Conteúdo</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Card Terciário Flutuante -->
+                        <div class="absolute -top-6 -right-4 sm:-right-6 bg-[#FF7A1A] rounded-xl p-5 shadow-[0_10px_30px_rgba(255,122,26,0.3)] z-20 transform rotate-3 hover:rotate-0 transition-transform">
+                            <div class="text-white font-display font-black text-3xl leading-none">NC5</div>
+                            <div class="text-white/90 text-[10px] font-bold uppercase tracking-widest mt-1">Hub Digital</div>
+                        </div>
                     </div>
                 </div>
             </div>
