@@ -45,9 +45,6 @@
 
                 <!-- COLUNA DIREITA · Glassmorphism Card -->
                 <div class="lg:col-span-5 relative reveal reveal-delay-4" :class="shown ? 'active' : ''">
-                    <!-- Fundo brilhante -->
-                    <div class="absolute -inset-1 bg-gradient-to-r from-[#FF7A1A]/40 to-transparent rounded-[2.5rem] blur-xl opacity-50"></div>
-                    
                     <div class="glass-card rounded-[2rem] p-8 sm:p-10 w-full lg:max-w-md ml-auto relative z-10 overflow-hidden group hover:border-[#FF7A1A]/40 transition-colors duration-500">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-[#FF7A1A]/10 rounded-full blur-[40px] group-hover:bg-[#FF7A1A]/20 transition-all duration-700"></div>
 
