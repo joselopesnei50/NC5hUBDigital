@@ -4,17 +4,6 @@
 
 @push('styles')
 <style>
-    /* Animations */
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-up {
-        animation: fadeUp 0.6s ease-out both;
-    }
-    .delay-100 { animation-delay: 100ms; }
-    .delay-200 { animation-delay: 200ms; }
-    
     /* Prose Styling for AI HTML Content */
     .bruce-prose {
         max-width: none;
@@ -71,7 +60,7 @@
 <div class="min-h-screen bg-slate-50 font-sans text-slate-800 pb-20">
     <!-- Hero Section -->
     <section class="bg-[#0A1128] pt-24 pb-16 relative overflow-hidden">
-        <div class="container mx-auto px-4 max-w-5xl relative z-10 animate-fade-up">
+        <div class="container mx-auto px-4 max-w-5xl relative z-10">
             <div class="flex items-center gap-3 mb-6">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -95,7 +84,7 @@
     </section>
 
     <!-- Info Strip -->
-    <div class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm animate-fade-up delay-100">
+    <div class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="container mx-auto px-4 max-w-5xl">
             <div class="flex flex-wrap items-center justify-between py-3 text-sm text-slate-600 gap-4">
                 <div class="flex items-center gap-6">
@@ -116,7 +105,7 @@
     <div class="container mx-auto px-4 max-w-5xl py-10">
         
         <!-- Report Card -->
-        <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden mb-12 border border-slate-100 animate-fade-up delay-100">
+        <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden mb-12 border border-slate-100">
             <!-- Card Header -->
             <div class="bg-[#0A1128] px-6 py-5 flex items-center justify-between border-b-4 border-[#FF7A1A]">
                 <div class="flex items-center gap-4">
@@ -143,7 +132,7 @@
         </div>
 
         <!-- CTA Section -->
-        <div class="bg-[#0A1128] rounded-2xl p-8 md:p-12 text-center relative overflow-hidden animate-fade-up delay-200 shadow-2xl">
+        <div class="bg-[#0A1128] rounded-2xl p-8 md:p-12 text-center relative overflow-hidden shadow-2xl">
             <div class="relative z-10 flex flex-col items-center">
                 <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-6 backdrop-blur-md border border-white/10">
                     <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="h-7 w-7">
