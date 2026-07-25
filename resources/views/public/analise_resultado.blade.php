@@ -114,6 +114,56 @@
                 </div>
             </div>
             
+            @if(isset($lead->tipo_analise) && $lead->tipo_analise === 'site' && isset($lead->seo_score))
+            <!-- Technical Audit Gauges -->
+            <div class="bg-slate-50 border-b border-slate-100 p-6 md:p-10 flex flex-col items-center justify-center">
+                <h3 class="font-display font-bold text-xl text-slate-800 mb-8">Auditoria Técnica Relâmpago</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 w-full max-w-3xl" x-data="{ currentSc: 0, currentPerf: 0, currentMob: 0 }" x-init="
+                    setTimeout(() => {
+                        let sc = setInterval(() => { if (currentSc < {{ $lead->seo_score }}) currentSc++; else clearInterval(sc); }, 20);
+                        let perf = setInterval(() => { if (currentPerf < {{ $lead->performance_score }}) currentPerf++; else clearInterval(perf); }, 20);
+                        let mob = setInterval(() => { if (currentMob < {{ $lead->mobile_score }}) currentMob++; else clearInterval(mob); }, 20);
+                    }, 500);
+                ">
+                    <!-- SEO Score -->
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-32 h-32 flex items-center justify-center rounded-full bg-slate-200">
+                            <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-200" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path :class="currentSc >= 80 ? 'text-emerald-500' : (currentSc >= 50 ? 'text-amber-500' : 'text-red-500')" :stroke-dasharray="currentSc + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" class="transition-all duration-300" />
+                            </svg>
+                            <span class="font-display font-black text-3xl" :class="currentSc >= 80 ? 'text-emerald-500' : (currentSc >= 50 ? 'text-amber-500' : 'text-red-500')" x-text="currentSc"></span>
+                        </div>
+                        <span class="mt-4 font-bold text-slate-700 text-sm uppercase tracking-wider">SEO On-Page</span>
+                    </div>
+
+                    <!-- Performance Score -->
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-32 h-32 flex items-center justify-center rounded-full bg-slate-200">
+                            <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-200" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path :class="currentPerf >= 80 ? 'text-emerald-500' : (currentPerf >= 50 ? 'text-amber-500' : 'text-red-500')" :stroke-dasharray="currentPerf + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" class="transition-all duration-300" />
+                            </svg>
+                            <span class="font-display font-black text-3xl" :class="currentPerf >= 80 ? 'text-emerald-500' : (currentPerf >= 50 ? 'text-amber-500' : 'text-red-500')" x-text="currentPerf"></span>
+                        </div>
+                        <span class="mt-4 font-bold text-slate-700 text-sm uppercase tracking-wider">Velocidade</span>
+                    </div>
+
+                    <!-- Mobile Score -->
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-32 h-32 flex items-center justify-center rounded-full bg-slate-200">
+                            <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-200" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path :class="currentMob >= 80 ? 'text-emerald-500' : (currentMob >= 50 ? 'text-amber-500' : 'text-red-500')" :stroke-dasharray="currentMob + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" class="transition-all duration-300" />
+                            </svg>
+                            <span class="font-display font-black text-3xl" :class="currentMob >= 80 ? 'text-emerald-500' : (currentMob >= 50 ? 'text-amber-500' : 'text-red-500')" x-text="currentMob"></span>
+                        </div>
+                        <span class="mt-4 font-bold text-slate-700 text-sm uppercase tracking-wider">UX / Mobile</span>
+                    </div>
+                </div>
+            </div>
+            @endif
+            
             <!-- AI Content -->
             <div class="p-6 md:p-10">
                 <div class="bruce-prose">
