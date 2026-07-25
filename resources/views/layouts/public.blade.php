@@ -10,6 +10,7 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800,900|fraunces:400,500,600,700,800,900&display=swap" rel="stylesheet" />
         <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
         <script>
@@ -23,6 +24,9 @@
                             bruce: '#FF7A1A',
                             bruceDark: '#E5651A',
                             bruceInk: '#0A0A0B',
+                            agDark: '#050505',
+                            agCard: 'rgba(20, 20, 25, 0.65)',
+                            agBorder: 'rgba(255, 255, 255, 0.08)',
                         },
                         animation: {
                             'float': 'float 8s ease-in-out infinite',
@@ -53,8 +57,29 @@
             .glass {
                 backdrop-filter: saturate(180%) blur(14px);
                 -webkit-backdrop-filter: saturate(180%) blur(14px);
-                background-color: rgba(255,255,255,0.72);
+                background-color: rgba(10, 10, 12, 0.75);
+                border-bottom: 1px solid rgba(255,255,255,0.05);
             }
+            .glass-card {
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                background-color: rgba(20, 20, 25, 0.6);
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+            .reveal {
+                opacity: 0;
+                transform: translateY(30px) scale(0.98);
+                transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            }
+            .reveal.active {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            .reveal-delay-1 { transition-delay: 100ms; }
+            .reveal-delay-2 { transition-delay: 200ms; }
+            .reveal-delay-3 { transition-delay: 300ms; }
+            .reveal-delay-4 { transition-delay: 400ms; }
+
             
             @keyframes bruceFloat {
                 0%, 100% {
@@ -88,13 +113,13 @@
         </style>
         @stack('styles')
     </head>
-    <body class="bg-mist text-ink flex flex-col min-h-screen" x-data="{ mobileNav: false }">
+    <body class="bg-[#050505] text-white flex flex-col min-h-screen selection:bg-[#FF7A1A] selection:text-white" x-data="{ mobileNav: false }">
 
         <!-- Navbar -->
-        <nav class="glass border-b border-black/5 sticky top-0 z-50">
+        <nav class="glass sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('images/logo.svg') }}" alt="NC5 Logo" class="h-9 w-auto">
+                    <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Logo" class="h-9 w-auto">
                 </a>
 
                 <div class="hidden md:flex items-center gap-1 text-sm font-medium">
@@ -106,7 +131,7 @@
                         ['route' => 'contato.index', 'label' => 'Contato'],
                     ]; @endphp
                     @foreach($items as $item)
-                        <a href="{{ route($item['route']) }}" class="px-4 py-2 rounded-full transition-colors {{ request()->routeIs($item['route']) ? 'bg-ink text-white' : 'text-ink hover:bg-black/5' }}">
+                        <a href="{{ route($item['route']) }}" class="px-4 py-2 rounded-full transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white' }}">
                             {{ $item['label'] }}
                         </a>
                     @endforeach
@@ -114,9 +139,9 @@
 
                 <div class="flex items-center gap-3">
                     @auth
-                        <a href="{{ route('dashboard') }}" class="hidden sm:inline-flex bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">Meu Painel</a>
+                        <a href="{{ route('dashboard') }}" class="hidden sm:inline-flex bg-white/10 hover:bg-[#FF7A1A] text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-md">Meu Painel</a>
                     @else
-                        <a href="{{ route('login') }}" class="hidden sm:inline text-sm font-semibold text-[#0A1128] hover:text-[#FF7A1A] transition-colors px-3 py-2">Entrar</a>
+                        <a href="{{ route('login') }}" class="hidden sm:inline text-sm font-semibold text-white/80 hover:text-[#FF7A1A] transition-colors px-3 py-2">Entrar</a>
                         <a href="{{ route('analise.index') }}" class="hidden md:inline-flex items-center gap-2 bg-[#FF7A1A] hover:bg-[#E5651A] text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-[#FF7A1A]/20">
                             Análise Gratuita
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
@@ -128,13 +153,13 @@
                 </div>
             </div>
 
-            <div x-show="mobileNav" x-transition class="md:hidden border-t border-black/5 bg-white" style="display: none;">
+            <div x-show="mobileNav" x-transition class="md:hidden border-t border-white/5 bg-[#0A0A0A]" style="display: none;">
                 <div class="px-4 py-3 flex flex-col gap-1">
                     @foreach($items as $item)
-                        <a href="{{ route($item['route']) }}" class="px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs($item['route']) ? 'bg-ink text-white' : 'text-ink hover:bg-mist' }}">{{ $item['label'] }}</a>
+                        <a href="{{ route($item['route']) }}" class="px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs($item['route']) ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white' }}">{{ $item['label'] }}</a>
                     @endforeach
                     @guest
-                        <a href="{{ route('login') }}" class="px-4 py-3 rounded-xl text-sm font-medium text-ink hover:bg-mist">Entrar</a>
+                        <a href="{{ route('login') }}" class="px-4 py-3 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white">Entrar</a>
                     @endguest
                 </div>
             </div>

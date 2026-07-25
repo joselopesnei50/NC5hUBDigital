@@ -1,0 +1,11 @@
+$user = new App\Models\User();
+$user->name = 'Admin NC5';
+$user->email = 'admin@nc5hubdigital.com.br';
+$user->password = bcrypt('Palmares50@');
+$user->role = 'admin';
+$user->save();
+
+
+
+##
+
