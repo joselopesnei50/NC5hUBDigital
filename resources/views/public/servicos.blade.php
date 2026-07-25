@@ -21,26 +21,47 @@
     <!-- Catálogo -->
     <section class="relative py-24 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            @php
+                $servicosList = collect([
+                    (object)[
+                        'nome' => 'Automação WhatsApp com API Oficial', 
+                        'descricao' => 'Escalabilidade e automação no atendimento usando a API Oficial do WhatsApp, chatbots inteligentes e integração direta com seu funil de vendas.'
+                    ],
+                    (object)[
+                        'nome' => 'Desenvolvimento Web', 
+                        'descricao' => 'Criação de websites premium, landing pages de alta performance e plataformas personalizadas com foco absoluto em conversão e velocidade.'
+                    ],
+                    (object)[
+                        'nome' => 'Desenvolvimento de Marca', 
+                        'descricao' => 'Construção de posicionamento estratégico, identidade visual premium e diretrizes que elevam a percepção de valor da sua empresa no mercado.'
+                    ],
+                    (object)[
+                        'nome' => 'Servidor AWS', 
+                        'descricao' => 'Arquitetura em nuvem, hospedagem de alta disponibilidade, segurança e escalabilidade garantida utilizando o ecossistema Amazon Web Services.'
+                    ],
+                    (object)[
+                        'nome' => 'CRM Customizado', 
+                        'descricao' => 'Implantação de CRM inteligente com gestão visual por cards, automação de pipeline de vendas e rastreamento completo da jornada do lead.'
+                    ],
+                ]);
+            @endphp
+            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse($servicos as $index => $servico)
+                @foreach($servicosList as $index => $servico)
                     <div class="group relative bg-white border border-black/5 rounded-3xl p-8 flex flex-col overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-ink/5">
                         <div class="flex items-start justify-between mb-8">
-                            <span class="font-display font-black text-5xl text-mist group-hover:text-bruce transition-colors">
+                            <span class="font-display font-black text-5xl text-mist group-hover:text-[#FF7A1A] transition-colors">
                                 {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                             </span>
-                            <span class="w-10 h-10 rounded-full bg-mist group-hover:bg-ink group-hover:text-white text-ink flex items-center justify-center transition-colors">
+                            <span class="w-10 h-10 rounded-full bg-mist group-hover:bg-[#0A1128] group-hover:text-white text-[#0A1128] flex items-center justify-center transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </span>
                         </div>
 
-                        <h3 class="font-display text-2xl font-bold text-ink mb-3 leading-tight">{{ $servico->nome }}</h3>
+                        <h3 class="font-display text-2xl font-bold text-[#0A1128] mb-3 leading-tight">{{ $servico->nome }}</h3>
                         <p class="text-slate text-sm leading-relaxed flex-grow">{{ $servico->descricao }}</p>
                     </div>
-                @empty
-                    <div class="col-span-full text-center py-20">
-                        <p class="text-lg text-slate">Nenhum serviço cadastrado. Assim que o catálogo for publicado ele aparece aqui.</p>
-                    </div>
-                @endforelse
+                @endforeach
             </div>
         </div>
     </section>

@@ -90,7 +90,7 @@
             </div>
 
             @php
-                $servicosList = $servicos->isEmpty() ? collect([
+                $servicosList = collect([
                     (object)[
                         'nome' => 'Automação WhatsApp com API Oficial', 
                         'descricao' => 'Escalabilidade e automação no atendimento usando a API Oficial do WhatsApp, chatbots inteligentes e integração direta com seu funil de vendas.'
@@ -111,7 +111,7 @@
                         'nome' => 'CRM Customizado', 
                         'descricao' => 'Implantação de CRM inteligente com gestão visual por cards, automação de pipeline de vendas e rastreamento completo da jornada do lead.'
                     ],
-                ]) : $servicos;
+                ]);
             @endphp
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
