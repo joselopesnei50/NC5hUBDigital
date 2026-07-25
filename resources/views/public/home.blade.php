@@ -13,7 +13,7 @@
                 
                 <!-- COLUNA ESQUERDA · Tipografia Massiva (Ref: Nixtio / Let's Talk) -->
                 <div class="lg:col-span-7">
-                    <h1 class="font-display font-black text-[15vw] sm:text-[10vw] lg:text-[7rem] leading-[0.9] tracking-tighter text-white mb-8 lg:mb-12">
+                    <h1 class="font-sans font-black text-[15vw] sm:text-[10vw] lg:text-[7rem] leading-[0.9] tracking-tighter text-white mb-8 lg:mb-12">
                         Estratégia.<br>
                         <span class="text-[#FF7A1A]">Design.</span><br>
                         Escala.
@@ -41,7 +41,7 @@
                     <div class="absolute -inset-4 bg-[#FF7A1A]/5 rounded-[2.5rem] blur-xl"></div>
                     
                     <div class="bg-white rounded-[2rem] p-8 sm:p-10 w-full lg:max-w-md ml-auto shadow-2xl relative z-10">
-                        <h3 class="font-display text-3xl font-extrabold text-[#0A1128] leading-tight mb-4">
+                        <h3 class="font-sans text-3xl font-extrabold text-[#0A1128] leading-tight mb-4 tracking-tight">
                             Descubra onde sua marca perde vendas.
                         </h3>
                         <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium">
