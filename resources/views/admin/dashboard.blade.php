@@ -119,9 +119,12 @@
         </div>
 
         <div class="bg-white border border-black/5 rounded-2xl shadow-sm">
-            <div class="px-6 py-5 border-b border-black/5">
-                <h3 class="font-display text-lg font-bold text-ink">Últimos leads (IA)</h3>
-                <p class="text-xs text-slate mt-0.5">Diagnóstico gratuito</p>
+            <div class="px-6 py-5 border-b border-black/5 flex justify-between items-center">
+                <div>
+                    <h3 class="font-display text-lg font-bold text-ink">Últimos leads (IA)</h3>
+                    <p class="text-xs text-slate mt-0.5">Diagnóstico gratuito</p>
+                </div>
+                <a href="{{ route('admin.leads.index') }}" class="text-xs font-bold text-slate hover:text-bruce transition-colors uppercase tracking-wider">Ver todos</a>
             </div>
             @if($ultimosLeads->isEmpty())
                 <div class="p-8 text-center text-sm text-slate">Nenhum lead capturado ainda.</div>

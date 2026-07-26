@@ -78,6 +78,7 @@
                             ['route'=>'admin.materiais.index', 'label'=>'Produção & Materiais', 'match'=>'admin.materiais.*', 'icon'=>'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
                             ['route'=>'admin.tickets.index', 'label'=>'Suporte & Tickets', 'match'=>'admin.tickets.*', 'icon'=>'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z'],
                             ['route'=>'admin.contatos.index', 'label'=>'Contatos', 'match'=>'admin.contatos.*', 'icon'=>'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+                            ['route'=>'admin.leads.index', 'label'=>'Leads (IA)', 'match'=>'admin.leads.*', 'icon'=>'M13 10V3L4 14h7v7l9-11h-7z'],
                         ];
                         $navCms = [
                             ['route'=>'admin.paginas.index', 'label'=>'Páginas', 'match'=>'admin.paginas.*', 'icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],

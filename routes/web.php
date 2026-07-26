@@ -65,6 +65,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/contatos/{contato}', [\App\Http\Controllers\Admin\ContatoController::class, 'show'])->name('contatos.show');
     Route::put('/contatos/{contato}/status', [\App\Http\Controllers\Admin\ContatoController::class, 'updateStatus'])->name('contatos.status');
     Route::delete('/contatos/{contato}', [\App\Http\Controllers\Admin\ContatoController::class, 'destroy'])->name('contatos.destroy');
+
+    // Leads (IA)
+    Route::get('/leads', [\App\Http\Controllers\Admin\LeadController::class, 'index'])->name('leads.index');
+    Route::get('/leads/export', [\App\Http\Controllers\Admin\LeadController::class, 'export'])->name('leads.export');
 });
 
 // Área do Cliente (Isolamento via Role)
