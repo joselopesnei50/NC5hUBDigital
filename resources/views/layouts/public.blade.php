@@ -208,7 +208,6 @@
                                 <li><a href="{{ route('dashboard') }}" class="hover:text-white transition-colors">Painel</a></li>
                             @else
                                 <li><a href="{{ route('login') }}" class="hover:text-white transition-colors">Entrar</a></li>
-                                <li><a href="{{ route('register') }}" class="hover:text-white transition-colors">Criar conta</a></li>
                             @endauth
                         </ul>
                     </div>
