@@ -133,15 +133,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Seu Nome</label>
-                                <input type="text" name="nome" value="{{ old('nome') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: João Silva">
+                                <input type="text" name="nome" value="{{ old('nome') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="Ex: João Silva">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">WhatsApp</label>
-                                <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="(11) 99999-9999">
+                                <input type="text" name="whatsapp" value="{{ old('whatsapp') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="(11) 99999-9999">
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">E-mail Corporativo</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="voce@suaempresa.com.br">
+                                <input type="email" name="email" value="{{ old('email') }}" required class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="voce@suaempresa.com.br">
                             </div>
                         </div>
                     </div>
@@ -187,7 +187,7 @@
                         <div x-show="tipo === 'site'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;" class="space-y-6">
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">URL da Página</label>
-                                <input type="url" name="url_site" :required="tipo === 'site'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="https://suaempresa.com.br">
+                                <input type="url" name="url_site" :required="tipo === 'site'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="https://suaempresa.com.br">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Objetivo Principal desta Página</label>
@@ -211,15 +211,15 @@
                         <div x-show="tipo === 'redes_sociais'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;" class="space-y-6">
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Seu @ do Instagram</label>
-                                <input type="text" name="url_social" :required="tipo === 'redes_sociais'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="@sua_marca">
+                                <input type="text" name="url_social" :required="tipo === 'redes_sociais'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="@sua_marca">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Sua Bio atual (copie exatamente como está hoje)</label>
-                                <textarea name="bio_social" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Especialistas em..."></textarea>
+                                <textarea name="bio_social" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="Ex: Especialistas em..."></textarea>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Qual produto/serviço de maior valor você vende?</label>
-                                <input type="text" name="produto_social" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Consultoria B2B (Ticket 5k)">
+                                <input type="text" name="produto_social" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="Ex: Consultoria B2B (Ticket 5k)">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Qual o seu maior desafio no Instagram?</label>
@@ -235,19 +235,19 @@
                         <div x-show="tipo === 'marca'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" style="display: none;" class="space-y-6">
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Nome da Marca</label>
-                                <input type="text" name="url_marca" :required="tipo === 'marca'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Sua Empresa LTDA">
+                                <input type="text" name="url_marca" :required="tipo === 'marca'" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="Sua Empresa LTDA">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Promessa Principal (Slogan/Pitch)</label>
-                                <input type="text" name="promessa_marca" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Transformamos... em...">
+                                <input type="text" name="promessa_marca" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="Transformamos... em...">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Quem é o cliente ideal?</label>
-                                <input type="text" name="publico_marca" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Ex: Diretores de indústrias...">
+                                <input type="text" name="publico_marca" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="Ex: Diretores de indústrias...">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Por que compram de você e não do concorrente?</label>
-                                <textarea name="diferencial_marca" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors placeholder-slate-400" placeholder="Qual o diferencial real?"></textarea>
+                                <textarea name="diferencial_marca" rows="2" class="w-full bg-[#F8FAFC] border-slate-200/80 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm font-medium px-4 py-3 transition-colors text-[#0A1128] placeholder-slate-400" placeholder="Qual o diferencial real?"></textarea>
                             </div>
                         </div>
                     </div>
