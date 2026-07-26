@@ -8,6 +8,8 @@ use App\Models\Fatura;
 
 class WebhookController extends Controller
 {
+    public function handleAbacatePay(Request $request)
+    {
         // Validar a assinatura do Webhook para segurança
         $signature = $request->header('x-webhook-signature') ?? $request->header('x-signature');
         $secret = \App\Models\Configuracao::get('abacatepay_webhook_secret', env('ABACATEPAY_WEBHOOK_SECRET'));
