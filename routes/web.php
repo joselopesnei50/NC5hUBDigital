@@ -56,6 +56,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
     Route::resource('servicos', \App\Http\Controllers\Admin\ServicoController::class);
     
+    // E-mail Marketing (Campanhas)
+    Route::get('/campanhas', [\App\Http\Controllers\Admin\CampanhaController::class, 'index'])->name('admin.campanhas.index');
+    Route::get('/campanhas/create', [\App\Http\Controllers\Admin\CampanhaController::class, 'create'])->name('admin.campanhas.create');
+    Route::post('/campanhas', [\App\Http\Controllers\Admin\CampanhaController::class, 'store'])->name('admin.campanhas.store');
+
     // Configurações Globais
     Route::get('configuracoes', [\App\Http\Controllers\Admin\ConfiguracaoController::class, 'index'])->name('configuracoes.index');
     Route::post('configuracoes', [\App\Http\Controllers\Admin\ConfiguracaoController::class, 'store'])->name('configuracoes.store');
