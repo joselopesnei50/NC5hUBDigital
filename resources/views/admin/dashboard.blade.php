@@ -133,6 +133,12 @@
                             <p class="text-xs text-slate truncate">{{ $lead->email }}</p>
                             <div class="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
                                 <span class="px-2 py-0.5 bg-mist text-slate rounded-full">{{ str_replace('_', ' ', $lead->tipo_analise) }}</span>
+                                @if($lead->tipo_analise === 'redes_sociais' && !is_null($lead->ig_followers))
+                                    <span class="px-2 py-0.5 bg-[#FF7A1A]/10 text-[#FF7A1A] rounded-full flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path></svg>
+                                        {{ number_format($lead->ig_followers, 0, ',', '.') }}
+                                    </span>
+                                @endif
                                 <span class="text-slate">{{ $lead->created_at->diffForHumans() }}</span>
                             </div>
                         </li>
