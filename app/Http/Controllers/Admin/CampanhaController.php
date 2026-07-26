@@ -23,7 +23,6 @@ class CampanhaController extends Controller
         $campanhas = Campanha::latest()->get();
         $brevoConectado = !empty($apiKey);
 
-        // Atualizar métricas se tiver ID
         if ($brevoConectado) {
             foreach ($campanhas as $campanha) {
                 if ($campanha->brevo_campaign_id) {
@@ -60,27 +59,12 @@ class CampanhaController extends Controller
     {
         $apiKey = $this->getBrevoKey();
         if (empty($apiKey)) {
-            return redirect()->route('admin.configuracoes.index')->with('error', 'Por favor, configure a chave da API do Brevo primeiro.');
+            return redirect()->route('configuracoes.index')->with('error', 'Por favor, configure a chave da API do Brevo primeiro.');
         }
 
-        // Buscar templates do Brevo para o usuário escolher
-        $templates = [];
-        try {
-            $response = Http::withHeaders([
-                'api-key' => $apiKey,
-                'Accept' => 'application/json'
-            ])->get('https://api.brevo.com/v3/smtp/templates?limit=50&status=true');
-            
-            if ($response->successful()) {
-                $templates = $response->json()['templates'] ?? [];
-            }
-        } catch (\Exception $e) {
-            Log::warning("Erro ao buscar templates do Brevo: " . $e->getMessage());
-        }
+        $totalLeads = Lead::whereNotNull('email')->count();
 
-        $totalLeads = Lead::count();
-
-        return view('admin.campanhas.create', compact('templates', 'totalLeads'));
+        return view('admin.campanhas.create', compact('totalLeads'));
     }
 
     public function store(Request $request)
@@ -88,20 +72,28 @@ class CampanhaController extends Controller
         $request->validate([
             'nome' => 'required|string',
             'assunto' => 'required|string',
-            'template_id' => 'required|numeric',
+            'audience' => 'required|in:leads_ia,csv',
+            'csv_file' => 'required_if:audience,csv|file|mimes:csv,txt',
+            'html_content' => 'required|string',
         ]);
 
         $apiKey = $this->getBrevoKey();
         $senderEmail = Configuracao::get('mail_from_address', 'contato@nc5.com.br');
         $senderName = Configuracao::get('mail_from_name', 'NC5 Hub');
 
-        // Passo 1: Obter/Criar Lista no Brevo para os Leads
-        $listId = $this->syncLeadsToBrevo($apiKey);
-        if (!$listId) {
-            return back()->with('error', 'Falha ao sincronizar leads com o Brevo.');
+        // Passo 1: Obter/Criar Lista no Brevo
+        $listId = null;
+        if ($request->audience === 'leads_ia') {
+            $listId = $this->syncLeadsToBrevo($apiKey);
+        } else {
+            $listId = $this->syncCsvToBrevo($apiKey, $request->file('csv_file'), $request->nome);
         }
 
-        // Passo 2: Criar Campanha no Brevo
+        if (!$listId) {
+            return back()->with('error', 'Falha ao sincronizar contatos com o Brevo.');
+        }
+
+        // Passo 2: Criar Campanha no Brevo (agora usando htmlContent em vez de templateId)
         try {
             $response = Http::withHeaders([
                 'api-key' => $apiKey,
@@ -113,7 +105,7 @@ class CampanhaController extends Controller
                 'sender' => ['name' => $senderName, 'email' => $senderEmail],
                 'type' => 'classic',
                 'recipients' => ['listIds' => [$listId]],
-                'templateId' => (int) $request->template_id,
+                'htmlContent' => $request->html_content,
             ]);
 
             if ($response->successful()) {
@@ -126,44 +118,36 @@ class CampanhaController extends Controller
                     'Content-Type' => 'application/json'
                 ])->post("https://api.brevo.com/v3/emailCampaigns/{$campaignId}/sendNow");
 
-                // Salvar no nosso banco
                 Campanha::create([
                     'nome' => $request->nome,
                     'assunto' => $request->assunto,
                     'brevo_campaign_id' => $campaignId,
-                    'audience' => 'leads_ia',
+                    'audience' => $request->audience,
                     'status' => 'enviando',
                     'sent_at' => now(),
                 ]);
 
-                return redirect()->route('admin.campanhas.index')->with('success', 'Campanha criada e disparada com sucesso!');
+                return redirect()->route('campanhas.index')->with('success', 'Campanha criada e disparada com sucesso!');
             }
 
             $erroMsg = $response->json()['message'] ?? 'Erro desconhecido na API do Brevo';
-            return back()->with('error', 'Erro ao criar campanha no Brevo: ' . $erroMsg);
+            return back()->with('error', 'Erro ao criar campanha no Brevo: ' . $erroMsg)->withInput();
 
         } catch (\Exception $e) {
             Log::error("Exceção na criação de campanha Brevo: " . $e->getMessage());
-            return back()->with('error', 'Erro de conexão com o Brevo.');
+            return back()->with('error', 'Erro de conexão com o Brevo.')->withInput();
         }
     }
 
-    private function syncLeadsToBrevo($apiKey)
+    private function getOrCreateList($apiKey, $listName)
     {
-        // Pega todos os leads
-        $leads = Lead::whereNotNull('email')->get();
-        if ($leads->isEmpty()) {
-            return false;
-        }
-
-        // 1. Tentar achar a lista "NC5 Hub - Leads IA"
         $listId = null;
         try {
             $listsRes = Http::withHeaders(['api-key' => $apiKey])->get('https://api.brevo.com/v3/contacts/lists');
             if ($listsRes->successful()) {
                 $lists = $listsRes->json()['lists'] ?? [];
                 foreach ($lists as $l) {
-                    if ($l['name'] === 'NC5 Hub - Leads IA') {
+                    if ($l['name'] === $listName) {
                         $listId = $l['id'];
                         break;
                     }
@@ -171,7 +155,6 @@ class CampanhaController extends Controller
             }
         } catch (\Exception $e) {}
 
-        // 2. Se não achou, criar a lista (precisa de um folderId, que por padrão é 1 no brevo, mas vamos pegar o primeiro)
         if (!$listId) {
             try {
                 $foldersRes = Http::withHeaders(['api-key' => $apiKey])->get('https://api.brevo.com/v3/contacts/folders');
@@ -181,7 +164,7 @@ class CampanhaController extends Controller
                 }
 
                 $createListRes = Http::withHeaders(['api-key' => $apiKey])->post('https://api.brevo.com/v3/contacts/lists', [
-                    'name' => 'NC5 Hub - Leads IA',
+                    'name' => $listName,
                     'folderId' => $folderId
                 ]);
                 if ($createListRes->successful()) {
@@ -190,15 +173,41 @@ class CampanhaController extends Controller
             } catch (\Exception $e) {}
         }
 
+        return $listId;
+    }
+
+    private function syncLeadsToBrevo($apiKey)
+    {
+        $leads = Lead::whereNotNull('email')->get();
+        if ($leads->isEmpty()) return false;
+
+        $listId = $this->getOrCreateList($apiKey, 'NC5 Hub - Leads IA');
         if (!$listId) return false;
 
-        // 3. Montar CSV
         $csvData = "EMAIL,NOME\n";
         foreach ($leads as $lead) {
             $csvData .= "{$lead->email},{$lead->nome}\n";
         }
 
-        // 4. Importar para a lista
+        $this->importCsvToBrevoList($apiKey, $listId, $csvData);
+        return $listId;
+    }
+
+    private function syncCsvToBrevo($apiKey, $file, $campaignName)
+    {
+        $csvData = file_get_contents($file->getRealPath());
+        
+        $listName = 'Import - ' . $campaignName . ' - ' . date('Y-m-d');
+        $listId = $this->getOrCreateList($apiKey, $listName);
+        
+        if (!$listId) return false;
+
+        $this->importCsvToBrevoList($apiKey, $listId, $csvData);
+        return $listId;
+    }
+
+    private function importCsvToBrevoList($apiKey, $listId, $csvData)
+    {
         try {
             Http::withHeaders([
                 'api-key' => $apiKey,
@@ -211,8 +220,8 @@ class CampanhaController extends Controller
                 'updateExistingContacts' => true,
                 'emptyContactsAttributes' => false
             ]);
-        } catch (\Exception $e) {}
-
-        return $listId;
+        } catch (\Exception $e) {
+            Log::error("Erro importando contatos para o brevo: " . $e->getMessage());
+        }
     }
 }
