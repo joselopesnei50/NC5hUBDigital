@@ -1,7 +1,7 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex items-center gap-4">
-            <a href="{{ route('campanhas.index') }}" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-[#0A1128] hover:border-[#0A1128] transition-colors">
+            <a href="{{ route('admin.campanhas.index') }}" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:text-[#0A1128] hover:border-[#0A1128] transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -14,7 +14,7 @@
     </x-slot>
 
     <div class="max-w-4xl">
-        <form action="{{ route('campanhas.store') }}" method="POST" enctype="multipart/form-data" class="bg-white border border-gray-100 rounded-[24px] shadow-sm p-8" x-data="{ audience: 'leads_ia' }">
+        <form action="{{ route('admin.campanhas.store') }}" method="POST" enctype="multipart/form-data" class="bg-white border border-gray-100 rounded-[24px] shadow-sm p-8" x-data="{ audience: 'leads_ia' }">
             @csrf
 
             @if($errors->any())

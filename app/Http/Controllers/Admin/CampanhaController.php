@@ -59,7 +59,7 @@ class CampanhaController extends Controller
     {
         $apiKey = $this->getBrevoKey();
         if (empty($apiKey)) {
-            return redirect()->route('configuracoes.index')->with('error', 'Por favor, configure a chave da API do Brevo primeiro.');
+            return redirect()->route('admin.configuracoes.index')->with('error', 'Por favor, configure a chave da API do Brevo primeiro.');
         }
 
         $totalLeads = Lead::whereNotNull('email')->count();
@@ -127,7 +127,7 @@ class CampanhaController extends Controller
                     'sent_at' => now(),
                 ]);
 
-                return redirect()->route('campanhas.index')->with('success', 'Campanha criada e disparada com sucesso!');
+                return redirect()->route('admin.campanhas.index')->with('success', 'Campanha criada e disparada com sucesso!');
             }
 
             $erroMsg = $response->json()['message'] ?? 'Erro desconhecido na API do Brevo';
