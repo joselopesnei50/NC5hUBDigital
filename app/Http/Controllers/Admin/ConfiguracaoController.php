@@ -16,6 +16,7 @@ class ConfiguracaoController extends Controller
         'brevo_api_key',
         'deepseek_api_key',
         'abacatepay_api_key',
+        'abacatepay_webhook_secret',
         'apify_token',
     ];
 
@@ -28,15 +29,16 @@ class ConfiguracaoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'brevo_smtp_login'    => 'nullable|string',
-            'brevo_api_key'       => 'nullable|string',
-            'mail_from_address'   => 'required|email',
-            'mail_from_name'      => 'required|string|max:255',
-            'mail_reply_to'       => 'nullable|email',
-            'mail_reply_to_name'  => 'nullable|string|max:255',
-            'deepseek_api_key'    => 'nullable|string',
-            'abacatepay_api_key'  => 'nullable|string',
-            'apify_token'         => 'nullable|string',
+            'brevo_smtp_login'          => 'nullable|string',
+            'brevo_api_key'             => 'nullable|string',
+            'mail_from_address'         => 'required|email',
+            'mail_from_name'            => 'required|string|max:255',
+            'mail_reply_to'             => 'nullable|email',
+            'mail_reply_to_name'        => 'nullable|string|max:255',
+            'deepseek_api_key'          => 'nullable|string',
+            'abacatepay_api_key'        => 'nullable|string',
+            'abacatepay_webhook_secret' => 'nullable|string',
+            'apify_token'               => 'nullable|string',
         ]);
 
         foreach ($validated as $chave => $valor) {

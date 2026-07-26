@@ -194,6 +194,11 @@
                         <label class="block text-sm font-bold text-[#0A1128] mb-2">Chave da API (Bearer Token)</label>
                         <input type="password" name="abacatepay_api_key" value="{{ $configuracoes['abacatepay_api_key'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="sua-api-key-aqui">
                     </div>
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Segredo do Webhook (HMAC)</label>
+                        <input type="password" name="abacatepay_webhook_secret" value="{{ $configuracoes['abacatepay_webhook_secret'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="sua_chave_secreta_aqui">
+                        <p class="mt-1 text-xs text-gray-500">Usado para validar a autenticidade dos webhooks recebidos.</p>
+                    </div>
                 </div>
             </div>
 
