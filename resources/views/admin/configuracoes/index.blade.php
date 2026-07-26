@@ -197,6 +197,25 @@
                 </div>
             </div>
 
+            <!-- Motor Apify (Redes Sociais) -->
+            <div class="mb-8 border-b border-gray-100 pb-8">
+                <h3 class="text-lg font-bold text-[#0A1128] flex items-center gap-3 mb-4">
+                    <svg class="w-6 h-6 text-[#833AB4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    Motor Apify (Instagram Scraper)
+                </h3>
+                <p class="text-sm text-[#8A8F9C] mb-6">
+                    Chave usada para se conectar ao Apify e ler o número de seguidores e a Bio real dos clientes que solicitam análise de redes sociais.
+                </p>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Personal API Token</label>
+                        <input type="password" name="apify_token" value="{{ $configuracoes['apify_token'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="apify_api_xxxxxxxxxxxxxxxxxxxxxxx">
+                        <p class="mt-1 text-xs text-gray-500">Deixe em branco para manter a atual (não exibida por segurança).</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Botões -->
             <div class="flex items-center justify-end gap-4">
                 <button type="submit" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-8 py-3 rounded-xl text-sm font-bold transition-colors shadow-lg">

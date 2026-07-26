@@ -111,10 +111,12 @@ class AnalysisController extends Controller
                 }
 
                 $contextoExtra .= "\n\n[Contexto Estratégico Instagram]\n";
+                
+                $apifyToken = \App\Models\Configuracao::get('apify_token') ?: env('APIFY_TOKEN');
 
-                if (!empty($username) && env('APIFY_TOKEN')) {
+                if (!empty($username) && $apifyToken) {
                     try {
-                        $apifyUrl = "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=" . env('APIFY_TOKEN');
+                        $apifyUrl = "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=" . $apifyToken;
                         $apifyResponse = Http::timeout(45)->post($apifyUrl, [
                             'usernames' => [$username],
                         ]);

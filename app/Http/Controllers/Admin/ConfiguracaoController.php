@@ -16,6 +16,7 @@ class ConfiguracaoController extends Controller
         'brevo_api_key',
         'deepseek_api_key',
         'abacatepay_api_key',
+        'apify_token',
     ];
 
     public function index()
@@ -35,6 +36,7 @@ class ConfiguracaoController extends Controller
             'mail_reply_to_name'  => 'nullable|string|max:255',
             'deepseek_api_key'    => 'nullable|string',
             'abacatepay_api_key'  => 'nullable|string',
+            'apify_token'         => 'nullable|string',
         ]);
 
         foreach ($validated as $chave => $valor) {
