@@ -95,12 +95,62 @@ class AnalysisController extends Controller
                 }
             }
         } elseif ($request->tipo_analise === 'redes_sociais') {
+            $urlAnalise = $request->url_social;
+            $lead->url_analise = $urlAnalise;
+            $lead->save();
+
+            $contextoExtra = "O usuário informou a seguinte URL de rede social: " . $urlAnalise;
             $promptContext = "Você vai analisar o perfil do cliente focando em POSICIONAMENTO E VENDAS. O cliente relatou uma dor específica. Use isso para mostrar como a bio atual ou falta de estratégia estão causando essa dor, e como uma agência premium conserta.";
-            $contextoExtra = "\n\nDados Estratégicos Fornecidos:\n" .
-                             "- Usuário: " . $request->url_social . "\n" .
-                             "- Bio exata atual: " . $request->bio_social . "\n" .
-                             "- Produto/Serviço principal: " . $request->produto_social . "\n" .
-                             "- Maior Desafio (DOR): " . $request->dor_social;
+            
+            if (str_contains(strtolower($urlAnalise), 'instagram.com')) {
+                // Tenta extrair o username
+                $username = '';
+                preg_match('/instagram\.com\/([a-zA-Z0-9_\.]+)/i', $urlAnalise, $matches);
+                if (isset($matches[1])) {
+                    $username = trim($matches[1], '/');
+                }
+
+                $contextoExtra .= "\n\n[Contexto Estratégico Instagram]\n";
+
+                if (!empty($username) && env('APIFY_TOKEN')) {
+                    try {
+                        $apifyUrl = "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=" . env('APIFY_TOKEN');
+                        $apifyResponse = Http::timeout(45)->post($apifyUrl, [
+                            'usernames' => [$username],
+                        ]);
+
+                        if ($apifyResponse->successful()) {
+                            $data = $apifyResponse->json();
+                            if (is_array($data) && count($data) > 0) {
+                                $profile = $data[0];
+                                $followers = $profile['followersCount'] ?? 0;
+                                $posts = $profile['postsCount'] ?? 0;
+                                $bio = $profile['biography'] ?? '';
+                                
+                                $lead->ig_followers = $followers;
+                                $lead->ig_posts = $posts;
+                                $lead->ig_bio = $bio;
+                                $lead->save();
+
+                                $contextoExtra .= "- Seguidores: {$followers}\n";
+                                $contextoExtra .= "- Posts: {$posts}\n";
+                                $contextoExtra .= "- Bio atual: {$bio}\n\n";
+                                $contextoExtra .= "Instrução Crítica (Dados Reais do Apify): Use o número de seguidores ({$followers}) e a Bio dele. Se ele tem muitos seguidores e pouca venda, diga que o público está desqualificado e precisa de tráfego pago focado em conversão. Se tem poucos, diga que o perfil não passa autoridade. Critique a Bio se for genérica.";
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning("Apify Scrape Error: " . $e->getMessage());
+                    }
+                } else {
+                    $contextoExtra .= "Nota: O usuário informou um perfil do Instagram. Baseie sua análise nos erros comuns que empresas desse nicho cometem. Fale sobre a diferença entre seguidores e tráfego qualificado, a importância de Reels estratégicos e tráfego pago focado em conversão. Prove por que postar 'panfletos digitais' não funciona mais.";
+                }
+            } else {
+                $contextoExtra .= "\n\nDados Estratégicos Fornecidos:\n" .
+                                 "- Usuário: " . $request->url_social . "\n" .
+                                 "- Bio exata atual: " . $request->bio_social . "\n" .
+                                 "- Produto/Serviço principal: " . $request->produto_social . "\n" .
+                                 "- Maior Desafio (DOR): " . $request->dor_social;
+            }
         } else {
             $promptContext = "Você vai analisar a marca do cliente focando em DIFERENCIAÇÃO COMPETITIVA. O cliente relatou um diferencial. Avalie se esse diferencial é forte o suficiente ou genérico, e como uma agência pode escalar isso.";
             $contextoExtra = "\n\nDados Estratégicos Fornecidos:\n" .

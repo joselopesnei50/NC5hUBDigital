@@ -190,6 +190,44 @@
                 </div>
             </div>
             @endif
+
+            @if(isset($lead->tipo_analise) && $lead->tipo_analise === 'redes_sociais' && isset($lead->ig_followers))
+            <!-- Social Media Audit Gauges -->
+            <div class="bg-white/5 border-b border-white/5 p-6 md:p-10 flex flex-col items-center justify-center relative">
+                <h3 class="font-display font-bold text-xl text-white mb-8 mt-4 text-center">Auditoria de Instagram (Apify Data)</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+                    <!-- Seguidores -->
+                    <div class="flex items-center gap-6 bg-black/40 p-6 rounded-2xl border border-white/10 shadow-inner">
+                        <div class="w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-tr from-[#E1306C] to-[#F56040] shadow-[0_0_15px_rgba(225,48,108,0.5)] text-white">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-white/60 text-sm font-bold uppercase tracking-wider mb-1">Seguidores Atuais</p>
+                            <p class="font-display font-black text-3xl text-white">{{ number_format($lead->ig_followers, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Posts -->
+                    <div class="flex items-center gap-6 bg-black/40 p-6 rounded-2xl border border-white/10 shadow-inner">
+                        <div class="w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-tr from-[#833AB4] to-[#C13584] shadow-[0_0_15px_rgba(131,58,180,0.5)] text-white">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-white/60 text-sm font-bold uppercase tracking-wider mb-1">Total de Posts</p>
+                            <p class="font-display font-black text-3xl text-white">{{ number_format($lead->ig_posts, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                @if(!empty($lead->ig_bio))
+                <div class="w-full max-w-2xl mt-6 bg-black/40 p-6 rounded-2xl border border-white/10 shadow-inner text-center">
+                    <p class="text-white/60 text-sm font-bold uppercase tracking-wider mb-3">Bio Extraída</p>
+                    <p class="text-white italic">"{{ $lead->ig_bio }}"</p>
+                </div>
+                @endif
+            </div>
+            @endif
             
             <!-- AI Content -->
             <div class="p-6 md:p-10 bg-transparent relative">
