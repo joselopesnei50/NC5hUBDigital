@@ -28,7 +28,9 @@ class AdminController extends Controller
         $contatosNovos = Contato::where('status', 'novo')->count();
 
         $ultimosClientes = Cliente::with('user')->latest()->take(5)->get();
-        $ultimosLeads = Lead::latest()->take(5)->get();
+        $ultimosLeads = Lead::latest()->take(10)->get(); // Aumentei para 10 para ficar mais completo
+        
+        $leadsNoMes = Lead::where('created_at', '>=', $inicioMes)->count();
 
         return view('admin.dashboard', compact(
             'clientesAtivos',
@@ -38,7 +40,8 @@ class AdminController extends Controller
             'ticketsAbertos',
             'contatosNovos',
             'ultimosClientes',
-            'ultimosLeads'
+            'ultimosLeads',
+            'leadsNoMes'
         ));
     }
 }
