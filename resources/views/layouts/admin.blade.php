@@ -78,6 +78,7 @@
                             ['route'=>'admin.materiais.index', 'label'=>'Produção & Materiais', 'match'=>'admin.materiais.*', 'icon'=>'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
                             ['route'=>'admin.tickets.index', 'label'=>'Suporte & Tickets', 'match'=>'admin.tickets.*', 'icon'=>'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z'],
                             ['route'=>'admin.contatos.index', 'label'=>'Contatos', 'match'=>'admin.contatos.*', 'icon'=>'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+                            ['route'=>'admin.lembretes.create', 'label'=>'Lembretes & Avisos', 'match'=>'admin.lembretes.*', 'icon'=>'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
                             ['route'=>'admin.leads.index', 'label'=>'Leads (IA)', 'match'=>'admin.leads.*', 'icon'=>'M13 10V3L4 14h7v7l9-11h-7z'],
                         ];
                         $navCms = [

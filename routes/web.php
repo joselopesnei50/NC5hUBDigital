@@ -69,6 +69,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Leads (IA)
     Route::get('/leads', [\App\Http\Controllers\Admin\LeadController::class, 'index'])->name('leads.index');
     Route::get('/leads/export', [\App\Http\Controllers\Admin\LeadController::class, 'export'])->name('leads.export');
+
+    // Lembretes & Notificações
+    Route::get('/lembretes', [\App\Http\Controllers\Admin\LembreteController::class, 'create'])->name('lembretes.create');
+    Route::post('/lembretes', [\App\Http\Controllers\Admin\LembreteController::class, 'store'])->name('lembretes.store');
 });
 
 // Área do Cliente (Isolamento via Role)
