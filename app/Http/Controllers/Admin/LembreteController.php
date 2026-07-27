@@ -105,13 +105,43 @@ class LembreteController extends Controller
         $botao = $request->texto_botao ?: 'Acessar Área do Cliente';
         $link = $request->link_acao ?: route('customer.index'); // link fallback pro dashboard do cliente
 
-        // Dispara o e-mail
-        Mail::to($email)->send(new LembreteAcao(
-            $request->assunto,
-            $request->mensagem,
-            $request->filled('link_acao') ? $request->link_acao : null, // Só envia link se quiser mostrar botão
-            $botao
-        ));
+        $apiKey = \App\Models\Configuracao::get('brevo_api_key');
+
+        if (!empty($apiKey)) {
+            // Usa a API do Brevo diretamente
+            $htmlContent = view('emails.lembrete-acao', [
+                'assunto' => $request->assunto,
+                'mensagem' => $request->mensagem,
+                'linkAcao' => $request->filled('link_acao') ? $request->link_acao : null,
+                'textoBotao' => $botao
+            ])->render();
+
+            $senderEmail = \App\Models\Configuracao::get('mail_from_address', 'contato@nc5.com.br');
+            $senderName = \App\Models\Configuracao::get('mail_from_name', 'NC5 Hub');
+
+            try {
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'api-key' => $apiKey,
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json'
+                ])->post('https://api.brevo.com/v3/smtp/email', [
+                    'sender' => ['name' => $senderName, 'email' => $senderEmail],
+                    'to' => [['email' => $email, 'name' => $cliente->user->name]],
+                    'subject' => $request->assunto,
+                    'htmlContent' => $htmlContent
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Erro enviando lembrete via Brevo: " . $e->getMessage());
+            }
+        } else {
+            // Dispara o e-mail via Mail (fallback se não tiver Brevo configurado)
+            Mail::to($email)->send(new LembreteAcao(
+                $request->assunto,
+                $request->mensagem,
+                $request->filled('link_acao') ? $request->link_acao : null, // Só envia link se quiser mostrar botão
+                $botao
+            ));
+        }
 
         return redirect()->route('admin.lembretes.create')
                          ->with('success', 'Lembrete enviado com sucesso para ' . $cliente->user->name . '!');
