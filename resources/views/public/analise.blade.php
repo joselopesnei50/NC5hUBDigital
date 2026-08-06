@@ -13,11 +13,6 @@
         <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
                 <div class="lg:col-span-7">
-                    <div class="inline-flex items-center gap-2 bg-white/[0.04] border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold text-white uppercase tracking-widest mb-8">
-                        <span class="w-1.5 h-1.5 bg-[#FF7A1A] rounded-full animate-pulse"></span>
-                        Diagnóstico Inteligente
-                    </div>
-
                     <h1 class="font-display font-extrabold text-5xl lg:text-7xl leading-[1.05] tracking-tight text-white mb-6">
                         Descubra o que <em class="not-italic text-[#FF7A1A]">trava</em> suas conversões.
                     </h1>
