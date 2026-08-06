@@ -89,7 +89,14 @@
             @if(!empty($sig['signature_image']))
                 <br>
                 <div class="sig-info"><strong>Assinatura manuscrita:</strong></div>
-                <img src="{{ $sig['signature_image'] }}" class="sig-img" alt="Assinatura">
+                @if(extension_loaded('gd') || extension_loaded('imagick'))
+                    <img src="{{ $sig['signature_image'] }}" class="sig-img" alt="Assinatura">
+                @else
+                    {{-- GD/Imagick ausente no servidor: omite imagem para não quebrar o PDF; auditoria (IP+timestamp+UA) permanece --}}
+                    <div class="sig-info" style="font-style:italic;color:#8A8F9C;">
+                        Assinatura manuscrita registrada no sistema (imagem não renderizada neste PDF).
+                    </div>
+                @endif
             @endif
             <p style="margin-top:14px;font-size:10px;color:#555;">
                 Este documento foi assinado eletronicamente. O registro acima constitui prova legal de aceite dos termos.
