@@ -2,6 +2,23 @@
 
 @section('title', 'Análise Gratuita com BruceIA · NC5 Hub')
 
+@push('styles')
+<style>
+    @keyframes arrowFlow {
+        0%   { transform: translateX(-6px); opacity: 0.35; }
+        50%  { transform: translateX(4px);  opacity: 1; }
+        100% { transform: translateX(-6px); opacity: 0.35; }
+    }
+    @keyframes arrowFlowDown {
+        0%   { transform: translateY(-6px); opacity: 0.35; }
+        50%  { transform: translateY(4px);  opacity: 1; }
+        100% { transform: translateY(-6px); opacity: 0.35; }
+    }
+    .step-arrow-h { animation: arrowFlow 1.6s ease-in-out infinite; }
+    .step-arrow-v { animation: arrowFlowDown 1.6s ease-in-out infinite; }
+</style>
+@endpush
+
 @section('content')
 
     {{-- ============================================================
@@ -90,16 +107,33 @@
                 <h2 class="font-display font-extrabold text-3xl md:text-4xl text-white leading-tight">Três passos até o laudo</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach([
-                    ['01', 'Você conta o cenário', 'Escolhe entre site, Instagram ou marca e responde 3–4 campos objetivos sobre o problema real que trava seu faturamento.'],
-                    ['02', 'Bruce cruza os dados', 'A IA coleta métricas reais (PageSpeed, seguidores, bio, conteúdo) e cruza com a dor que você descreveu.'],
-                    ['03', 'Recebe um parecer', 'Laudo estruturado em 4 blocos com onde você acerta, o que trava suas vendas e o próximo passo estratégico.'],
-                ] as $passo)
-                    <div class="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+            @php $passos = [
+                ['01', 'Você conta o cenário', 'Escolhe entre site, Instagram ou marca e responde 3–4 campos objetivos sobre o problema real que trava seu faturamento.'],
+                ['02', 'Bruce cruza os dados', 'A IA coleta métricas reais (PageSpeed, seguidores, bio, conteúdo) e cruza com a dor que você descreveu.'],
+                ['03', 'Recebe um parecer', 'Laudo estruturado em 4 blocos com onde você acerta, o que trava suas vendas e o próximo passo estratégico.'],
+            ]; @endphp
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 relative">
+                @foreach($passos as $i => $passo)
+                    <div class="relative bg-white/[0.03] border border-white/10 rounded-2xl p-6">
                         <div class="text-[#FF7A1A] font-display font-extrabold text-3xl mb-3">{{ $passo[0] }}</div>
                         <h3 class="text-white font-bold text-lg mb-2">{{ $passo[1] }}</h3>
                         <p class="text-sm text-white/60 leading-relaxed">{{ $passo[2] }}</p>
+
+                        @if($i < count($passos) - 1)
+                            {{-- Seta desktop: aponta pro próximo card à direita --}}
+                            <div class="hidden md:flex absolute top-1/2 -right-8 -translate-y-1/2 w-8 h-8 items-center justify-center pointer-events-none z-10">
+                                <svg class="step-arrow-h w-6 h-6 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                            {{-- Seta mobile: aponta pro próximo card abaixo --}}
+                            <div class="flex md:hidden justify-center mt-4 pointer-events-none">
+                                <svg class="step-arrow-v w-6 h-6 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25" d="M19 13l-7 7-7-7M19 5l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
