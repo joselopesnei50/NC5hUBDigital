@@ -34,6 +34,11 @@
                                 <td style="padding:20px 24px;">
                                     <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8A8F9C;">Resposta da NC5</p>
                                     <p style="margin:0;font-size:14px;line-height:1.65;color:#3A3A3C;white-space:pre-line;">{{ $reply->mensagem }}</p>
+
+                                    @if(!empty($reply->anexo_link))
+                                        <p style="margin:16px 0 4px 0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8A8F9C;">Link para baixar</p>
+                                        <a href="{{ $reply->anexo_link }}" target="_blank" style="display:inline-block;font-size:13px;color:#FF7A1A;text-decoration:underline;word-break:break-all;">{{ $reply->anexo_link }}</a>
+                                    @endif
                                 </td>
                             </tr>
                         </table>

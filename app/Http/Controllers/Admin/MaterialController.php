@@ -78,6 +78,7 @@ class MaterialController extends Controller
         $request->validate([
             'mensagem' => 'required|string',
             'anexo' => 'nullable|file|max:25600',
+            'anexo_link' => 'nullable|url|max:2048',
             'reabrir' => 'nullable|boolean',
         ]);
 
@@ -94,6 +95,7 @@ class MaterialController extends Controller
             'autor_type' => 'admin',
             'mensagem' => $request->mensagem,
             'anexo_path' => $anexoPath,
+            'anexo_link' => $request->anexo_link ?: null,
         ]);
 
         if ($request->boolean('reabrir')) {

@@ -107,6 +107,7 @@
                         'autor_nome' => $r->user->name ?? ($r->autor_type === 'admin' ? 'Equipe NC5' : 'Cliente'),
                         'mensagem' => $r->mensagem,
                         'anexo_path' => $r->anexo_path,
+                        'anexo_link' => $r->anexo_link ?? null,
                         'created_at' => $r->created_at,
                         'is_initial' => false,
                     ]);
@@ -162,11 +163,21 @@
                                         @if($msg->mensagem)
                                             <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{{ $msg->mensagem }}</p>
                                         @endif
-                                        @if($msg->anexo_path)
-                                            <a href="{{ asset('storage/' . $msg->anexo_path) }}" target="_blank" class="mt-3 inline-flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-ink px-3 py-2 rounded-lg text-xs font-bold transition-colors">
-                                                <svg class="w-4 h-4 text-slateText" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                Baixar anexo
-                                            </a>
+                                        @if($msg->anexo_path || ($msg->anexo_link ?? null))
+                                            <div class="mt-3 flex flex-wrap gap-2">
+                                                @if($msg->anexo_path)
+                                                    <a href="{{ asset('storage/' . $msg->anexo_path) }}" target="_blank" class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-ink px-3 py-2 rounded-lg text-xs font-bold transition-colors">
+                                                        <svg class="w-4 h-4 text-slateText" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                        Baixar anexo
+                                                    </a>
+                                                @endif
+                                                @if($msg->anexo_link ?? null)
+                                                    <a href="{{ $msg->anexo_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-[#FF7A1A]/10 hover:bg-[#FF7A1A]/20 border border-[#FF7A1A]/30 text-[#FF7A1A] px-3 py-2 rounded-lg text-xs font-bold transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                        Abrir link externo
+                                                    </a>
+                                                @endif
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -187,14 +198,22 @@
                                       placeholder="Explique os ajustes feitos, tire dúvidas ou peça mais informações…"></textarea>
                         </div>
 
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+                        <div>
+                            <label class="block text-[11px] font-extrabold uppercase tracking-widest text-slateText mb-2">Link externo (opcional — Drive, WeTransfer, Figma…)</label>
+                            <input type="url" name="anexo_link" placeholder="https://drive.google.com/…"
+                                   class="w-full bg-white border border-slate-200 rounded-xl focus:ring-0 focus:border-[#FF7A1A] text-sm text-ink px-4 py-3 transition-colors placeholder-slate-400">
+                            <p class="text-[11px] text-slateText mt-1.5">Use para arquivos acima de 25&nbsp;MB. Verifique se o link está com acesso público antes de enviar.</p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between" x-data="{ f: null }">
                             <div class="flex items-center gap-3">
                                 <label class="cursor-pointer inline-flex items-center gap-2 bg-white border border-slate-200 hover:border-slate-300 text-ink px-4 py-2.5 rounded-xl text-xs font-bold transition-colors">
                                     <svg class="w-4 h-4 text-slateText" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                    <span x-data="{ f: null }" x-text="f ? f : 'Anexar arquivo'"></span>
+                                    <span x-text="f ? f : 'Anexar arquivo'">Anexar arquivo</span>
                                     <input type="file" name="anexo" class="hidden" x-on:change="f = $event.target.files[0]?.name || null">
                                 </label>
                                 <span class="text-[11px] text-slateText">Máx. 25 MB</span>
+                                <button type="button" x-show="f" x-on:click="f = null; $root.querySelector('input[name=anexo]').value = ''" class="text-[11px] text-rose-500 hover:text-rose-700 font-bold" style="display:none;">Remover</button>
                             </div>
 
                             <div class="flex items-center gap-4">
