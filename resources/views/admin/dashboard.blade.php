@@ -2,21 +2,17 @@
     <x-slot name="header">
         <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-2">
             <div>
-                <p class="text-[11px] font-bold text-[#FF7A1A] uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#FF7A1A] animate-pulse"></span>
-                    Central de Comando
-                </p>
                 <h2 class="font-display font-extrabold text-3xl md:text-4xl text-[#0A1128] leading-tight tracking-tight">
                     Boa {{ now()->hour < 12 ? 'manhã' : (now()->hour < 18 ? 'tarde' : 'noite') }}, {{ Str::before(Auth::user()->name, ' ') }}.
                 </h2>
-                <p class="text-[#8A8F9C] text-sm mt-2 font-medium">Visão consolidada da operação · {{ now()->translatedFormat('l, d \d\e F \d\e Y') }}</p>
+                <p class="text-[#64748B] text-sm mt-2 font-medium">Visão consolidada da operação · {{ now()->translatedFormat('l, d \d\e F \d\e Y') }}</p>
             </div>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.lembretes.create') }}" class="bg-white hover:bg-gray-50 border border-gray-200 text-[#0A1128] px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2">
+                <a href="{{ route('admin.lembretes.create') }}" class="bg-white hover:bg-gray-50 border border-gray-200 text-[#0A1128] px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center gap-2">
                     <svg class="w-4 h-4 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                     Avisos Rápidos
                 </a>
-                <a href="{{ route('admin.clientes.create') }}" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-[#0A1128]/10 flex items-center gap-2">
+                <a href="{{ route('admin.clientes.create') }}" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                     Novo Cliente
                 </a>
@@ -24,25 +20,20 @@
         </div>
     </x-slot>
 
-    <!-- KPIs Premium Grid -->
+    <!-- KPIs Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-5 mb-10">
         <!-- Faturamento (Hero Card) -->
-        <div class="lg:col-span-2 bg-gradient-to-br from-[#0A1128] to-[#1a264a] rounded-[24px] p-7 text-white relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/10 group">
-            <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-[#FF7A1A]/30 rounded-full blur-[80px] group-hover:bg-[#FF7A1A]/40 transition-all duration-500"></div>
-            <div class="absolute top-0 right-0 p-6 opacity-20">
-                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-            </div>
-            
+        <div class="lg:col-span-2 bg-gradient-to-br from-[#0A1128] to-[#141D38] rounded-2xl p-7 text-white relative overflow-hidden border border-white/10">
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/5">
+                    <div class="w-10 h-10 bg-white/[0.06] rounded-xl flex items-center justify-center border border-white/10">
                         <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-white/70">Faturamento Mensal</span>
                 </div>
                 <h3 class="font-display text-4xl font-extrabold text-white tracking-tight mb-2">R$ {{ number_format($faturamentoMes, 2, ',', '.') }}</h3>
                 <div class="flex items-center gap-2 mt-4">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 text-white text-[11px] font-semibold border border-white/10 backdrop-blur-sm">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.06] text-white text-[11px] font-semibold border border-white/10">
                         <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
                         {{ $faturasPendentes }} pendentes
                     </span>
@@ -52,59 +43,51 @@
         </div>
 
         <!-- Clientes Ativos -->
-        <div class="bg-white rounded-[24px] p-7 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors group relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full blur-2xl group-hover:bg-emerald-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-5 border border-emerald-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                </div>
-                <p class="text-[11px] font-bold uppercase tracking-widest text-[#8A8F9C] mb-1">Clientes Ativos</p>
-                <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $clientesAtivos }}</h3>
+        <div class="bg-white rounded-2xl p-7 border border-gray-100 hover:border-gray-200 transition-colors relative overflow-hidden">
+            <span class="absolute inset-y-0 left-0 w-1 bg-emerald-500"></span>
+            <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             </div>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-[#64748B] mb-1">Clientes Ativos</p>
+            <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $clientesAtivos }}</h3>
         </div>
 
         <!-- Contratos -->
-        <div class="bg-white rounded-[24px] p-7 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors group relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full blur-2xl group-hover:bg-blue-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-5 border border-blue-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                </div>
-                <p class="text-[11px] font-bold uppercase tracking-widest text-[#8A8F9C] mb-1">Contratos Vigentes</p>
-                <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $contratosVigentes }}</h3>
+        <div class="bg-white rounded-2xl p-7 border border-gray-100 hover:border-gray-200 transition-colors relative overflow-hidden">
+            <span class="absolute inset-y-0 left-0 w-1 bg-blue-500"></span>
+            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             </div>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-[#64748B] mb-1">Contratos Vigentes</p>
+            <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $contratosVigentes }}</h3>
         </div>
 
         <!-- Leads (IA) -->
-        <div class="bg-white rounded-[24px] p-7 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors group relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 rounded-full blur-2xl group-hover:bg-purple-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-                <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-5 border border-purple-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <p class="text-[11px] font-bold uppercase tracking-widest text-[#8A8F9C] mb-1">Leads gerados (mês)</p>
-                <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $leadsNoMes ?? 0 }}</h3>
+        <div class="bg-white rounded-2xl p-7 border border-gray-100 hover:border-gray-200 transition-colors relative overflow-hidden">
+            <span class="absolute inset-y-0 left-0 w-1 bg-[#FF7A1A]"></span>
+            <div class="w-10 h-10 bg-[#FF7A1A]/10 rounded-xl flex items-center justify-center text-[#FF7A1A] mb-5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-[#64748B] mb-1">Leads gerados (mês)</p>
+            <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $leadsNoMes ?? 0 }}</h3>
         </div>
 
         <!-- Tickets / Suporte -->
-        <div class="bg-white rounded-[24px] p-7 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors group relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full blur-2xl group-hover:bg-rose-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-                <div class="flex justify-between items-start mb-5">
-                    <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 border border-rose-100/50">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    </div>
-                    @if($ticketsAbertos > 0)
-                        <span class="flex h-3 w-3 relative">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-                        </span>
-                    @endif
+        <div class="bg-white rounded-2xl p-7 border border-gray-100 hover:border-gray-200 transition-colors relative overflow-hidden">
+            <span class="absolute inset-y-0 left-0 w-1 bg-rose-500"></span>
+            <div class="flex justify-between items-start mb-5">
+                <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </div>
-                <p class="text-[11px] font-bold uppercase tracking-widest text-[#8A8F9C] mb-1">Tickets Abertos</p>
-                <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $ticketsAbertos }}</h3>
+                @if($ticketsAbertos > 0)
+                    <span class="flex h-3 w-3 relative">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                    </span>
+                @endif
             </div>
+            <p class="text-[11px] font-bold uppercase tracking-widest text-[#64748B] mb-1">Tickets Abertos</p>
+            <h3 class="font-display text-3xl font-extrabold text-[#0A1128]">{{ $ticketsAbertos }}</h3>
         </div>
     </div>
 
