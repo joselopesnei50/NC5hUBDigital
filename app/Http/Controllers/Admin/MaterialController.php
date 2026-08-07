@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Material;
+use App\Models\MaterialReply;
 use App\Models\Cliente;
 use App\Mail\MaterialPendenteMail;
+use App\Mail\MaterialRespostaAdminMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -66,8 +69,50 @@ class MaterialController extends Controller
 
     public function show($id)
     {
-        $material = Material::with('cliente.user')->findOrFail($id);
+        $material = Material::with(['cliente.user', 'replies.user'])->findOrFail($id);
         return view('admin.materiais.show', compact('material'));
+    }
+
+    public function storeReply(Request $request, $id)
+    {
+        $request->validate([
+            'mensagem' => 'required|string',
+            'anexo' => 'nullable|file|max:25600',
+            'reabrir' => 'nullable|boolean',
+        ]);
+
+        $material = Material::with('cliente.user')->findOrFail($id);
+
+        $anexoPath = null;
+        if ($request->hasFile('anexo')) {
+            $anexoPath = $request->file('anexo')->store('materials_replies', 'public');
+        }
+
+        $reply = MaterialReply::create([
+            'material_id' => $material->id,
+            'user_id' => Auth::id(),
+            'autor_type' => 'admin',
+            'mensagem' => $request->mensagem,
+            'anexo_path' => $anexoPath,
+        ]);
+
+        if ($request->boolean('reabrir')) {
+            $material->update([
+                'status_aprovacao' => 'pendente',
+                'data_resposta' => null,
+            ]);
+        }
+
+        try {
+            $email = $material->cliente->user->email ?? null;
+            if ($email) {
+                Mail::to($email)->send(new MaterialRespostaAdminMail($material, $reply));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Falha ao enviar e-mail de resposta admin do material #' . $material->id . ': ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.materiais.show', $material->id)->with('success', 'Resposta enviada ao cliente.');
     }
 
     public function edit($id)

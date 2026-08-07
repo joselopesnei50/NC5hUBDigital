@@ -44,6 +44,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('contratos/{id}/pdf', [\App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('contratos.pdf');
     Route::resource('faturas', \App\Http\Controllers\Admin\FaturaController::class);
     Route::resource('materiais', \App\Http\Controllers\Admin\MaterialController::class);
+    Route::post('materiais/{id}/replies', [\App\Http\Controllers\Admin\MaterialController::class, 'storeReply'])->name('materiais.replies.store');
     
     // Tickets no painel Admin
     Route::get('/tickets', [\App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index');

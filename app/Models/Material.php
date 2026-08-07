@@ -19,4 +19,9 @@ class Material extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    public function replies()
+    {
+        return $this->hasMany(MaterialReply::class)->orderBy('created_at');
+    }
 }
