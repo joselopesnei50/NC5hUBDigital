@@ -3,7 +3,7 @@
 @section('title', 'O que fazemos · NC5 Hub')
 
 @php
-    {{-- TODO: trocar pelo WhatsApp comercial real da NC5 --}}
+    // TODO: trocar pelo WhatsApp comercial real da NC5
     $whatsapp = '5511999999999';
 
     $pacotes = [
