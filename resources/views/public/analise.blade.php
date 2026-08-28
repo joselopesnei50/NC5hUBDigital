@@ -62,7 +62,7 @@
                                 <p class="font-display font-extrabold text-3xl text-white leading-none">Bruce<span class="text-white/40">IA</span></p>
                             </div>
                             <div class="relative w-14 h-14 flex items-center justify-center">
-                                <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="w-12 h-12 animate-bruce-logo relative z-10">
+                                <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="w-12 h-12 relative z-10">
                             </div>
                         </div>
 
@@ -144,7 +144,7 @@
          FORMULÁRIO
          ============================================================ --}}
     <section id="form" class="relative py-20 lg:py-24 bg-[#050505]">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ loading: false, tipo: 'site' }">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ loading: false, tipo: 'redes_sociais' }">
 
             <div class="text-center mb-12 lg:mb-16">
                 <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#FF7A1A] mb-3 block">Dados Estratégicos</span>
@@ -173,7 +173,7 @@
                     <div class="relative w-24 h-24 mb-8 flex items-center justify-center">
                         <div class="absolute inset-0 border-[3px] border-white/10 rounded-full"></div>
                         <div class="absolute inset-0 border-[3px] border-transparent border-t-[#FF7A1A] rounded-full animate-spin"></div>
-                        <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="IA Processando" class="w-12 h-12 relative z-10 animate-bruce-logo">
+                        <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="IA Processando" class="w-12 h-12 relative z-10">
                     </div>
                     <h3 class="font-display text-2xl font-extrabold text-white tracking-tight text-center">O Bruce está analisando…</h3>
                     <p class="text-sm font-medium text-white/60 mt-2 max-w-xs text-center leading-relaxed">Cruzando seus dados com PageSpeed, Apify e o histórico de gargalos comuns do seu nicho. Aguarde até 30 segundos.</p>
@@ -233,7 +233,7 @@
 
                                 {{-- Rede Social --}}
                                 <label class="relative flex cursor-pointer rounded-xl border border-white/10 bg-white/[0.03] p-5 hover:border-white/20 transition-colors has-[:checked]:border-[#FF7A1A] has-[:checked]:bg-[#FF7A1A]/5 has-[:checked]:ring-1 has-[:checked]:ring-[#FF7A1A]">
-                                    <input type="radio" name="tipo_analise" value="redes_sociais" x-model="tipo" class="sr-only">
+                                    <input type="radio" name="tipo_analise" value="redes_sociais" x-model="tipo" checked class="sr-only">
                                     <div class="flex flex-col gap-3">
                                         <span class="w-9 h-9 rounded-lg bg-white/[0.06] flex items-center justify-center">
                                             <svg class="w-5 h-5 text-[#FF7A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" stroke-width="1.75"/><circle cx="12" cy="12" r="4" stroke-width="1.75"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
@@ -269,7 +269,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-white/50 mb-2">Objetivo principal desta página</label>
-                                <select name="objetivo_site" class="w-full bg-white/[0.04] border border-white/10 rounded-xl focus:ring-0 focus:border-[#FF7A1A] focus:bg-white/[0.06] text-sm font-medium px-4 py-3 transition-colors text-white">
+                                <select name="objetivo_site" class="w-full bg-white/[0.04] border border-white/10 rounded-xl focus:ring-0 focus:border-[#FF7A1A] focus:bg-white/[0.06] text-sm font-medium px-4 py-3 transition-colors text-white [&>option]:bg-[#0F1729] [&>option]:text-white">
                                     <option value="Gerar Leads (Formulário/WhatsApp)">Gerar Leads (Formulário/WhatsApp)</option>
                                     <option value="Venda Direta (Checkout/E-commerce)">Venda Direta (Checkout/E-commerce)</option>
                                     <option value="Apresentação Institucional (Autoridade)">Apresentação Institucional (Autoridade)</option>
@@ -277,7 +277,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-white/50 mb-2">Qual o maior problema hoje?</label>
-                                <select name="dor_site" class="w-full bg-white/[0.04] border border-white/10 rounded-xl focus:ring-0 focus:border-[#FF7A1A] focus:bg-white/[0.06] text-sm font-medium px-4 py-3 transition-colors text-white">
+                                <select name="dor_site" class="w-full bg-white/[0.04] border border-white/10 rounded-xl focus:ring-0 focus:border-[#FF7A1A] focus:bg-white/[0.06] text-sm font-medium px-4 py-3 transition-colors text-white [&>option]:bg-[#0F1729] [&>option]:text-white">
                                     <option value="Tenho tráfego (visitas), mas as pessoas não convertem/compram">Tenho tráfego (visitas), mas as pessoas não convertem/compram</option>
                                     <option value="Pouco tráfego, ninguém acessa">Pouco tráfego, ninguém acessa</option>
                                     <option value="O design está ultrapassado e não passa confiança">O design está ultrapassado e não passa confiança</option>
@@ -301,7 +301,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-extrabold uppercase tracking-widest text-white/50 mb-2">Maior desafio no Instagram?</label>
-                                <select name="dor_social" class="w-full bg-white/[0.04] border border-white/10 rounded-xl focus:ring-0 focus:border-[#FF7A1A] focus:bg-white/[0.06] text-sm font-medium px-4 py-3 transition-colors text-white">
+                                <select name="dor_social" class="w-full bg-white/[0.04] border border-white/10 rounded-xl focus:ring-0 focus:border-[#FF7A1A] focus:bg-white/[0.06] text-sm font-medium px-4 py-3 transition-colors text-white [&>option]:bg-[#0F1729] [&>option]:text-white">
                                     <option value="Atrair seguidores qualificados (público pagante)">Atrair seguidores qualificados (público pagante)</option>
                                     <option value="Converter os seguidores atuais em clientes (não compram)">Converter os seguidores atuais em clientes (não compram)</option>
                                     <option value="Posicionamento amador que afasta clientes premium">Posicionamento amador que afasta clientes premium</option>

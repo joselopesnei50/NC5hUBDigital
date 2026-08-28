@@ -14,6 +14,13 @@
         </div>
     </x-slot>
 
+    @if(session('success'))
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl px-5 py-3 mb-6 text-sm font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
+        </div>
+    @endif
+
     <!-- Filtros -->
     <div class="bg-white border border-black/5 rounded-2xl p-6 shadow-sm mb-6">
         <form method="GET" action="{{ route('admin.leads.index') }}" class="flex flex-col md:flex-row gap-4 items-end">
@@ -59,6 +66,7 @@
                             <th class="px-6 py-4 text-[10px] font-extrabold text-slate uppercase tracking-widest whitespace-nowrap">Tipo</th>
                             <th class="px-6 py-4 text-[10px] font-extrabold text-slate uppercase tracking-widest whitespace-nowrap">Pontuações / Dados</th>
                             <th class="px-6 py-4 text-[10px] font-extrabold text-slate uppercase tracking-widest whitespace-nowrap">Data</th>
+                            <th class="px-6 py-4 text-[10px] font-extrabold text-slate uppercase tracking-widest whitespace-nowrap text-right">Ações</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-black/5">
@@ -102,6 +110,20 @@
                                 <td class="px-6 py-4">
                                     <p class="text-sm font-semibold text-ink">{{ $lead->created_at->format('d/m/Y') }}</p>
                                     <p class="text-xs text-slate mt-0.5">{{ $lead->created_at->format('H:i') }}</p>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <form action="{{ route('admin.leads.destroy', $lead) }}" method="POST"
+                                          onsubmit="return confirm('Apagar o lead de {{ addslashes($lead->nome) }}? Esta ação não pode ser desfeita.');"
+                                          class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-500 hover:text-white hover:bg-rose-500 border border-rose-200 hover:border-rose-500 px-3 py-1.5 rounded-lg transition-colors"
+                                                title="Apagar lead">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
+                                            Apagar
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach

@@ -84,4 +84,12 @@ class LeadController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    public function destroy(Lead $lead)
+    {
+        $lead->delete();
+
+        return redirect()->route('admin.leads.index')
+            ->with('success', 'Lead removido com sucesso.');
+    }
 }
