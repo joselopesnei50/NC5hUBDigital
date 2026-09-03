@@ -11,7 +11,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <form action="{{ route('faturas.enviar_email', $fatura->id) }}" method="POST" class="inline" onsubmit="return confirm('Deseja enviar a notificação desta fatura por e-mail para o cliente?')">
+                <form action="{{ route('admin.faturas.enviar_email', $fatura->id) }}" method="POST" class="inline" onsubmit="return confirm('Deseja enviar a notificação desta fatura por e-mail para o cliente?')">
                     @csrf
                     <button type="submit" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm border border-blue-200 inline-flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
