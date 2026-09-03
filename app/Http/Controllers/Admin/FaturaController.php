@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Fatura;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\FaturaGeradaMail;
 use App\Services\AbacatePayService;
 
 class FaturaController extends Controller
@@ -180,5 +182,17 @@ class FaturaController extends Controller
     {
         Fatura::findOrFail($id)->delete();
         return redirect()->route('admin.faturas.index')->with('success', 'Fatura removida.');
+    }
+
+    public function enviarEmail($id)
+    {
+        $fatura = Fatura::with('cliente.user')->findOrFail($id);
+        
+        if ($fatura->cliente && $fatura->cliente->user) {
+            Mail::to($fatura->cliente->user->email)->send(new FaturaGeradaMail($fatura));
+            return back()->with('success', 'E-mail enviado com sucesso para o cliente!');
+        }
+
+        return back()->with('error', 'Não foi possível enviar o e-mail: cliente não possui usuário vinculado.');
     }
 }

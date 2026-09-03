@@ -43,6 +43,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('contratos', \App\Http\Controllers\Admin\ContratoController::class);
     Route::get('contratos/{id}/pdf', [\App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('contratos.pdf');
     Route::resource('faturas', \App\Http\Controllers\Admin\FaturaController::class);
+    Route::post('faturas/{id}/enviar-email', [\App\Http\Controllers\Admin\FaturaController::class, 'enviarEmail'])->name('faturas.enviar_email');
     Route::resource('materiais', \App\Http\Controllers\Admin\MaterialController::class);
     Route::post('materiais/{id}/replies', [\App\Http\Controllers\Admin\MaterialController::class, 'storeReply'])->name('materiais.replies.store');
     
