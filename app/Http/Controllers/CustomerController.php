@@ -75,6 +75,36 @@ class CustomerController extends Controller
         return view('customer.invoices', compact('faturas'));
     }
 
+    public function showInvoice($id)
+    {
+        $cliente = Auth::user()->cliente;
+        $fatura = $cliente->faturas()->findOrFail($id);
+        return view('customer.invoice_show', compact('fatura'));
+    }
+
+    public function uploadComprovante(Request $request, $id)
+    {
+        $request->validate([
+            'comprovante' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        ]);
+
+        $cliente = Auth::user()->cliente;
+        $fatura = $cliente->faturas()->findOrFail($id);
+
+        if (in_array($fatura->status, ['pago', 'cancelado'])) {
+            return back()->with('error', 'Não é possível enviar comprovante para esta fatura.');
+        }
+
+        $path = $request->file('comprovante')->store('comprovantes', 'public');
+
+        $fatura->update([
+            'comprovante_path' => $path,
+            'comprovante_enviado_em' => now(),
+        ]);
+
+        return back()->with('success', 'Comprovante de pagamento enviado com sucesso! Nossa equipe irá validar em breve.');
+    }
+
     public function support()
     {
         $cliente = Auth::user()->cliente;
