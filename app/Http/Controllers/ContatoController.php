@@ -16,11 +16,16 @@ class ContatoController extends Controller
     {
         $request->validate([
             'nome'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255',
+            'email'    => 'required|email:rfc,dns|max:255',
             'whatsapp' => 'nullable|string|max:20',
             'assunto'  => 'required|string|max:255',
             'mensagem' => 'required|string|max:5000',
         ]);
+
+        // Honeypot para bloquear bots (robôs preenchem todos os campos ocultos)
+        if ($request->filled('website_url')) {
+            return back()->with('success', 'Mensagem enviada com sucesso! Nossa equipe entrará em contato em breve.');
+        }
 
         Contato::create($request->only(['nome', 'email', 'whatsapp', 'assunto', 'mensagem']));
 

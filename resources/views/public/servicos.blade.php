@@ -176,6 +176,12 @@
                 <form action="{{ route('contato.store') }}" method="POST" class="space-y-6 relative z-10">
                     @csrf
                     
+                    {{-- Honeypot field (hidden from real users, filled by spam bots) --}}
+                    <div style="display:none;" aria-hidden="true">
+                        <label for="website_url">Website</label>
+                        <input type="text" name="website_url" id="website_url" tabindex="-1" autocomplete="off">
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="nome" class="block text-sm font-semibold text-white/80 mb-2">Seu Nome</label>
