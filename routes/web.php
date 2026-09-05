@@ -69,6 +69,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Contatos recebidos
     Route::get('/contatos', [\App\Http\Controllers\Admin\ContatoController::class, 'index'])->name('contatos.index');
+    Route::post('/contatos/bulk-destroy', [\App\Http\Controllers\Admin\ContatoController::class, 'bulkDestroy'])->name('contatos.bulk_destroy');
     Route::get('/contatos/{contato}', [\App\Http\Controllers\Admin\ContatoController::class, 'show'])->name('contatos.show');
     Route::put('/contatos/{contato}/status', [\App\Http\Controllers\Admin\ContatoController::class, 'updateStatus'])->name('contatos.status');
     Route::delete('/contatos/{contato}', [\App\Http\Controllers\Admin\ContatoController::class, 'destroy'])->name('contatos.destroy');

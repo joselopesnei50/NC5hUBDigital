@@ -36,4 +36,16 @@ class ContatoController extends Controller
         $contato->delete();
         return redirect()->route('admin.contatos.index')->with('success', 'Contato removido com sucesso.');
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'integer|exists:contatos,id',
+        ]);
+
+        Contato::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('admin.contatos.index')->with('success', 'Contatos selecionados removidos com sucesso.');
+    }
 }

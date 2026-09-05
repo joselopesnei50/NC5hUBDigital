@@ -11,77 +11,91 @@
                 
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <h3 class="font-display font-medium text-ink text-lg">Mensagens de Contato</h3>
+                    
+                    <button type="button" onclick="confirmBulkDelete()" class="bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border border-red-200 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Deletar Selecionados
+                    </button>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left font-sans">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
-                                <th class="px-6 py-4 font-medium">Nome</th>
-                                <th class="px-6 py-4 font-medium">Email</th>
-                                <th class="px-6 py-4 font-medium">Assunto</th>
-                                <th class="px-6 py-4 font-medium">Data</th>
-                                <th class="px-6 py-4 font-medium">Status</th>
-                                <th class="px-6 py-4 font-medium text-right">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse ($contatos as $contato)
-                                <tr class="hover:bg-slate-50/50 transition-colors {{ $contato->status === 'novo' ? 'bg-orange-50/30' : '' }}">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="font-medium text-ink">{{ $contato->nome }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                                        {{ $contato->email }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-800">
-                                        {{ Str::limit($contato->assunto, 30) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                        {{ $contato->created_at->format('d/m/Y H:i') }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($contato->status === 'novo')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-                                                Novo
-                                            </span>
-                                        @elseif($contato->status === 'lido')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                                                Lido
-                                            </span>
-                                        @elseif($contato->status === 'respondido')
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                Respondido
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                                                {{ ucfirst($contato->status) }}
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('admin.contatos.show', $contato->id) }}" class="text-bruce hover:text-orange-700 transition-colors bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5">
-                                            <span>Visualizar</span>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                                        </a>
-                                    </td>
+                <form id="bulkDeleteForm" action="{{ route('admin.contatos.bulk_destroy') }}" method="POST">
+                    @csrf
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left font-sans">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
+                                    <th class="px-6 py-4 font-medium w-10">
+                                        <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-orange-500 shadow-sm focus:ring-orange-500">
+                                    </th>
+                                    <th class="px-6 py-4 font-medium">Nome</th>
+                                    <th class="px-6 py-4 font-medium">Email</th>
+                                    <th class="px-6 py-4 font-medium">Assunto</th>
+                                    <th class="px-6 py-4 font-medium">Data</th>
+                                    <th class="px-6 py-4 font-medium">Status</th>
+                                    <th class="px-6 py-4 font-medium text-right">Ação</th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-4">
-                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse ($contatos as $contato)
+                                    <tr class="hover:bg-slate-50/50 transition-colors {{ $contato->status === 'novo' ? 'bg-orange-50/30' : '' }}">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="checkbox" name="ids[]" value="{{ $contato->id }}" class="contato-checkbox rounded border-slate-300 text-orange-500 shadow-sm focus:ring-orange-500">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="font-medium text-ink">{{ $contato->nome }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                            {{ $contato->email }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-800">
+                                            {{ Str::limit($contato->assunto, 30) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            {{ $contato->created_at->format('d/m/Y H:i') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($contato->status === 'novo')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                                                    Novo
+                                                </span>
+                                            @elseif($contato->status === 'lido')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
+                                                    Lido
+                                                </span>
+                                            @elseif($contato->status === 'respondido')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                    Respondido
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                                    {{ ucfirst($contato->status) }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <a href="{{ route('admin.contatos.show', $contato->id) }}" class="text-bruce hover:text-orange-700 transition-colors bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5">
+                                                <span>Visualizar</span>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-12 text-center">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-4">
+                                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                                </div>
+                                                <h4 class="font-display font-medium text-ink text-lg mb-1">Nenhum contato recebido</h4>
+                                                <p class="font-sans text-slate-500 text-sm max-w-sm">Quando os visitantes preencherem o formulário no site, as mensagens aparecerão aqui.</p>
                                             </div>
-                                            <h4 class="font-display font-medium text-ink text-lg mb-1">Nenhum contato recebido</h4>
-                                            <p class="font-sans text-slate-500 text-sm max-w-sm">Quando os visitantes preencherem o formulário no site, as mensagens aparecerão aqui.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
 
                 @if($contatos->hasPages())
                     <div class="px-6 py-4 border-t border-slate-200 bg-white">
@@ -91,4 +105,25 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('selectAll').addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.contato-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        function confirmBulkDelete() {
+            let checked = document.querySelectorAll('.contato-checkbox:checked');
+            if (checked.length === 0) {
+                alert('Selecione pelo menos um contato para deletar.');
+                return;
+            }
+
+            if (confirm(`Tem certeza que deseja deletar ${checked.length} contato(s) selecionado(s)? Esta ação não pode ser desfeita.`)) {
+                document.getElementById('bulkDeleteForm').submit();
+            }
+        }
+    </script>
 </x-admin-layout>
