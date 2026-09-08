@@ -120,6 +120,8 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         ->names('customer.pedidos');
 
     // Catálogo de Produtos e Serviços
+    Route::post('produtos-servicos/importar', [\App\Http\Controllers\Customer\ProdutoServicoController::class, 'importCsv'])
+        ->name('customer.produtos.import');
     Route::resource('produtos-servicos', \App\Http\Controllers\Customer\ProdutoServicoController::class)
         ->names('customer.produtos')
         ->parameters(['produtos-servicos' => 'produto']);

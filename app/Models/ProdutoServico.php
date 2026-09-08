@@ -17,6 +17,7 @@ class ProdutoServico extends Model
         'nome',
         'descricao',
         'preco_padrao',
+        'unidade_medida',
     ];
 
     protected $casts = [

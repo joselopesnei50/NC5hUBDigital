@@ -32,6 +32,25 @@
                                 @error('preco_padrao') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
 
+                            {{-- Unidade de Medida --}}
+                            <div>
+                                <label for="unidade_medida" class="block font-medium text-sm text-gray-700">Unidade de Medida</label>
+                                <input type="text" list="unidades" name="unidade_medida" id="unidade_medida" value="{{ old('unidade_medida') }}" placeholder="Ex: UN, KG, HR..." class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <datalist id="unidades">
+                                    <option value="UN">Unidade</option>
+                                    <option value="KG">Quilo</option>
+                                    <option value="G">Grama</option>
+                                    <option value="L">Litro</option>
+                                    <option value="CX">Caixa</option>
+                                    <option value="PCT">Pacote</option>
+                                    <option value="HR">Hora</option>
+                                    <option value="M">Metro</option>
+                                    <option value="M2">Metro Quadrado</option>
+                                    <option value="M3">Metro Cúbico</option>
+                                </datalist>
+                                @error('unidade_medida') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
                             {{-- Nome --}}
                             <div class="md:col-span-2">
                                 <label for="nome" class="block font-medium text-sm text-gray-700">Nome do Produto ou Serviço *</label>

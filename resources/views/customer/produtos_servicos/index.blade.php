@@ -14,10 +14,20 @@
                 </div>
             @endif
 
+            @if($errors->any())
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                    <ul class="list-disc list-inside">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <form method="GET" action="{{ route('customer.produtos.index') }}" class="w-full md:w-1/2 flex">
+                        <form method="GET" action="{{ route('customer.produtos.index') }}" class="w-full md:w-1/3 flex">
                             <input type="text" name="search" value="{{ $search }}" placeholder="Buscar por nome ou descrição..." class="w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700">Buscar</button>
                             @if($search)
@@ -25,10 +35,22 @@
                             @endif
                         </form>
                         
-                        <a href="{{ route('customer.produtos.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Novo Item
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <!-- Form para Importar CSV -->
+                            <form action="{{ route('customer.produtos.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center">
+                                @csrf
+                                <input type="file" name="csv_file" accept=".csv" required class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100" />
+                                <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900 flex items-center text-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    Importar CSV
+                                </button>
+                            </form>
+
+                            <a href="{{ route('customer.produtos.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center text-sm">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Novo Item
+                            </a>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -58,7 +80,12 @@
                                             @endif
                                         </td>
                                         <td class="p-3">
-                                            <div class="font-semibold text-green-700">R$ {{ number_format($item->preco_padrao, 2, ',', '.') }}</div>
+                                            <div class="font-semibold text-green-700">
+                                                R$ {{ number_format($item->preco_padrao, 2, ',', '.') }}
+                                                @if($item->unidade_medida)
+                                                    <span class="text-gray-500 text-xs font-normal">/ {{ $item->unidade_medida }}</span>
+                                                @endif
+                                            </div>
                                         </td>
                                         <td class="p-3 text-center">
                                             <div class="flex justify-center gap-2">

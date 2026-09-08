@@ -40,6 +40,7 @@ class ProdutoServicoController extends Controller
             'nome' => 'required|string|max:255',
             'descricao' => 'nullable|string',
             'preco_padrao' => 'required|numeric|min:0',
+            'unidade_medida' => 'nullable|string|max:50',
         ]);
 
         $cliente = Auth::user()->cliente;
@@ -72,6 +73,7 @@ class ProdutoServicoController extends Controller
             'nome' => 'required|string|max:255',
             'descricao' => 'nullable|string',
             'preco_padrao' => 'required|numeric|min:0',
+            'unidade_medida' => 'nullable|string|max:50',
         ]);
 
         $produto->update($validated);
@@ -90,5 +92,49 @@ class ProdutoServicoController extends Controller
         $produto->delete();
 
         return redirect()->route('customer.produtos.index')->with('success', 'Excluído com sucesso!');
+    }
+
+    public function importCsv(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048'
+        ]);
+
+        $file = $request->file('csv_file');
+        $csvData = array_map('str_getcsv', file($file->getRealPath()));
+        $header = array_shift($csvData);
+
+        // Normalize header
+        $header = array_map(function($val) { return strtolower(trim($val)); }, $header);
+
+        $cliente = Auth::user()->cliente;
+        $count = 0;
+
+        foreach ($csvData as $row) {
+            if (count($header) !== count($row)) {
+                continue;
+            }
+
+            $rowAssociative = array_combine($header, $row);
+
+            $tipo = isset($rowAssociative['tipo']) && in_array(ucfirst(trim($rowAssociative['tipo'])), ['Produto', 'Serviço']) ? ucfirst(trim($rowAssociative['tipo'])) : 'Serviço';
+            $nome = isset($rowAssociative['nome']) ? trim($rowAssociative['nome']) : null;
+            $descricao = isset($rowAssociative['descricao']) ? trim($rowAssociative['descricao']) : null;
+            $preco = isset($rowAssociative['preco_padrao']) ? floatval(trim($rowAssociative['preco_padrao'])) : 0;
+            $unidade = isset($rowAssociative['unidade_medida']) ? trim($rowAssociative['unidade_medida']) : null;
+
+            if ($nome) {
+                $cliente->produtosServicos()->create([
+                    'tipo' => $tipo,
+                    'nome' => $nome,
+                    'descricao' => $descricao,
+                    'preco_padrao' => $preco,
+                    'unidade_medida' => $unidade,
+                ]);
+                $count++;
+            }
+        }
+
+        return redirect()->route('customer.produtos.index')->with('success', "Importação concluída! {$count} itens foram adicionados.");
     }
 }
