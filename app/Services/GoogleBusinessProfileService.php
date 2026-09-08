@@ -75,8 +75,15 @@ class GoogleBusinessProfileService
         
         $httpClient = $this->client->authorize();
         // Busca a conta associada ao usuário
-        $accountResponse = $httpClient->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
-        $accounts = json_decode($accountResponse->getBody(), true);
+        try {
+            $accountResponse = $httpClient->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
+            $body = (string) $accountResponse->getBody();
+            \Illuminate\Support\Facades\Log::info('Google Accounts Response: ' . $body);
+            $accounts = json_decode($body, true);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Google API Error: ' . $e->getMessage());
+            throw $e;
+        }
         
         if (!isset($accounts['accounts'])) {
             return [];
@@ -86,12 +93,18 @@ class GoogleBusinessProfileService
         foreach ($accounts['accounts'] as $account) {
             $accountId = $account['name'];
             
-            // Busca os locais (locations) desta conta
-            $locResponse = $httpClient->get("https://mybusinessbusinessinformation.googleapis.com/v1/{$accountId}/locations?readMask=name,title,storeCode");
-            $locData = json_decode($locResponse->getBody(), true);
-            
-            if (isset($locData['locations'])) {
-                $locations = array_merge($locations, $locData['locations']);
+            try {
+                // Busca os locais (locations) desta conta
+                $locResponse = $httpClient->get("https://mybusinessbusinessinformation.googleapis.com/v1/{$accountId}/locations?readMask=name,title,storeCode");
+                $locBody = (string) $locResponse->getBody();
+                \Illuminate\Support\Facades\Log::info("Google Locations Response for {$accountId}: " . $locBody);
+                $locData = json_decode($locBody, true);
+                
+                if (isset($locData['locations'])) {
+                    $locations = array_merge($locations, $locData['locations']);
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Google Locations Error for {$accountId}: " . $e->getMessage());
             }
         }
 

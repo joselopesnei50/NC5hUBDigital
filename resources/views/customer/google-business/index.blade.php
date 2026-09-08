@@ -21,6 +21,14 @@
                 </div>
             @endif
 
+            @if(!empty($apiError))
+                <div class="mb-6 p-4 rounded-xl bg-orange-50 border border-orange-200 text-orange-800 font-medium shadow-sm">
+                    <p class="font-bold mb-1">Aviso do Google API:</p>
+                    <p class="text-sm">{{ $apiError }}</p>
+                    <p class="text-xs mt-2 opacity-80">Verifique se as APIs do Google Meu Negócio estão ativadas no Google Cloud Console.</p>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     

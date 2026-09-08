@@ -21,15 +21,17 @@ class GoogleBusinessController extends Controller
         $isConnected = !empty($cliente->google_refresh_token);
         
         $locations = [];
+        $apiError = null;
         if ($isConnected) {
             try {
                 $locations = $this->googleService->getLocations($cliente);
             } catch (\Exception $e) {
-                $isConnected = false;
+                // Manter conectado para permitir desconectar, mas mostrar erro
+                $apiError = 'Falha ao buscar dados do Google: ' . $e->getMessage();
             }
         }
 
-        return view('customer.google-business.index', compact('isConnected', 'locations', 'cliente'));
+        return view('customer.google-business.index', compact('isConnected', 'locations', 'cliente', 'apiError'));
     }
 
     public function redirectToGoogle()
