@@ -24,11 +24,21 @@
                                 <a href="{{ route('customer.pedidos.index') }}" class="ml-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Limpar</a>
                             @endif
                         </form>
-                        
-                        <a href="{{ route('customer.pedidos.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Novo Pedido
-                        </a>
+                        <div class="flex items-center gap-4">
+                            <div class="flex hidden md:flex rounded-md shadow-sm" role="group">
+                                <a href="{{ route('customer.pedidos.index') }}" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-l-lg">
+                                    Visualização em Lista
+                                </a>
+                                <a href="{{ route('customer.pedidos.kanban') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-blue-700">
+                                    Quadro Kanban
+                                </a>
+                            </div>
+
+                            <a href="{{ route('customer.pedidos.create') }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Novo Pedido
+                            </a>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">

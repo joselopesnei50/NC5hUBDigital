@@ -124,6 +124,10 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         ->name('customer.dashboard-vendas');
 
     // Gestão de Pedidos (Vendas)
+    Route::get('pedidos-kanban', [\App\Http\Controllers\Customer\PedidoClienteController::class, 'kanban'])
+        ->name('customer.pedidos.kanban');
+    Route::patch('pedidos/{pedido}/status', [\App\Http\Controllers\Customer\PedidoClienteController::class, 'updateStatus'])
+        ->name('customer.pedidos.update-status');
     Route::post('pedidos/{pedido}/enviar-email', [\App\Http\Controllers\Customer\PedidoClienteController::class, 'enviarEmail'])
         ->name('customer.pedidos.enviar-email');
     Route::resource('pedidos', \App\Http\Controllers\Customer\PedidoClienteController::class)

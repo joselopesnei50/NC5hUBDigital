@@ -151,4 +151,39 @@ class PedidoClienteController extends Controller
 
         return back()->with('success', 'E-mail com o link da proposta enviado com sucesso para ' . $pedido->clienteFinal->email . '!');
     }
+
+    public function kanban()
+    {
+        $cliente = Auth::user()->cliente;
+        
+        // Pega todos os pedidos ativos (exceto cancelados, a menos que você queira mostrar cancelados)
+        $pedidos = $cliente->pedidosClientesFinais()->with('clienteFinal')->orderBy('updated_at', 'desc')->get();
+
+        // Agrupa pelos status principais
+        $kanban = [
+            'Orçamento' => $pedidos->where('status', 'Orçamento'),
+            'Aguardando Pagamento' => $pedidos->where('status', 'Aguardando Pagamento'),
+            'Em Andamento' => $pedidos->where('status', 'Em Andamento'),
+            'Concluído' => $pedidos->where('status', 'Concluído'),
+        ];
+
+        return view('customer.pedidos_clientes.kanban', compact('kanban'));
+    }
+
+    public function updateStatus(Request $request, PedidoCliente $pedido)
+    {
+        $cliente = Auth::user()->cliente;
+        
+        if ($pedido->cliente_id !== $cliente->id) {
+            return response()->json(['error' => 'Não autorizado'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:Orçamento,Aguardando Pagamento,Em Andamento,Concluído,Cancelado'
+        ]);
+
+        $pedido->update(['status' => $validated['status']]);
+
+        return response()->json(['success' => true, 'message' => 'Status atualizado']);
+    }
 }
