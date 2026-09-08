@@ -50,4 +50,9 @@ class Cliente extends Model
     {
         return $this->hasMany(PedidoServico::class);
     }
+
+    public function clientesFinais()
+    {
+        return $this->hasMany(ClienteFinal::class);
+    }
 }

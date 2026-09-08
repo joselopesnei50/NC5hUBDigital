@@ -109,6 +109,11 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('/google-business/connect', [\App\Http\Controllers\GoogleBusinessController::class, 'redirectToGoogle'])->name('customer.google-business.connect');
     Route::get('/google-business/callback', [\App\Http\Controllers\GoogleBusinessController::class, 'handleGoogleCallback'])->name('customer.google-business.callback');
     Route::post('/google-business/disconnect', [\App\Http\Controllers\GoogleBusinessController::class, 'disconnect'])->name('customer.google-business.disconnect');
+
+    // Gestão de Clientes (CRM do Cliente)
+    Route::resource('gestao-clientes', \App\Http\Controllers\Customer\ClienteFinalController::class)
+        ->names('customer.clientes-finais')
+        ->parameters(['gestao-clientes' => 'clientes_finai']);
 });
 
 require __DIR__.'/auth.php';
