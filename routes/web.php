@@ -120,6 +120,8 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         ->parameters(['gestao-clientes' => 'clientes_finai']);
 
     // Gestão de Pedidos (Vendas)
+    Route::post('pedidos/{pedido}/enviar-email', [\App\Http\Controllers\Customer\PedidoClienteController::class, 'enviarEmail'])
+        ->name('customer.pedidos.enviar-email');
     Route::resource('pedidos', \App\Http\Controllers\Customer\PedidoClienteController::class)
         ->names('customer.pedidos');
 

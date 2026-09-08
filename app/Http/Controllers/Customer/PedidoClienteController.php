@@ -134,4 +134,21 @@ class PedidoClienteController extends Controller
 
         return redirect()->route('customer.pedidos.index')->with('success', 'Pedido excluído com sucesso!');
     }
+
+    public function enviarEmail(PedidoCliente $pedido)
+    {
+        $cliente = Auth::user()->cliente;
+        
+        if ($pedido->cliente_id !== $cliente->id) {
+            abort(403);
+        }
+
+        if (!$pedido->clienteFinal->email) {
+            return back()->with('error', 'O cliente final não possui um e-mail cadastrado.');
+        }
+
+        \Illuminate\Support\Facades\Mail::to($pedido->clienteFinal->email)->send(new \App\Mail\PropostaPedidoMail($pedido));
+
+        return back()->with('success', 'E-mail com o link da proposta enviado com sucesso para ' . $pedido->clienteFinal->email . '!');
+    }
 }
