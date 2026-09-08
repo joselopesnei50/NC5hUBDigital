@@ -16,6 +16,10 @@ Route::get('/servicos', [PublicController::class, 'servicos'])->name('servicos')
 Route::get('/blog', [PublicController::class, 'blog'])->name('blog');
 Route::get('/blog/{slug}', [PublicController::class, 'post'])->name('blog.post');
 
+// Proposta Pública (Aceite Eletrônico)
+Route::get('/proposta/{token}', [\App\Http\Controllers\PublicPedidoController::class, 'show'])->name('public.pedido.show');
+Route::post('/proposta/{token}/aprovar', [\App\Http\Controllers\PublicPedidoController::class, 'approve'])->name('public.pedido.approve');
+
 // Análise com Inteligência Artificial
 Route::get('/analise-gratuita', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analise.index');
 Route::post('/analise-gratuita/processar', [\App\Http\Controllers\AnalysisController::class, 'process'])->name('analise.process');
