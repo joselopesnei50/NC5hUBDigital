@@ -13,6 +13,16 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 font-medium">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 max-w-4xl">
         
         <form action="{{ route('admin.configuracoes.store') }}" method="POST">
