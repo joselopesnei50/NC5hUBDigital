@@ -85,8 +85,8 @@ class GoogleBusinessProfileService
             throw $e;
         }
         
-        if (!isset($accounts['accounts'])) {
-            return [];
+        if (!isset($accounts['accounts']) || empty($accounts['accounts'])) {
+            throw new \Exception("Nenhuma conta encontrada. Resposta bruta do Google: " . $body);
         }
 
         $locations = [];
