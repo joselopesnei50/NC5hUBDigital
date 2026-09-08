@@ -18,6 +18,7 @@ class ConfiguracaoController extends Controller
         'abacatepay_api_key',
         'abacatepay_webhook_secret',
         'apify_token',
+        'google_client_secret',
     ];
 
     public function index()
@@ -39,6 +40,9 @@ class ConfiguracaoController extends Controller
             'abacatepay_api_key'        => 'nullable|string',
             'abacatepay_webhook_secret' => 'nullable|string',
             'apify_token'               => 'nullable|string',
+            'google_client_id'          => 'nullable|string',
+            'google_client_secret'      => 'nullable|string',
+            'google_redirect_uri'       => 'nullable|string',
         ]);
 
         foreach ($validated as $chave => $valor) {

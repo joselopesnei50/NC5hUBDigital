@@ -103,6 +103,12 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::post('/suporte', [CustomerController::class, 'storeTicket'])->name('customer.support.store');
     Route::get('/suporte/{ticket}', [CustomerController::class, 'showTicket'])->name('customer.support.show');
     Route::post('/suporte/{ticket}/reply', [CustomerController::class, 'replyTicket'])->name('customer.support.reply');
+
+    // Integração Google Meu Negócio
+    Route::get('/google-business', [\App\Http\Controllers\GoogleBusinessController::class, 'index'])->name('customer.google-business.index');
+    Route::get('/google-business/connect', [\App\Http\Controllers\GoogleBusinessController::class, 'redirectToGoogle'])->name('customer.google-business.connect');
+    Route::get('/google-business/callback', [\App\Http\Controllers\GoogleBusinessController::class, 'handleGoogleCallback'])->name('customer.google-business.callback');
+    Route::post('/google-business/disconnect', [\App\Http\Controllers\GoogleBusinessController::class, 'disconnect'])->name('customer.google-business.disconnect');
 });
 
 require __DIR__.'/auth.php';

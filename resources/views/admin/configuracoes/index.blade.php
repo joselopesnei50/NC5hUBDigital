@@ -221,6 +221,36 @@
                 </div>
             </div>
 
+            <!-- Google Business Profile -->
+            <div class="mb-8 border-b border-gray-100 pb-8">
+                <h3 class="text-lg font-bold text-[#0A1128] flex items-center gap-3 mb-4">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM11 19.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm5.9-2.56c-.34-.23-.74-.37-1.15-.37H15v-2c0-.55-.45-1-1-1h-2v-2h2c.55 0 1-.45 1-1V9h2c1.1 0 2-.9 2-2v-.41c1.25 1.51 2 3.48 2 5.41 0 3.51-2.19 6.51-5.1 7.44z"></path></svg>
+                    Google Meu Negócio (OAuth 2.0)
+                </h3>
+                <p class="text-sm text-[#8A8F9C] mb-6">
+                    Configure as chaves do Google Cloud Console para permitir que os clientes conectem suas fichas do Google Meu Negócio.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Client ID</label>
+                        <input type="text" name="google_client_id" value="{{ $configuracoes['google_client_id'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: 1234567890-xxx.apps.googleusercontent.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Client Secret</label>
+                        <input type="password" name="google_client_secret" value="{{ $configuracoes['google_client_secret'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxx">
+                        <p class="mt-1 text-xs text-gray-500">Deixe em branco para manter a atual (não exibida por segurança).</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Redirect URI Autorizada</label>
+                        <input type="text" name="google_redirect_uri" value="{{ $configuracoes['google_redirect_uri'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: {{ route('customer.google-business.callback') }}">
+                        <p class="mt-1 text-xs text-gray-500">A URL recomendada para adicionar no Google Cloud Console é: <span class="font-semibold">{{ route('customer.google-business.callback') }}</span></p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Botões -->
             <div class="flex items-center justify-end gap-4">
                 <button type="submit" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-8 py-3 rounded-xl text-sm font-bold transition-colors shadow-lg">
