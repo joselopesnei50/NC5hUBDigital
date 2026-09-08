@@ -14,6 +14,7 @@ class PedidoCliente extends Model
     protected $fillable = [
         'cliente_id',
         'cliente_final_id',
+        'produto_servico_id',
         'titulo',
         'descricao',
         'valor',
@@ -36,5 +37,10 @@ class PedidoCliente extends Model
     public function clienteFinal()
     {
         return $this->belongsTo(ClienteFinal::class, 'cliente_final_id');
+    }
+
+    public function produtoServico()
+    {
+        return $this->belongsTo(ProdutoServico::class, 'produto_servico_id');
     }
 }

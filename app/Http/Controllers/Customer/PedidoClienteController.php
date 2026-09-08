@@ -36,13 +36,15 @@ class PedidoClienteController extends Controller
     {
         $cliente = Auth::user()->cliente;
         $clientesFinais = $cliente->clientesFinais()->orderBy('nome_empresa')->get();
-        return view('customer.pedidos_clientes.create', compact('clientesFinais'));
+        $produtosServicos = $cliente->produtosServicos()->orderBy('tipo')->orderBy('nome')->get();
+        return view('customer.pedidos_clientes.create', compact('clientesFinais', 'produtosServicos'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'cliente_final_id' => 'required|exists:clientes_finais,id',
+            'produto_servico_id' => 'nullable|exists:produtos_servicos,id',
             'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
             'valor' => 'required|numeric|min:0',
@@ -59,6 +61,13 @@ class PedidoClienteController extends Controller
             abort(403, 'Acesso não autorizado a este cliente.');
         }
 
+        if(!empty($validated['produto_servico_id'])) {
+            $produtoExists = $cliente->produtosServicos()->where('id', $validated['produto_servico_id'])->exists();
+            if(!$produtoExists) {
+                $validated['produto_servico_id'] = null;
+            }
+        }
+
         $cliente->pedidosClientesFinais()->create($validated);
 
         return redirect()->route('customer.pedidos.index')->with('success', 'Pedido cadastrado com sucesso!');
@@ -73,7 +82,8 @@ class PedidoClienteController extends Controller
         }
 
         $clientesFinais = $cliente->clientesFinais()->orderBy('nome_empresa')->get();
-        return view('customer.pedidos_clientes.edit', compact('pedido', 'clientesFinais'));
+        $produtosServicos = $cliente->produtosServicos()->orderBy('tipo')->orderBy('nome')->get();
+        return view('customer.pedidos_clientes.edit', compact('pedido', 'clientesFinais', 'produtosServicos'));
     }
 
     public function update(Request $request, PedidoCliente $pedido)
@@ -86,6 +96,7 @@ class PedidoClienteController extends Controller
 
         $validated = $request->validate([
             'cliente_final_id' => 'required|exists:clientes_finais,id',
+            'produto_servico_id' => 'nullable|exists:produtos_servicos,id',
             'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
             'valor' => 'required|numeric|min:0',
@@ -97,6 +108,13 @@ class PedidoClienteController extends Controller
         $clienteFinalExists = $cliente->clientesFinais()->where('id', $validated['cliente_final_id'])->exists();
         if (!$clienteFinalExists) {
             abort(403, 'Acesso não autorizado a este cliente.');
+        }
+
+        if(!empty($validated['produto_servico_id'])) {
+            $produtoExists = $cliente->produtosServicos()->where('id', $validated['produto_servico_id'])->exists();
+            if(!$produtoExists) {
+                $validated['produto_servico_id'] = null;
+            }
         }
 
         $pedido->update($validated);

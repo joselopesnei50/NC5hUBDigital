@@ -118,6 +118,11 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     // Gestão de Pedidos (Vendas)
     Route::resource('pedidos', \App\Http\Controllers\Customer\PedidoClienteController::class)
         ->names('customer.pedidos');
+
+    // Catálogo de Produtos e Serviços
+    Route::resource('produtos-servicos', \App\Http\Controllers\Customer\ProdutoServicoController::class)
+        ->names('customer.produtos')
+        ->parameters(['produtos-servicos' => 'produto']);
 });
 
 require __DIR__.'/auth.php';

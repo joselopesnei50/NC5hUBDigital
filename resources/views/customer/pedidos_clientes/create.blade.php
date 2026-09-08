@@ -29,6 +29,20 @@
                                 @error('cliente_final_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
 
+                            {{-- Produto / Serviço --}}
+                            <div class="md:col-span-2">
+                                <label for="produto_servico_id" class="block font-medium text-sm text-gray-700">Vincular a um Produto/Serviço do Catálogo</label>
+                                <select name="produto_servico_id" id="produto_servico_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" onchange="autoFillProduto(this)">
+                                    <option value="">Nenhum (Pedido Avulso)</option>
+                                    @foreach($produtosServicos as $produto)
+                                        <option value="{{ $produto->id }}" data-preco="{{ $produto->preco_padrao }}" data-nome="{{ $produto->nome }}" {{ old('produto_servico_id') == $produto->id ? 'selected' : '' }}>
+                                            [{{ $produto->tipo }}] {{ $produto->nome }} - R$ {{ number_format($produto->preco_padrao, 2, ',', '.') }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('produto_servico_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
                             {{-- Título --}}
                             <div class="md:col-span-2">
                                 <label for="titulo" class="block font-medium text-sm text-gray-700">Título ou Identificador do Pedido *</label>
@@ -38,8 +52,9 @@
 
                             {{-- Valor --}}
                             <div>
-                                <label for="valor" class="block font-medium text-sm text-gray-700">Valor (R$) *</label>
+                                <label for="valor" class="block font-medium text-sm text-gray-700">Valor Negociado (R$) *</label>
                                 <input type="number" step="0.01" name="valor" id="valor" value="{{ old('valor', '0.00') }}" required class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <p class="text-xs text-gray-500 mt-1">Você pode alterar este valor se der desconto.</p>
                                 @error('valor') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
 
@@ -90,4 +105,19 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function autoFillProduto(selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            if (selectedOption.value) {
+                const preco = selectedOption.getAttribute('data-preco');
+                const nome = selectedOption.getAttribute('data-nome');
+                
+                document.getElementById('valor').value = preco;
+                if(document.getElementById('titulo').value === '') {
+                    document.getElementById('titulo').value = nome;
+                }
+            }
+        }
+    </script>
 </x-app-layout>
