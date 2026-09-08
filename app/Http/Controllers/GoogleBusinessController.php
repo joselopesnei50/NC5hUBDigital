@@ -34,9 +34,13 @@ class GoogleBusinessController extends Controller
 
     public function redirectToGoogle()
     {
-        if (empty(\App\Models\Configuracao::get('google_client_id'))) {
+        if (
+            empty(\App\Models\Configuracao::get('google_client_id')) ||
+            empty(\App\Models\Configuracao::get('google_client_secret')) ||
+            empty(\App\Models\Configuracao::get('google_redirect_uri'))
+        ) {
             return redirect()->route('customer.google-business.index')
-                ->with('error', 'O administrador do sistema ainda não configurou as chaves de API do Google Meu Negócio.');
+                ->with('error', 'O administrador do sistema ainda não configurou corretamente todas as chaves (ID, Secret e Redirect URI) do Google Meu Negócio.');
         }
 
         $authUrl = $this->googleService->getAuthUrl();
