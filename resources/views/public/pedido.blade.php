@@ -40,8 +40,8 @@
             <div class="bg-slate-800 text-white p-8">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h1 class="text-3xl font-bold">{{ $pedido->cliente->nome_empresa }}</h1>
-                        <p class="text-slate-300 mt-1">CNPJ/Doc: {{ $pedido->cliente->documento ?? 'Não informado' }}</p>
+                        <h1 class="text-3xl font-bold">{{ $pedido->cliente->razao_social }}</h1>
+                        <p class="text-slate-300 mt-1">CNPJ/Doc: {{ $pedido->cliente->cpf_cnpj ?? 'Não informado' }}</p>
                     </div>
                     <div class="text-right">
                         <div class="text-sm font-semibold uppercase tracking-wider text-slate-400">Proposta / Pedido</div>
@@ -157,7 +157,7 @@
         </div>
 
         <div class="text-center text-sm text-gray-500 mt-6">
-            Documento gerado por {{ $pedido->cliente->nome_empresa }} via plataforma integrada.
+            Documento gerado por {{ $pedido->cliente->razao_social }} via plataforma integrada.
         </div>
     </div>
 </body>
