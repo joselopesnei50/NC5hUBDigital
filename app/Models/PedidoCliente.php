@@ -21,13 +21,29 @@ class PedidoCliente extends Model
         'status',
         'data_pedido',
         'data_entrega',
+        'token_publico',
+        'ip_aprovacao',
+        'nome_aprovacao',
+        'data_aprovacao',
     ];
 
     protected $casts = [
         'data_pedido' => 'date',
         'data_entrega' => 'date',
+        'data_aprovacao' => 'datetime',
         'valor' => 'decimal:2',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->token_publico)) {
+                $model->token_publico = \Illuminate\Support\Str::uuid()->toString();
+            }
+        });
+    }
 
     public function cliente()
     {

@@ -7,6 +7,39 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            @if($pedido->nome_aprovacao)
+                <div class="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-md shadow-sm">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                <strong>Pedido aprovado eletronicamente por:</strong> {{ $pedido->nome_aprovacao }}<br>
+                                <span class="text-xs">Registrado em {{ $pedido->data_aprovacao->format('d/m/Y \à\s H:i') }} pelo IP: {{ $pedido->ip_aprovacao }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="mb-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md shadow-sm flex items-center justify-between">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">Este pedido ainda não foi assinado digitalmente pelo cliente final.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ route('public.pedido.show', $pedido->token_publico) }}'); alert('Copiado!')" class="bg-blue-600 text-white px-3 py-1 text-xs rounded shadow hover:bg-blue-700">Copiar Link do Orçamento</button>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     
