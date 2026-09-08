@@ -114,6 +114,10 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::resource('gestao-clientes', \App\Http\Controllers\Customer\ClienteFinalController::class)
         ->names('customer.clientes-finais')
         ->parameters(['gestao-clientes' => 'clientes_finai']);
+
+    // Gestão de Pedidos (Vendas)
+    Route::resource('pedidos', \App\Http\Controllers\Customer\PedidoClienteController::class)
+        ->names('customer.pedidos');
 });
 
 require __DIR__.'/auth.php';

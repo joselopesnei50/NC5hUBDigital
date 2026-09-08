@@ -55,4 +55,9 @@ class Cliente extends Model
     {
         return $this->hasMany(ClienteFinal::class);
     }
+
+    public function pedidosClientesFinais()
+    {
+        return $this->hasMany(PedidoCliente::class);
+    }
 }

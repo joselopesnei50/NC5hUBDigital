@@ -32,4 +32,9 @@ class ClienteFinal extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    public function pedidos()
+    {
+        return $this->hasMany(PedidoCliente::class, 'cliente_final_id');
+    }
 }
