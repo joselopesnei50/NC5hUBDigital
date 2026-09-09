@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Agent\DTOs;
 
-readonly class LlmResponse
+class LlmResponse
 {
     public function __construct(
         public string $content,

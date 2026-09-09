@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-readonly class DeepSeekDriver implements LlmDriver
+class DeepSeekDriver implements LlmDriver
 {
     public function __construct(
         private string $apiKey,

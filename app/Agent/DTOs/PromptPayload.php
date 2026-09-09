@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Agent\DTOs;
 
-readonly class PromptPayload
+class PromptPayload
 {
     public function __construct(
         public string $systemPrompt,

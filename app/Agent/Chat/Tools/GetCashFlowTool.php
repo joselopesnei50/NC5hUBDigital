@@ -7,7 +7,7 @@ namespace App\Agent\Chat\Tools;
 use App\Agent\Chat\Contracts\ToolInterface;
 use App\Agent\Metrics\CashFlowMetric;
 
-readonly class GetCashFlowTool implements ToolInterface
+class GetCashFlowTool implements ToolInterface
 {
     public function __construct(
         private CashFlowMetric $metric

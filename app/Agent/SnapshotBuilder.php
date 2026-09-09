@@ -6,7 +6,7 @@ namespace App\Agent;
 
 use App\Agent\Contracts\MetricInterface;
 
-readonly class SnapshotBuilder
+class SnapshotBuilder
 {
     /**
      * @param MetricInterface[] $metrics Coleção de métricas a serem processadas

@@ -7,7 +7,7 @@ namespace App\Agent\Chat\Tools;
 use App\Agent\Chat\Contracts\ToolInterface;
 use App\Agent\NotificationDraftService;
 
-readonly class DraftCustomerMessageTool implements ToolInterface
+class DraftCustomerMessageTool implements ToolInterface
 {
     public function __construct(
         private NotificationDraftService $draftService
