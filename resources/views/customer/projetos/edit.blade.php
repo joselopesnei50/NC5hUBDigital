@@ -19,9 +19,10 @@
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Cliente *</label>
-                    <select name="cliente_id" required class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
-                        @foreach($clientes as $cliente)
-                            <option value="{{ $cliente->id }}" {{ (isset($projeto) && $projeto->cliente_id == $cliente->id) ? 'selected' : '' }}>{{ $cliente->razao_social }}</option>
+                    <select name="cliente_final_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
+                        <option value="">(Nenhum - Projeto Interno)</option>
+                        @foreach($clientesFinais as $cliente)
+                            <option value="{{ $cliente->id }}" {{ (isset($projeto) && $projeto->cliente_final_id == $cliente->id) ? 'selected' : '' }}>{{ $cliente->nome_empresa }}</option>
                         @endforeach
                     </select>
                 </div>

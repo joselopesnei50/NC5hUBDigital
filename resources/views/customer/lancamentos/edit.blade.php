@@ -46,10 +46,10 @@
 
                 <div>
                     <label class="block text-sm font-bold text-[#0A1128] mb-2">Cliente (Para receitas)</label>
-                    <select name="cliente_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
+                    <select name="cliente_final_id" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
                         <option value="">Nenhum</option>
-                        @foreach($clientes as $cliente)
-                            <option value="{{ $cliente->id }}" {{ $lancamento->cliente_id == $cliente->id ? 'selected' : '' }}>{{ $cliente->razao_social }}</option>
+                        @foreach($clientesFinais as $cliente)
+                            <option value="{{ $cliente->id }}" {{ $lancamento->cliente_final_id == $cliente->id ? 'selected' : '' }}>{{ $cliente->nome_empresa }}</option>
                         @endforeach
                     </select>
                 </div>

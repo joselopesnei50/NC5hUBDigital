@@ -3,15 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\LancamentoFinanceiro;
-use App\Models\Cliente;
+use App\Models\ClienteFinal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LancamentoFinanceiroController extends Controller
 {
     public function index(Request $request)
     {
         $tipo = $request->get('tipo', 'receber');
-        $lancamentos = LancamentoFinanceiro::with('cliente')
+        $lancamentos = LancamentoFinanceiro::with('clienteFinal')
+            ->where('cliente_id', Auth::user()->cliente->id)
             ->where('tipo', $tipo)
             ->orderBy('data_vencimento', 'asc')
             ->get();
@@ -21,8 +23,8 @@ class LancamentoFinanceiroController extends Controller
 
     public function create()
     {
-        $clientes = Cliente::all();
-        return view('customer.lancamentos.create', compact('clientes'));
+        $clientesFinais = ClienteFinal::where('cliente_id', Auth::user()->cliente->id)->get();
+        return view('customer.lancamentos.create', compact('clientesFinais'));
     }
 
     public function store(Request $request)
@@ -32,9 +34,13 @@ class LancamentoFinanceiroController extends Controller
             'descricao' => 'required|string|max:255',
             'valor' => 'required|numeric',
             'data_vencimento' => 'required|date',
+            'cliente_final_id' => 'nullable|exists:clientes_finais,id',
         ]);
 
-        LancamentoFinanceiro::create($request->all());
+        $data = $request->all();
+        $data['cliente_id'] = Auth::user()->cliente->id; // Tenant isolation
+        
+        LancamentoFinanceiro::create($data);
 
         return redirect()->route('customer.lancamentos.index', ['tipo' => $request->tipo])
             ->with('success', 'Lançamento criado com sucesso.');
@@ -42,17 +48,22 @@ class LancamentoFinanceiroController extends Controller
 
     public function edit(LancamentoFinanceiro $lancamento)
     {
-        $clientes = Cliente::all();
-        return view('customer.lancamentos.edit', compact('lancamento', 'clientes'));
+        if ($lancamento->cliente_id !== Auth::user()->cliente->id) abort(403);
+
+        $clientesFinais = ClienteFinal::where('cliente_id', Auth::user()->cliente->id)->get();
+        return view('customer.lancamentos.edit', compact('lancamento', 'clientesFinais'));
     }
 
     public function update(Request $request, LancamentoFinanceiro $lancamento)
     {
+        if ($lancamento->cliente_id !== Auth::user()->cliente->id) abort(403);
+
         $request->validate([
             'tipo' => 'required|in:receber,pagar',
             'descricao' => 'required|string|max:255',
             'valor' => 'required|numeric',
             'data_vencimento' => 'required|date',
+            'cliente_final_id' => 'nullable|exists:clientes_finais,id',
         ]);
 
         $lancamento->update($request->all());
@@ -63,6 +74,8 @@ class LancamentoFinanceiroController extends Controller
 
     public function destroy(LancamentoFinanceiro $lancamento)
     {
+        if ($lancamento->cliente_id !== Auth::user()->cliente->id) abort(403);
+
         $tipo = $lancamento->tipo;
         $lancamento->delete();
 

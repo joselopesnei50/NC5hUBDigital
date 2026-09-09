@@ -47,8 +47,8 @@
                                     @if($lancamento->fornecedor)
                                         <p class="text-xs text-slate-500">Fornecedor: {{ $lancamento->fornecedor }}</p>
                                     @endif
-                                    @if($lancamento->cliente)
-                                        <p class="text-xs text-slate-500">Cliente: {{ $lancamento->cliente->razao_social }}</p>
+                                    @if($lancamento->clienteFinal)
+                                        <p class="text-xs text-slate-500">Cliente: {{ $lancamento->clienteFinal->nome_empresa }}</p>
                                     @endif
                                 </td>
                                 <td class="py-4 text-sm text-slate-600">{{ $lancamento->categoria ?? '-' }}</td>
