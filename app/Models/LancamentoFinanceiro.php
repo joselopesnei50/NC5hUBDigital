@@ -9,6 +9,8 @@ class LancamentoFinanceiro extends Model
 {
     use HasFactory;
 
+    protected $table = 'lancamentos_financeiros';
+
     protected $guarded = [];
 
     protected $casts = [
