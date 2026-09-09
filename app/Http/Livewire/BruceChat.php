@@ -18,7 +18,7 @@ class BruceChat extends Component
         // Se já existir uma conversa ativa hoje, ele a reaproveita para manter o contexto.
         $user = Auth::user();
         
-        if ($user) {
+        if ($user && $user->cliente_id) {
             $conversation = AgentConversation::firstOrCreate(
                 [
                     'cliente_id' => $user->cliente_id,
@@ -35,6 +35,11 @@ class BruceChat extends Component
     public function sendMessage(BruceConversation $bruce)
     {
         $this->validate(['message' => 'required|string|max:1000']);
+
+        if (!$this->conversationId) {
+            $this->addError('limit', 'Sessão inválida. Atualize a página.');
+            return;
+        }
 
         $conversation = AgentConversation::find($this->conversationId);
         
