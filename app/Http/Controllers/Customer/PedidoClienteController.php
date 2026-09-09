@@ -228,4 +228,18 @@ class PedidoClienteController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Status atualizado']);
     }
+
+    public function downloadPdf(PedidoCliente $pedido)
+    {
+        $cliente = Auth::user()->cliente;
+        
+        if ($pedido->cliente_id !== $cliente->id) {
+            abort(403);
+        }
+
+        $pedido->load('itens', 'cliente', 'clienteFinal');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdfs.pedido_cliente', compact('pedido'));
+        return $pdf->download("Pedido_{$pedido->id}.pdf");
+    }
 }

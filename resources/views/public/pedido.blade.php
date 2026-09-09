@@ -47,6 +47,12 @@
                         <div class="text-sm font-semibold uppercase tracking-wider text-slate-400">Proposta / Pedido</div>
                         <div class="text-2xl font-bold mt-1">#{{ str_pad($pedido->id, 5, '0', STR_PAD_LEFT) }}</div>
                         <div class="text-sm text-slate-300 mt-1">Data: {{ $pedido->data_pedido ? $pedido->data_pedido->format('d/m/Y') : $pedido->created_at->format('d/m/Y') }}</div>
+                        <div class="mt-4">
+                            <a href="{{ route('public.pedido.pdf', $pedido->token_publico) }}" class="inline-flex items-center text-sm bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded transition">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Baixar PDF
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

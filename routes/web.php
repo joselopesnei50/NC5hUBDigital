@@ -16,9 +16,10 @@ Route::get('/servicos', [PublicController::class, 'servicos'])->name('servicos')
 Route::get('/blog', [PublicController::class, 'blog'])->name('blog');
 Route::get('/blog/{slug}', [PublicController::class, 'post'])->name('blog.post');
 
-// Proposta Pública (Aceite Eletrônico)
+// Rotas Públicas de Propostas
 Route::get('/proposta/{token}', [\App\Http\Controllers\PublicPedidoController::class, 'show'])->name('public.pedido.show');
-Route::post('/proposta/{token}/aprovar', [\App\Http\Controllers\PublicPedidoController::class, 'approve'])->name('public.pedido.approve');
+Route::post('/proposta/{token}/approve', [\App\Http\Controllers\PublicPedidoController::class, 'approve'])->name('public.pedido.approve');
+Route::get('/proposta/{token}/pdf', [\App\Http\Controllers\PublicPedidoController::class, 'downloadPdf'])->name('public.pedido.pdf');
 
 // Análise com Inteligência Artificial
 Route::get('/analise-gratuita', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analise.index');
@@ -130,12 +131,15 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         ->name('customer.pedidos.update-status');
     Route::post('pedidos/{pedido}/enviar-email', [\App\Http\Controllers\Customer\PedidoClienteController::class, 'enviarEmail'])
         ->name('customer.pedidos.enviar-email');
+    Route::get('pedidos/{pedido}/pdf', [\App\Http\Controllers\Customer\PedidoClienteController::class, 'downloadPdf'])
+        ->name('customer.pedidos.pdf');
     Route::resource('pedidos', \App\Http\Controllers\Customer\PedidoClienteController::class)
-        ->names('customer.pedidos');
+        ->names('customer.pedidos')
+        ->parameters(['pedidos' => 'pedido']);
 
-    // Catálogo de Produtos e Serviços
-    Route::post('produtos-servicos/importar', [\App\Http\Controllers\Customer\ProdutoServicoController::class, 'importCsv'])
-        ->name('customer.produtos.import');
+    // Produtos e Serviços (Catálogo do Cliente)
+    Route::post('produtos-importar', [\App\Http\Controllers\Customer\ProdutoServicoController::class, 'importCsv'])
+        ->name('customer.produtos.importar');
     Route::resource('produtos-servicos', \App\Http\Controllers\Customer\ProdutoServicoController::class)
         ->names('customer.produtos')
         ->parameters(['produtos-servicos' => 'produto']);

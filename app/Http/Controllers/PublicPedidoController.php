@@ -37,4 +37,14 @@ class PublicPedidoController extends Controller
 
         return back()->with('success', 'Orçamento aprovado com sucesso! A empresa foi notificada.');
     }
+
+    public function downloadPdf($token)
+    {
+        $pedido = PedidoCliente::with(['itens', 'cliente', 'clienteFinal'])
+            ->where('token_publico', $token)
+            ->firstOrFail();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdfs.pedido_cliente', compact('pedido'));
+        return $pdf->download("Proposta_{$pedido->id}.pdf");
+    }
 }
