@@ -47,6 +47,7 @@
             .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
             .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.9); }
         </style>
+        @livewireStyles
     </head>
     <body class="bg-mist text-ink h-full font-sans antialiased" x-data="{ sidebarOpen: false }">
         <div class="flex h-screen overflow-hidden">
@@ -97,5 +98,6 @@
                 </main>
             </div>
         </div>
+        @livewireScripts
     </body>
 </html>
