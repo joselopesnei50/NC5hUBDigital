@@ -143,6 +143,13 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::resource('produtos-servicos', \App\Http\Controllers\Customer\ProdutoServicoController::class)
         ->names('customer.produtos')
         ->parameters(['produtos-servicos' => 'produto']);
+
+    // Financeiro, Projetos e Documentos (Hub)
+    Route::resource('lancamentos', \App\Http\Controllers\LancamentoFinanceiroController::class)->names('customer.lancamentos');
+    Route::resource('projetos', \App\Http\Controllers\ProjetoController::class)->names('customer.projetos');
+    Route::post('projetos/{projeto}/tarefas', [\App\Http\Controllers\ProjetoController::class, 'storeTarefa'])->name('customer.projetos.tarefas.store');
+    Route::patch('tarefas/{tarefa}/toggle', [\App\Http\Controllers\ProjetoController::class, 'toggleTarefa'])->name('customer.projetos.tarefas.toggle');
+    Route::resource('documentos', \App\Http\Controllers\DocumentoController::class)->names('customer.documentos');
 });
 
 require __DIR__.'/auth.php';
