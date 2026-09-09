@@ -79,13 +79,10 @@
 
             <!-- Escopo do Pedido -->
             <div class="p-8">
-                <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-2">Detalhes do Serviço / Produto</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-2">Detalhes do Pedido / Projeto</h2>
                 
                 <div class="mb-6">
                     <h3 class="font-bold text-lg text-gray-800">{{ $pedido->titulo }}</h3>
-                    @if($pedido->produtoServico)
-                        <p class="text-sm text-blue-600 font-medium mb-2">Item do Catálogo: {{ $pedido->produtoServico->nome }}</p>
-                    @endif
                     
                     @if($pedido->descricao)
                         <div class="mt-4 text-gray-600 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg border border-gray-100">{{ $pedido->descricao }}</div>
@@ -102,15 +99,42 @@
                     </div>
                 @endif
 
+                <!-- Tabela de Itens -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Itens Incluídos</h3>
+                    <div class="overflow-x-auto rounded-lg border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left font-bold text-gray-600 uppercase tracking-wider">Descrição do Item</th>
+                                    <th class="px-6 py-3 text-center font-bold text-gray-600 uppercase tracking-wider">Qtd</th>
+                                    <th class="px-6 py-3 text-right font-bold text-gray-600 uppercase tracking-wider">V. Unitário</th>
+                                    <th class="px-6 py-3 text-right font-bold text-gray-600 uppercase tracking-wider">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($pedido->itens as $item)
+                                    <tr>
+                                        <td class="px-6 py-4 font-medium text-gray-900">{{ $item->nome_item }}</td>
+                                        <td class="px-6 py-4 text-center text-gray-700">{{ number_format($item->quantidade, 2, ',', '') }}</td>
+                                        <td class="px-6 py-4 text-right text-gray-700">R$ {{ number_format($item->valor_unitario, 2, ',', '.') }}</td>
+                                        <td class="px-6 py-4 text-right font-bold text-gray-800">R$ {{ number_format($item->valor_total, 2, ',', '.') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Total -->
-                <div class="mt-8 flex justify-end">
+                <div class="mt-6 flex justify-end">
                     <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 min-w-[250px]">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-gray-500 font-medium">Subtotal</span>
                             <span class="text-gray-800 font-semibold">R$ {{ number_format($pedido->valor, 2, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between items-center pt-2 border-t border-gray-300 mt-2">
-                            <span class="text-xl font-bold text-gray-800">Total</span>
+                            <span class="text-xl font-bold text-gray-800">Total Final</span>
                             <span class="text-2xl font-bold text-green-600">R$ {{ number_format($pedido->valor, 2, ',', '.') }}</span>
                         </div>
                     </div>

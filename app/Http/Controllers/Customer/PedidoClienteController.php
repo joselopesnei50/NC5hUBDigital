@@ -44,31 +44,50 @@ class PedidoClienteController extends Controller
     {
         $validated = $request->validate([
             'cliente_final_id' => 'required|exists:clientes_finais,id',
-            'produto_servico_id' => 'nullable|exists:produtos_servicos,id',
             'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
-            'valor' => 'required|numeric|min:0',
             'status' => 'required|string|in:Orçamento,Aguardando Pagamento,Em Andamento,Concluído,Cancelado',
             'data_pedido' => 'nullable|date',
             'data_entrega' => 'nullable|date',
+            'itens' => 'required|array|min:1',
+            'itens.*.produto_servico_id' => 'nullable|exists:produtos_servicos,id',
+            'itens.*.nome_item' => 'required|string|max:255',
+            'itens.*.quantidade' => 'required|numeric|min:0.01',
+            'itens.*.valor_unitario' => 'required|numeric|min:0',
         ]);
 
         $cliente = Auth::user()->cliente;
         
-        // Verifica se o cliente_final_id pertence realmente a este cliente
         $clienteFinalExists = $cliente->clientesFinais()->where('id', $validated['cliente_final_id'])->exists();
         if (!$clienteFinalExists) {
             abort(403, 'Acesso não autorizado a este cliente.');
         }
 
-        if(!empty($validated['produto_servico_id'])) {
-            $produtoExists = $cliente->produtosServicos()->where('id', $validated['produto_servico_id'])->exists();
-            if(!$produtoExists) {
-                $validated['produto_servico_id'] = null;
-            }
+        // Calcular valor total
+        $valorTotalGeral = 0;
+        foreach ($validated['itens'] as $item) {
+            $valorTotalGeral += ($item['quantidade'] * $item['valor_unitario']);
         }
 
-        $cliente->pedidosClientesFinais()->create($validated);
+        $pedido = $cliente->pedidosClientesFinais()->create([
+            'cliente_final_id' => $validated['cliente_final_id'],
+            'titulo' => $validated['titulo'],
+            'descricao' => $validated['descricao'],
+            'status' => $validated['status'],
+            'data_pedido' => $validated['data_pedido'],
+            'data_entrega' => $validated['data_entrega'],
+            'valor' => $valorTotalGeral,
+        ]);
+
+        foreach ($validated['itens'] as $item) {
+            $pedido->itens()->create([
+                'produto_servico_id' => $item['produto_servico_id'] ?? null,
+                'nome_item' => $item['nome_item'],
+                'quantidade' => $item['quantidade'],
+                'valor_unitario' => $item['valor_unitario'],
+                'valor_total' => $item['quantidade'] * $item['valor_unitario'],
+            ]);
+        }
 
         return redirect()->route('customer.pedidos.index')->with('success', 'Pedido cadastrado com sucesso!');
     }
@@ -81,6 +100,7 @@ class PedidoClienteController extends Controller
             abort(403);
         }
 
+        $pedido->load('itens');
         $clientesFinais = $cliente->clientesFinais()->orderBy('nome_empresa')->get();
         $produtosServicos = $cliente->produtosServicos()->orderBy('tipo')->orderBy('nome')->get();
         return view('customer.pedidos_clientes.edit', compact('pedido', 'clientesFinais', 'produtosServicos'));
@@ -96,13 +116,16 @@ class PedidoClienteController extends Controller
 
         $validated = $request->validate([
             'cliente_final_id' => 'required|exists:clientes_finais,id',
-            'produto_servico_id' => 'nullable|exists:produtos_servicos,id',
             'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
-            'valor' => 'required|numeric|min:0',
             'status' => 'required|string|in:Orçamento,Aguardando Pagamento,Em Andamento,Concluído,Cancelado',
             'data_pedido' => 'nullable|date',
             'data_entrega' => 'nullable|date',
+            'itens' => 'required|array|min:1',
+            'itens.*.produto_servico_id' => 'nullable|exists:produtos_servicos,id',
+            'itens.*.nome_item' => 'required|string|max:255',
+            'itens.*.quantidade' => 'required|numeric|min:0.01',
+            'itens.*.valor_unitario' => 'required|numeric|min:0',
         ]);
 
         $clienteFinalExists = $cliente->clientesFinais()->where('id', $validated['cliente_final_id'])->exists();
@@ -110,14 +133,33 @@ class PedidoClienteController extends Controller
             abort(403, 'Acesso não autorizado a este cliente.');
         }
 
-        if(!empty($validated['produto_servico_id'])) {
-            $produtoExists = $cliente->produtosServicos()->where('id', $validated['produto_servico_id'])->exists();
-            if(!$produtoExists) {
-                $validated['produto_servico_id'] = null;
-            }
+        // Calcular valor total
+        $valorTotalGeral = 0;
+        foreach ($validated['itens'] as $item) {
+            $valorTotalGeral += ($item['quantidade'] * $item['valor_unitario']);
         }
 
-        $pedido->update($validated);
+        $pedido->update([
+            'cliente_final_id' => $validated['cliente_final_id'],
+            'titulo' => $validated['titulo'],
+            'descricao' => $validated['descricao'],
+            'status' => $validated['status'],
+            'data_pedido' => $validated['data_pedido'],
+            'data_entrega' => $validated['data_entrega'],
+            'valor' => $valorTotalGeral,
+        ]);
+
+        // Apagar itens antigos e recriar
+        $pedido->itens()->delete();
+        foreach ($validated['itens'] as $item) {
+            $pedido->itens()->create([
+                'produto_servico_id' => $item['produto_servico_id'] ?? null,
+                'nome_item' => $item['nome_item'],
+                'quantidade' => $item['quantidade'],
+                'valor_unitario' => $item['valor_unitario'],
+                'valor_total' => $item['quantidade'] * $item['valor_unitario'],
+            ]);
+        }
 
         return redirect()->route('customer.pedidos.index')->with('success', 'Pedido atualizado com sucesso!');
     }
