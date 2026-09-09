@@ -1,4 +1,4 @@
-<div class="flex flex-col h-[600px] bg-white rounded-2xl shadow-sm border border-slate-200">
+<div class="flex flex-col h-full bg-white rounded-3xl shadow-sm">
     <!-- Cabeçalho -->
     <div class="p-4 border-b border-slate-200 bg-slate-50 rounded-t-2xl flex items-center justify-between">
         <div class="flex items-center gap-3">

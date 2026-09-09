@@ -54,19 +54,35 @@
             </div>
         </div>
 
-        <!-- Active Services Table Section -->
-        <div class="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-premium">
-            <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-display font-extrabold text-ink">Esteira de Produção & Contratos</h3>
-                    <p class="text-xs text-slateText mt-0.5">Visão consolidada dos seus contratos ativos e materiais cadastrados.</p>
+        <!-- Grid Inferior (Conteúdo e Chat) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Coluna Principal -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Active Services Table Section -->
+                <div class="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-premium">
+                    <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-display font-extrabold text-ink">Esteira de Produção & Contratos</h3>
+                            <p class="text-xs text-slateText mt-0.5">Visão consolidada dos seus contratos ativos e materiais cadastrados.</p>
+                        </div>
+                        <a href="{{ route('customer.contracts') }}" class="text-xs font-bold text-[#FF7A1A] hover:underline">Ver todos os contratos →</a>
+                    </div>
+                    <div class="p-8">
+                        <p class="text-sm text-slate-600 leading-relaxed font-medium">
+                            Acesse o menu ao lado para visualizar <strong class="text-ink">Meus Contratos</strong>, baixar faturas ou responder aos briefings e chamados de suporte da sua conta.
+                        </p>
+                    </div>
                 </div>
-                <a href="{{ route('customer.contracts') }}" class="text-xs font-bold text-[#FF7A1A] hover:underline">Ver todos os contratos →</a>
             </div>
-            <div class="p-8">
-                <p class="text-sm text-slate-600 leading-relaxed font-medium">
-                    Acesse o menu ao lado para visualizar <strong class="text-ink">Meus Contratos</strong>, baixar faturas ou responder aos briefings e chamados de suporte da sua conta.
-                </p>
+
+            <!-- Coluna do Agente IA -->
+            <div class="lg:col-span-1 relative">
+                <!-- Efeito brilhante no fundo do card -->
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-[#FF7A1A] rounded-3xl blur opacity-25"></div>
+                
+                <div class="relative bg-white rounded-3xl overflow-hidden shadow-premium flex flex-col h-[600px] border border-indigo-100">
+                    <livewire:bruce-chat />
+                </div>
             </div>
         </div>
     </div>
