@@ -30,4 +30,9 @@ class Projeto extends Model
     {
         return $this->hasMany(ProjetoTarefa::class);
     }
+
+    public function clienteFinal()
+    {
+        return $this->belongsTo(ClienteFinal::class, 'cliente_final_id');
+    }
 }

@@ -23,4 +23,9 @@ class LancamentoFinanceiro extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    public function clienteFinal()
+    {
+        return $this->belongsTo(ClienteFinal::class, 'cliente_final_id');
+    }
 }
