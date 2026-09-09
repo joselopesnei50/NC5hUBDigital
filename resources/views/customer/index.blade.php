@@ -112,5 +112,30 @@
                 </dl>
             </div>
         </div>
+
+        <!-- Seção: Inteligência Artificial (Bruce) -->
+        <div class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <!-- Texto explicativo na esquerda -->
+            <div class="lg:col-span-1 bg-ink text-white rounded-3xl p-8 shadow-sm flex flex-col justify-center">
+                <h3 class="text-2xl font-display font-bold mb-4">Seu Analista de Negócios 24/7</h3>
+                <p class="text-white/60 text-sm leading-relaxed mb-6">
+                    O BruceIA está conectado aos seus dados de faturamento, projetos e comportamento dos seus clientes. 
+                    Peça resumos financeiros, projeções ou mande ele redigir mensagens de resgate para clientes sumidos.
+                </p>
+                <div class="text-xs font-bold uppercase tracking-wider text-bruce">
+                    Experimente perguntar: "Como foi o caixa deste mês?"
+                </div>
+            </div>
+
+            <!-- Caixa de Chat na direita (ocupa 2 espaços) -->
+            <div class="lg:col-span-2 relative">
+                <!-- Efeito brilhante no fundo do card -->
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-bruce rounded-3xl blur opacity-25"></div>
+                
+                <div class="relative bg-white rounded-3xl overflow-hidden shadow-premium flex flex-col h-[600px] border border-indigo-100">
+                    <livewire:bruce-chat />
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>
