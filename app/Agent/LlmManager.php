@@ -26,8 +26,11 @@ class LlmManager extends Manager
         $config = $this->config->get('agent.drivers.deepseek');
         $timeout = $this->config->get('agent.timeout', 120);
 
+        // Busca a chave primeiro no banco de dados (Painel Admin), com fallback para o .env/config
+        $apiKey = \App\Models\Configuracao::get('deepseek_api_key', $config['api_key'] ?? '');
+
         return new DeepSeekDriver(
-            apiKey: $config['api_key'] ?? '',
+            apiKey: $apiKey,
             baseUrl: $config['base_url'] ?? 'https://api.deepseek.com',
             model: $config['model'] ?? 'deepseek-chat',
             costPer1kIn: (float) ($config['cost_per_1k_in'] ?? 0.001),
