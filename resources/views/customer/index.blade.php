@@ -78,18 +78,22 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div class="lg:col-span-2 bg-white border border-black/5 rounded-2xl p-6 shadow-sm">
                 <h3 class="font-display text-lg font-bold text-ink mb-5">Ações rápidas</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <a href="{{ route('customer.materiais') }}" class="group flex flex-col p-5 bg-mist hover:bg-ink hover:text-white rounded-2xl transition-colors">
-                        <span class="text-slate group-hover:text-white/60 text-xs font-semibold uppercase tracking-wider">Materiais</span>
-                        <span class="font-display text-xl font-bold mt-1">Aprovar</span>
+                        <span class="text-slate group-hover:text-white/60 text-[10px] font-semibold uppercase tracking-wider">Materiais</span>
+                        <span class="font-display text-lg font-bold mt-1">Aprovar</span>
                     </a>
                     <a href="{{ route('customer.invoices') }}" class="group flex flex-col p-5 bg-mist hover:bg-ink hover:text-white rounded-2xl transition-colors">
-                        <span class="text-slate group-hover:text-white/60 text-xs font-semibold uppercase tracking-wider">Faturas</span>
-                        <span class="font-display text-xl font-bold mt-1">Pagar</span>
+                        <span class="text-slate group-hover:text-white/60 text-[10px] font-semibold uppercase tracking-wider">Faturas</span>
+                        <span class="font-display text-lg font-bold mt-1">Pagar</span>
                     </a>
                     <a href="{{ route('customer.briefings') }}" class="group flex flex-col p-5 bg-mist hover:bg-ink hover:text-white rounded-2xl transition-colors">
-                        <span class="text-slate group-hover:text-white/60 text-xs font-semibold uppercase tracking-wider">Briefings</span>
-                        <span class="font-display text-xl font-bold mt-1">Responder</span>
+                        <span class="text-slate group-hover:text-white/60 text-[10px] font-semibold uppercase tracking-wider">Briefings</span>
+                        <span class="font-display text-lg font-bold mt-1">Responder</span>
+                    </a>
+                    <a href="{{ route('customer.agent-drafts.index') }}" class="group flex flex-col p-5 bg-indigo-50 border border-indigo-100 hover:bg-[#0A1128] hover:border-transparent hover:text-white rounded-2xl transition-all shadow-sm">
+                        <span class="text-indigo-600 group-hover:text-indigo-300 text-[10px] font-semibold uppercase tracking-wider">Mensagens IA</span>
+                        <span class="font-display text-lg font-bold mt-1 text-indigo-900 group-hover:text-white">Revisar</span>
                     </a>
                 </div>
             </div>

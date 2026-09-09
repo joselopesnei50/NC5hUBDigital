@@ -149,7 +149,13 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::resource('projetos', \App\Http\Controllers\ProjetoController::class)->names('customer.projetos');
     Route::post('projetos/{projeto}/tarefas', [\App\Http\Controllers\ProjetoController::class, 'storeTarefa'])->name('customer.projetos.tarefas.store');
     Route::patch('tarefas/{tarefa}/toggle', [\App\Http\Controllers\ProjetoController::class, 'toggleTarefa'])->name('customer.projetos.tarefas.toggle');
+    // Documentos
     Route::resource('documentos', \App\Http\Controllers\DocumentoController::class)->names('customer.documentos');
+
+    // Rascunhos da IA
+    Route::get('mensagens-ia', [\App\Http\Controllers\Customer\AgentDraftController::class, 'index'])->name('customer.agent-drafts.index');
+    Route::post('mensagens-ia/{draft}/approve', [\App\Http\Controllers\Customer\AgentDraftController::class, 'approve'])->name('customer.agent-drafts.approve');
+    Route::post('mensagens-ia/{draft}/discard', [\App\Http\Controllers\Customer\AgentDraftController::class, 'discard'])->name('customer.agent-drafts.discard');
 });
 
 require __DIR__.'/auth.php';
