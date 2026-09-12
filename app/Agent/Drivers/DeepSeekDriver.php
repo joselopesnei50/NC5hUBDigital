@@ -45,7 +45,11 @@ class DeepSeekDriver implements LlmDriver
             }
         }
 
-        $messages[] = ['role' => 'user', 'content' => $payload->userPrompt];
+        // Só anexa o turno do usuário quando ele existe de fato.
+        // No chat o userPrompt vem vazio: a fala já está na última mensagem do history.
+        if (trim($payload->userPrompt) !== '') {
+            $messages[] = ['role' => 'user', 'content' => $payload->userPrompt];
+        }
 
         $requestData = [
             'model' => $this->model,

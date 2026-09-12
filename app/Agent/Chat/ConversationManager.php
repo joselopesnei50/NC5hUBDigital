@@ -44,8 +44,12 @@ class ConversationManager
     public function buildContext(AgentConversation $conversation, int $limit = 20): array
     {
         // Pega somente as últimas N mensagens enviadas. O resto fica pra trás.
+        // Ordenamos por id (auto-incremento, monotônico) e não por created_at:
+        // TIMESTAMP no MySQL tem precisão de 1 segundo, o assistant(tool_calls)
+        // e as respostas tool gravam no mesmo segundo e o servidor devolve em
+        // ordem arbitrária, fazendo o filtro de pares descartar blocos válidos.
         $messages = $conversation->messages()
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->take($limit)
             ->get()
             ->reverse()
@@ -101,8 +105,13 @@ class ConversationManager
             $item = $items[$i];
 
             if ($item['role'] === 'tool') {
-                $last = end($safe);
-                if (!$last || $last['role'] !== 'assistant' || empty($last['tool_calls'] ?? null)) {
+                // Uma tool response eh valida se a anterior em $safe for:
+                // - assistant com tool_calls (primeira tool response do bloco), ou
+                // - outra tool response (2a, 3a resposta do mesmo bloco multi-tool)
+                $last = $safe ? end($safe) : null;
+                $okAssistant = $last && $last['role'] === 'assistant' && !empty($last['tool_calls'] ?? null);
+                $okTool      = $last && $last['role'] === 'tool';
+                if (!$okAssistant && !$okTool) {
                     $i++;
                     continue;
                 }
