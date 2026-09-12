@@ -44,8 +44,8 @@
             </div>
         @endforelse
 
-        <!-- Indicador digitando -->
-        <div wire:loading wire:target="sendMessage" class="flex items-end gap-2">
+        <!-- Indicador digitando (comeca hidden; Livewire remove a classe durante o envio) -->
+        <div wire:loading.class.remove="hidden" wire:target="sendMessage" class="hidden items-end gap-2">
             <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="" class="w-7 h-7 shrink-0 mb-0.5">
             <div class="bg-white border border-black/5 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
                 <div class="flex items-center gap-1">
