@@ -11,7 +11,7 @@ return [
     | Em ambiente local/testes, o driver 'null' retorna fixtures.
     |
     */
-    'default_driver' => env('AGENT_DRIVER', 'null'),
+    'default_driver' => env('AGENT_DRIVER', 'deepseek'),
 
     /*
     |--------------------------------------------------------------------------
