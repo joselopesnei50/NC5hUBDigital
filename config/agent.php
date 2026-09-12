@@ -20,7 +20,10 @@ return [
     | Configurações de segurança e contenção de custo.
     |
     */
-    'timeout' => env('AGENT_TIMEOUT', 120),
+    // 45s: com Http::retry(2, 1000) e maxTurns=6, precisamos caber no timeout
+    // do Nginx (60s por padrao). 120s deixava requests morrerem em 504 sem
+    // que o Bruce sequer conseguisse gravar a mensagem final.
+    'timeout' => env('AGENT_TIMEOUT', 45),
     'max_tokens' => env('AGENT_MAX_TOKENS', 4096),
     'monthly_cost_limit' => env('AGENT_MONTHLY_COST_LIMIT', 50.00), // Em Dólares ou Reais
 

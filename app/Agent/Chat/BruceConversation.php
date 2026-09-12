@@ -42,7 +42,7 @@ class BruceConversation
 
         // GUARDRAIL #2: LIMITE DE RECURSÃO (CUSTO)
         // Impede que o modelo entre num loop infinito conversando consigo mesmo.
-        $maxTurns = 4;
+        $maxTurns = 6;
 
         while ($turnCount < $maxTurns) {
             $turnCount++;
@@ -67,17 +67,26 @@ class BruceConversation
             // 3. Bate na API de Inteligência
             $response = $this->driver->complete($payload);
 
+            // Contagem de tokens: tokensIn eh o prompt inteiro (system+history+tools),
+            // recompilado a cada volta. Somar tokensIn a cada rodada infla o acumulado
+            // porque contamos o mesmo historico varias vezes. Contamos tokensIn apenas
+            // na primeira chamada API do turno; nas seguintes, so tokensOut (o novo
+            // conteudo gerado). O 'cost' financeiro permanece por chamada.
+            $tokensGravar = $turnCount === 1
+                ? $response->tokensIn + $response->tokensOut
+                : $response->tokensOut;
+
             // 4. Decisão de Ação (Tool Calling)
             if (!empty($response->toolCalls)) {
                 $toolsAlreadyRan = true;
-                
+
                 // O assistente decidiu chamar uma ou mais ferramentas. Gravamos essa intenção.
                 $this->memory->addMessage(
                     conversation: $conversation,
                     role: 'assistant',
                     content: null,
                     toolCalls: $response->toolCalls,
-                    tokens: $response->tokensIn,
+                    tokens: $tokensGravar,
                     cost: $response->estimatedCost
                 );
 
@@ -126,7 +135,7 @@ class BruceConversation
                 conversation: $conversation,
                 role: 'assistant',
                 content: $response->content,
-                tokens: $response->tokensIn + $response->tokensOut,
+                tokens: $tokensGravar,
                 cost: $response->estimatedCost
             );
 

@@ -36,7 +36,7 @@
                         {{ $msg->content }}
                     </div>
                 </div>
-            @elseif($msg->role === 'assistant' && trim($msg->content ?? '') !== '')
+            @elseif($msg->role === 'assistant' && filled($msg->content))
                 {{-- So renderiza se tem conteudo real; mensagens intermediarias de tool_calls (content=null) sao invisiveis pro cliente --}}
                 <div class="flex justify-start items-end gap-2">
                     <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="" class="w-8 h-8 shrink-0 mb-1">
