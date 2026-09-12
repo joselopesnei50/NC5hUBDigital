@@ -56,14 +56,21 @@ class BruceChat extends Component
 
         // Salvamos temporariamente o input pois limparemos a tela instantaneamente
         $userText = $this->message;
-        $this->message = ''; 
+        $this->message = '';
 
         try {
-            // Este método vai segurar a conexão do PHP por uns segundos, mas o front não vai 
+            // Este método vai segurar a conexão do PHP por uns segundos, mas o front não vai
             // travar, pois o Livewire exibe a flag "wire:loading" para o usuário.
             $bruce->handleTurn($conversation, $userText);
         } catch (\Exception $e) {
-            Log::error("[Livewire BruceChat] Erro fatal no chat: " . $e->getMessage());
+            Log::error('[Livewire BruceChat] Erro fatal no chat', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile() . ':' . $e->getLine(),
+                'conversation_id' => $this->conversationId,
+            ]);
+            // Devolve a pergunta pro input para o usuario poder tentar de novo sem redigitar
+            $this->message = $userText;
             $this->addError('limit', 'Ops, o Bruce não conseguiu responder no momento. Tente novamente mais tarde.');
         }
     }
