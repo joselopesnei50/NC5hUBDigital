@@ -38,10 +38,11 @@ class BruceConversation
         $availableTools = $this->tools->getToolsForLlm();
 
         $turnCount = 0;
-        
+        $toolsAlreadyRan = false;
+
         // GUARDRAIL #2: LIMITE DE RECURSÃO (CUSTO)
         // Impede que o modelo entre num loop infinito conversando consigo mesmo.
-        $maxTurns = 4; 
+        $maxTurns = 4;
 
         while ($turnCount < $maxTurns) {
             $turnCount++;
@@ -49,13 +50,18 @@ class BruceConversation
             // 2. Compila as memórias curtas (Janela Deslizante) para o LLM
             $history = $this->memory->buildContext($conversation);
 
-            // Importante: No loop do chat, deixamos o userPrompt vazio porque 
-            // a fala real do usuário já é a última mensagem dentro do $history.
+            // GUARDRAIL #3: NO SEGUNDO TURNO EM DIANTE, PROIBE NOVAS TOOL CALLS.
+            // Se o modelo ja consumiu uma rodada de tools, forcamos texto final.
+            // Isso quebra qualquer tentativa de loop (chamar tool > ver resultado >
+            // chamar tool de novo) direto na API, sem depender do prompt.
+            $toolChoice = $toolsAlreadyRan ? 'none' : null;
+
             $payload = new PromptPayload(
                 systemPrompt: $systemPrompt,
-                userPrompt: "", 
+                userPrompt: "",
                 tools: empty($availableTools) ? null : $availableTools,
-                history: $history
+                history: $history,
+                toolChoice: $toolChoice
             );
 
             // 3. Bate na API de Inteligência
@@ -63,6 +69,7 @@ class BruceConversation
 
             // 4. Decisão de Ação (Tool Calling)
             if (!empty($response->toolCalls)) {
+                $toolsAlreadyRan = true;
                 
                 // O assistente decidiu chamar uma ou mais ferramentas. Gravamos essa intenção.
                 $this->memory->addMessage(
@@ -126,8 +133,14 @@ class BruceConversation
             return $response->content;
         }
 
-        // Se por algum motivo estressou o limite de 4 requisições, cortamos a operação graciosamente.
-        $fallback = "Desculpe, eu precisei cruzar dados em muitos relatórios simultâneos e cheguei ao meu limite de processamento. Poderia ser mais específico na pergunta?";
+        // Chegou ao teto de rodadas sem gerar texto final — nao deveria mais acontecer
+        // porque toolChoice=none forca o texto no 2o turno. Se cair aqui, e sinal de
+        // que a API devolveu vazio; logamos e devolvemos mensagem util.
+        Log::warning('[Bruce Orquestrador] Bateu maxTurns sem texto final', [
+            'conversation_id' => $conversation->id,
+            'turns' => $turnCount,
+        ]);
+        $fallback = "Não consegui montar uma resposta agora. Reformule a pergunta ou tente novamente em alguns segundos.";
         $this->memory->addMessage($conversation, 'assistant', $fallback);
 
         return $fallback;

@@ -56,7 +56,13 @@ class DeepSeekDriver implements LlmDriver
         if ($payload->tools !== null) {
             $requestData['tools'] = $payload->tools;
             // Desativa json_object force quando usando tools, pois a API pode conflitar
-            unset($requestData['response_format']); 
+            unset($requestData['response_format']);
+
+            // Permite ao orquestrador forcar "none" (proibir novas tools) em turnos
+            // subsequentes, quebrando qualquer tentativa de loop de tool_calls.
+            if ($payload->toolChoice !== null) {
+                $requestData['tool_choice'] = $payload->toolChoice;
+            }
         }
 
         try {
