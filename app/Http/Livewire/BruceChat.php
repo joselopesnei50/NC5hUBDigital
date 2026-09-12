@@ -69,10 +69,24 @@ class BruceChat extends Component
                 'file' => $e->getFile() . ':' . $e->getLine(),
                 'conversation_id' => $this->conversationId,
             ]);
-            // Devolve a pergunta pro input para o usuario poder tentar de novo sem redigitar
-            $this->message = $userText;
+            // NAO reinjeta $userText no input: com wire:model.defer isso
+            // dessincroniza o campo e o usuario ve o texto aparecer sozinho.
             $this->addError('limit', 'Ops, o Bruce não conseguiu responder no momento. Tente novamente mais tarde.');
         }
+    }
+
+    /**
+     * Encerra a conversa atual e forca o mount a abrir uma nova.
+     */
+    public function resetConversation()
+    {
+        if ($this->conversationId) {
+            AgentConversation::where('id', $this->conversationId)->update(['status' => 'archived']);
+        }
+        $this->conversationId = null;
+        $this->message = '';
+        $this->resetErrorBag();
+        $this->mount();
     }
 
     public function render()
