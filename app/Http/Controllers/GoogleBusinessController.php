@@ -15,19 +15,30 @@ class GoogleBusinessController extends Controller
         $this->googleService = $googleService;
     }
 
+    protected function requireCliente()
+    {
+        $cliente = Auth::user()->cliente ?? null;
+        if (!$cliente) {
+            return redirect()->route('customer.index')
+                ->with('error', 'Sua conta ainda não está vinculada a um cadastro empresarial. Fale com o suporte.');
+        }
+        return $cliente;
+    }
+
     public function index()
     {
-        $cliente = Auth::user()->cliente;
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) return $cliente;
+
         $isConnected = !empty($cliente->google_refresh_token);
-        
+
         $locations = [];
         $apiError = null;
         if ($isConnected) {
             try {
                 $locations = $this->googleService->getLocations($cliente);
             } catch (\Exception $e) {
-                // Manter conectado para permitir desconectar, mas mostrar erro
-                $apiError = 'Falha ao buscar dados do Google: ' . $e->getMessage();
+                $apiError = $e->getMessage();
             }
         }
 
@@ -36,6 +47,9 @@ class GoogleBusinessController extends Controller
 
     public function redirectToGoogle()
     {
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) return $cliente;
+
         if (
             empty(\App\Models\Configuracao::get('google_client_id')) ||
             empty(\App\Models\Configuracao::get('google_client_secret')) ||
@@ -51,6 +65,9 @@ class GoogleBusinessController extends Controller
 
     public function handleGoogleCallback(Request $request)
     {
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) return $cliente;
+
         if ($request->has('error')) {
             return redirect()->route('customer.google-business.index')
                 ->with('error', 'A autorização foi recusada.');
@@ -61,22 +78,22 @@ class GoogleBusinessController extends Controller
                 ->with('error', 'Código de autorização não recebido.');
         }
 
-        $cliente = Auth::user()->cliente;
-        
         try {
             $this->googleService->authenticateAndSaveTokens($request->code, $cliente);
             return redirect()->route('customer.google-business.index')
                 ->with('success', 'Conta do Google Meu Negócio conectada com sucesso!');
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('[GoogleBusiness] Falha no callback do cliente ' . $cliente->id . ': ' . $e->getMessage());
             return redirect()->route('customer.google-business.index')
-                ->with('error', 'Falha ao conectar: ' . $e->getMessage());
+                ->with('error', 'Falha ao conectar sua conta Google. Tente novamente ou fale com o suporte.');
         }
     }
 
     public function disconnect()
     {
-        $cliente = Auth::user()->cliente;
-        
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) return $cliente;
+
         $cliente->update([
             'google_access_token' => null,
             'google_refresh_token' => null,

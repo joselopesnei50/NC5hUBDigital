@@ -53,15 +53,34 @@ class GoogleBusinessProfileService
     protected function setClientForCliente($cliente)
     {
         if (!$cliente->google_access_token) {
-            throw new \Exception("Cliente não conectado ao Google.");
+            throw new \Exception("Conta Google não conectada.");
         }
 
-        $this->client->setAccessToken(Crypt::decryptString($cliente->google_access_token));
+        try {
+            $accessToken = Crypt::decryptString($cliente->google_access_token);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('[GoogleBusiness] Falha ao descriptografar access_token do cliente ' . $cliente->id);
+            throw new \Exception("Não conseguimos ler suas credenciais salvas. Desconecte e reconecte sua conta Google.");
+        }
+
+        $this->client->setAccessToken($accessToken);
 
         // Se expirou e temos refresh token, renova e salva no banco
         if ($this->client->isAccessTokenExpired() && $cliente->google_refresh_token) {
-            $newToken = $this->client->fetchAccessTokenWithRefreshToken(Crypt::decryptString($cliente->google_refresh_token));
-            
+            try {
+                $refreshToken = Crypt::decryptString($cliente->google_refresh_token);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[GoogleBusiness] Falha ao descriptografar refresh_token do cliente ' . $cliente->id);
+                throw new \Exception("Não conseguimos renovar seu acesso. Desconecte e reconecte sua conta Google.");
+            }
+
+            $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            if (isset($newToken['error'])) {
+                \Illuminate\Support\Facades\Log::warning('[GoogleBusiness] Refresh falhou para cliente ' . $cliente->id . ': ' . ($newToken['error'] ?? ''));
+                throw new \Exception("Sua sessão do Google expirou. Reconecte a conta para continuar.");
+            }
+
             $cliente->update([
                 'google_access_token' => Crypt::encryptString($newToken['access_token']),
                 'google_token_expires_at' => Carbon::now()->addSeconds($newToken['expires_in']),
@@ -72,39 +91,36 @@ class GoogleBusinessProfileService
     public function getLocations($cliente)
     {
         $this->setClientForCliente($cliente);
-        
+
         $httpClient = $this->client->authorize();
-        // Busca a conta associada ao usuário
+
         try {
             $accountResponse = $httpClient->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
-            $body = (string) $accountResponse->getBody();
-            \Illuminate\Support\Facades\Log::info('Google Accounts Response: ' . $body);
-            $accounts = json_decode($body, true);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Google API Error: ' . $e->getMessage());
-            throw $e;
+            $accounts = json_decode((string) $accountResponse->getBody(), true) ?? [];
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('[GoogleBusiness] Falha ao listar contas do cliente ' . $cliente->id . ': ' . $e->getMessage());
+            throw new \Exception("Não conseguimos consultar suas contas do Google. Verifique se as APIs estão ativadas no Google Cloud.");
         }
-        
-        if (!isset($accounts['accounts']) || empty($accounts['accounts'])) {
-            throw new \Exception("Nenhuma conta encontrada. Resposta bruta do Google: " . $body);
+
+        if (empty($accounts['accounts'])) {
+            \Illuminate\Support\Facades\Log::info('[GoogleBusiness] Cliente ' . $cliente->id . ' autenticou mas não tem contas associadas.');
+            throw new \Exception("Nenhuma conta do Google Meu Negócio encontrada nesta conta Google.");
         }
 
         $locations = [];
         foreach ($accounts['accounts'] as $account) {
-            $accountId = $account['name'];
-            
+            $accountId = $account['name'] ?? null;
+            if (!$accountId) continue;
+
             try {
-                // Busca os locais (locations) desta conta
                 $locResponse = $httpClient->get("https://mybusinessbusinessinformation.googleapis.com/v1/{$accountId}/locations?readMask=name,title,storeCode");
-                $locBody = (string) $locResponse->getBody();
-                \Illuminate\Support\Facades\Log::info("Google Locations Response for {$accountId}: " . $locBody);
-                $locData = json_decode($locBody, true);
-                
-                if (isset($locData['locations'])) {
+                $locData = json_decode((string) $locResponse->getBody(), true) ?? [];
+
+                if (!empty($locData['locations'])) {
                     $locations = array_merge($locations, $locData['locations']);
                 }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Google Locations Error for {$accountId}: " . $e->getMessage());
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("[GoogleBusiness] Falha em locations de {$accountId} (cliente {$cliente->id}): " . $e->getMessage());
             }
         }
 
