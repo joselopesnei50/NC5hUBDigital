@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Log;
 class BruceConversation
 {
     public function __construct(
-        private readonly LlmDriver $driver,
-        private readonly ConversationManager $memory,
-        private readonly ToolRegistry $tools
+        private LlmDriver $driver,
+        private ConversationManager $memory,
+        private ToolRegistry $tools
     ) {
     }
 

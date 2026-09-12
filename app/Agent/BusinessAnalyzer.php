@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Log;
 class BusinessAnalyzer
 {
     public function __construct(
-        private readonly LlmDriver $driver,
-        private readonly SnapshotBuilder $snapshotBuilder,
-        private readonly ResponseValidator $validator
+        private LlmDriver $driver,
+        private SnapshotBuilder $snapshotBuilder,
+        private ResponseValidator $validator
     ) {
     }
 

@@ -117,29 +117,83 @@
             </div>
         </div>
 
-        <!-- Seção: Inteligência Artificial (Bruce) -->
-        <div class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <!-- Texto explicativo na esquerda -->
-            <div class="lg:col-span-1 bg-ink text-white rounded-3xl p-8 shadow-sm flex flex-col justify-center">
-                <h3 class="text-2xl font-display font-bold mb-4">Seu Analista de Negócios 24/7</h3>
-                <p class="text-white/60 text-sm leading-relaxed mb-6">
-                    O BruceIA está conectado aos seus dados de faturamento, projetos e comportamento dos seus clientes. 
-                    Peça resumos financeiros, projeções ou mande ele redigir mensagens de resgate para clientes sumidos.
-                </p>
-                <div class="text-xs font-bold uppercase tracking-wider text-bruce">
-                    Experimente perguntar: "Como foi o caixa deste mês?"
+        <!-- Card discreto que anuncia o Bruce (substitui a caixa gigante) -->
+        <div class="mt-2 flex items-center justify-between gap-4 rounded-2xl bg-[#0A0A0B] p-5 text-white shadow-sm">
+            <div class="flex items-center gap-4">
+                <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="w-12 h-12 shrink-0">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-[#FF7A1A]">Analista 24/7</p>
+                    <p class="font-display text-lg font-bold leading-tight">Fale com o <span class="text-[#FF7A1A]">Bruce</span><span class="text-white">IA</span></p>
+                    <p class="text-white/60 text-xs mt-1">Pergunte sobre caixa, clientes ou peça mensagens prontas.</p>
                 </div>
             </div>
+            <button
+                type="button"
+                @click="$dispatch('bruce-open')"
+                class="hidden sm:inline-flex items-center gap-2 bg-[#FF7A1A] hover:bg-white hover:text-[#0A0A0B] text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-full transition-colors whitespace-nowrap"
+            >
+                Abrir chat →
+            </button>
+        </div>
+    </div>
 
-            <!-- Caixa de Chat na direita (ocupa 2 espaços) -->
-            <div class="lg:col-span-2 relative">
-                <!-- Efeito brilhante no fundo do card -->
-                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-bruce rounded-3xl blur opacity-25"></div>
-                
-                <div class="relative bg-white rounded-3xl overflow-hidden shadow-premium flex flex-col h-[600px] border border-indigo-100">
-                    <livewire:bruce-chat />
-                </div>
-            </div>
+    <!-- ============================================
+         Widget flutuante BruceIA (bubble + painel)
+         ============================================ -->
+    <div
+        x-data="{
+            open: false,
+            init() {
+                this.$watch('open', v => {
+                    if (v) this.$nextTick(() => {
+                        const c = document.getElementById('bruce-chat-messages');
+                        if (c) c.scrollTop = c.scrollHeight;
+                    });
+                });
+            }
+        }"
+        x-on:bruce-open.window="open = true"
+        x-on:keydown.escape.window="open = false"
+        class="fixed bottom-6 right-6 z-50 font-sans"
+    >
+        <!-- Botão flutuante -->
+        <button
+            type="button"
+            @click="open = !open"
+            x-show="!open"
+            x-transition
+            class="group relative flex items-center justify-center w-16 h-16 rounded-full bg-[#0A0A0B] shadow-2xl shadow-[#0A0A0B]/40 hover:shadow-[#FF7A1A]/40 transition-all hover:scale-105"
+            aria-label="Abrir BruceIA"
+        >
+            <span class="absolute inset-0 rounded-full bg-[#FF7A1A]/20 animate-ping"></span>
+            <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="relative w-11 h-11">
+            <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF7A1A] opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-[#FF7A1A]"></span>
+            </span>
+        </button>
+
+        <!-- Painel flutuante -->
+        <div
+            x-show="open"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+            class="relative origin-bottom-right w-[calc(100vw-3rem)] sm:w-[380px] h-[70vh] sm:h-[560px] max-h-[calc(100vh-3rem)] bg-white rounded-3xl shadow-2xl shadow-[#0A0A0B]/25 border border-black/5 overflow-hidden flex flex-col"
+            style="display: none;"
+        >
+            <livewire:bruce-chat />
+            <button
+                type="button"
+                @click="open = false"
+                class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                aria-label="Fechar"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
     </div>
 </x-app-layout>
