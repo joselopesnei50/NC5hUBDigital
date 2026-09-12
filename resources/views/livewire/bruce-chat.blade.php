@@ -36,7 +36,8 @@
                         {{ $msg->content }}
                     </div>
                 </div>
-            @elseif($msg->role === 'assistant')
+            @elseif($msg->role === 'assistant' && trim($msg->content ?? '') !== '')
+                {{-- So renderiza se tem conteudo real; mensagens intermediarias de tool_calls (content=null) sao invisiveis pro cliente --}}
                 <div class="flex justify-start items-end gap-2">
                     <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="" class="w-8 h-8 shrink-0 mb-1">
                     <div class="max-w-[85%] bg-white border border-black/5 text-[#0A0A0B] px-4 py-3 rounded-2xl rounded-bl-md shadow-sm">
@@ -47,7 +48,7 @@
                                     prose-a:text-[#FF7A1A] prose-a:font-semibold
                                     prose-ul:my-2 prose-li:my-1
                                     prose-code:text-[#FF7A1A] prose-code:bg-[#F4F4F5] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
-                            {!! Str::markdown($msg->content ?? '') !!}
+                            {!! Str::markdown($msg->content) !!}
                         </div>
                     </div>
                 </div>
