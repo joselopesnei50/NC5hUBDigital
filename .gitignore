@@ -13,3 +13,14 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# Scripts ad-hoc / experimentos na raiz — nao versionar
+/test*.php
+/debug_*.php
+/fix_*.php
+/create_*.php
+/create_*.ps1
+/senha
+/*.txt
+/*.jpeg
+/*.png
