@@ -47,10 +47,12 @@ class BruceChat extends Component
         
         // ==========================================
         // GUARDRAIL FINANCEIRO (DISJUNTOR)
-        // Impede que um cliente faça o sistema torrar mais de 50.000 tokens em uma única sala
+        // Teto por conversa para nao estourar orcamento com um cliente
+        // que ficou horas trocando ideia. Ao atingir, o usuario clica em
+        // "Nova conversa" no cabecalho.
         // ==========================================
-        if ($conversation->accumulated_tokens > 50000) {
-            $this->addError('limit', 'Você atingiu o teto de consultas simultâneas deste bate-papo. Por favor, encerre e abra um novo chat.');
+        if ($conversation->accumulated_tokens > 200000) {
+            $this->addError('limit', 'Esta conversa acumulou muito histórico. Clique no botão ↻ no topo do chat para começar uma nova.');
             return;
         }
 

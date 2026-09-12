@@ -182,7 +182,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-            class="relative origin-bottom-right w-[calc(100vw-3rem)] sm:w-[380px] h-[70vh] sm:h-[560px] max-h-[calc(100vh-3rem)] bg-white rounded-3xl shadow-2xl shadow-[#0A0A0B]/25 border border-black/5 overflow-hidden flex flex-col"
+            class="relative origin-bottom-right w-[calc(100vw-2rem)] sm:w-[440px] lg:w-[480px] h-[80vh] sm:h-[680px] max-h-[calc(100vh-2rem)] bg-white rounded-3xl shadow-2xl shadow-[#0A0A0B]/25 border border-black/5 overflow-hidden flex flex-col"
             style="display: none;"
         >
             <livewire:bruce-chat />
