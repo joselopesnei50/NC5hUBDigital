@@ -41,7 +41,7 @@ class ConversationManager
      * Compila as memórias passadas do Chat e formata estritamente no padrão API da LLM.
      * Implementa a técnica "Sliding Window" para evitar pagar caro por histórico velho.
      */
-    public function buildContext(AgentConversation $conversation, int $limit = 10): array
+    public function buildContext(AgentConversation $conversation, int $limit = 20): array
     {
         // Pega somente as últimas N mensagens enviadas. O resto fica pra trás.
         $messages = $conversation->messages()
@@ -51,56 +51,76 @@ class ConversationManager
             ->reverse()
             ->values();
 
-        $history = [];
-
-        // Injeção de "Memória de Longo Prazo".
-        // Se a conversa for tão antiga que geramos um resumo (ex: "Vocês falaram sobre inadimplência antes"),
-        // injetamos isso silenciosamente como instrução System.
-        if ($conversation->summary !== null) {
-            $history[] = [
-                'role' => 'system',
-                'content' => "MEMÓRIA DA CONVERSA ANTIGA: " . $conversation->summary
-            ];
-        }
-
+        // Pass 1: normalizar cada msg em array no formato da API.
+        $items = [];
         foreach ($messages as $msg) {
-            $formattedMsg = [
+            $item = [
                 'role' => $msg->role,
                 'content' => $msg->content,
             ];
-
             if ($msg->tool_calls) {
-                $formattedMsg['tool_calls'] = $msg->tool_calls;
+                $item['tool_calls'] = $msg->tool_calls;
             }
-
             if ($msg->tool_call_id) {
-                $formattedMsg['tool_call_id'] = $msg->tool_call_id;
-                $formattedMsg['role'] = 'tool';
+                $item['tool_call_id'] = $msg->tool_call_id;
+                $item['role'] = 'tool';
+            }
+            $items[] = $item;
+        }
 
-                // GUARDRAIL API: uma msg role=tool so eh valida se a anterior for
-                // assistant com tool_calls. Se o slice de $limit cortou no meio de
-                // um bloco tool, a tool response fica orfa e o DeepSeek devolve 400.
-                $last = end($history);
+        // Pass 2: para cada assistant com tool_calls, exigir que TODAS as suas
+        // tool responses (uma por tool_call.id) apareçam imediatamente depois.
+        // Se faltar alguma, remove o bloco inteiro (assistant + qualquer tool response
+        // parcial). Também remove tool responses órfãs no início.
+        $safe = [];
+        $i = 0;
+        while ($i < count($items)) {
+            $item = $items[$i];
+
+            // Tool response so eh valida se a ultima em $safe for assistant com tool_calls
+            if ($item['role'] === 'tool') {
+                $last = end($safe);
                 if (!$last || $last['role'] !== 'assistant' || empty($last['tool_calls'] ?? null)) {
+                    $i++;
                     continue;
                 }
             }
 
-            $history[] = $formattedMsg;
-        }
+            // Assistant com tool_calls: verificar se todos os IDs tem tool response na sequencia
+            if ($item['role'] === 'assistant' && !empty($item['tool_calls'] ?? null)) {
+                $requiredIds = array_filter(array_map(
+                    fn ($tc) => $tc['id'] ?? null,
+                    $item['tool_calls']
+                ));
 
-        // GUARDRAIL API: assistant com tool_calls precisa ter tool response(s) depois.
-        // Se o loop terminou com um tool_call solto no final, remove — a proxima rodada
-        // do while do BruceConversation vai reperguntar do zero de forma valida.
-        while (!empty($history)) {
-            $last = end($history);
-            if ($last['role'] === 'assistant' && !empty($last['tool_calls'] ?? null)) {
-                array_pop($history);
-                continue;
+                $j = $i + 1;
+                $foundIds = [];
+                while ($j < count($items) && $items[$j]['role'] === 'tool') {
+                    $foundIds[] = $items[$j]['tool_call_id'] ?? null;
+                    $j++;
+                }
+
+                $missing = array_diff($requiredIds, array_filter($foundIds));
+                if (!empty($missing)) {
+                    // Pula o assistant e todas as tool responses parciais
+                    $i = $j;
+                    continue;
+                }
             }
-            break;
+
+            $safe[] = $item;
+            $i++;
         }
 
-        return $history;
+        // Prefixa com memoria de longo prazo (se houver)
+        $history = [];
+        if ($conversation->summary !== null) {
+            $history[] = [
+                'role' => 'system',
+                'content' => "MEMÓRIA DA CONVERSA ANTIGA: " . $conversation->summary,
+            ];
+        }
+
+        return array_merge($history, $safe);
     }
 }
