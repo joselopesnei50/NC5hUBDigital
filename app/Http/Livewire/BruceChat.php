@@ -15,13 +15,15 @@ class BruceChat extends Component
 
     public function mount()
     {
-        // Se já existir uma conversa ativa hoje, ele a reaproveita para manter o contexto.
+        // A tabela users nao tem cliente_id. O vinculo eh clientes.user_id
+        // via hasOne, entao pegamos o cliente pela relacao.
         $user = Auth::user();
-        
-        if ($user && $user->cliente_id) {
+        $cliente = $user?->cliente;
+
+        if ($user && $cliente) {
             $conversation = AgentConversation::firstOrCreate(
                 [
-                    'cliente_id' => $user->cliente_id,
+                    'cliente_id' => $cliente->id,
                     'user_id' => $user->id,
                     'status' => 'active'
                 ],
