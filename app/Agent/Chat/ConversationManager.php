@@ -72,14 +72,33 @@ class ConversationManager
             if ($msg->tool_calls) {
                 $formattedMsg['tool_calls'] = $msg->tool_calls;
             }
+
             if ($msg->tool_call_id) {
                 $formattedMsg['tool_call_id'] = $msg->tool_call_id;
-                // Para respostas de ferramenta, alguns LLMs pedem role="tool" e sem name, 
-                // já o formato OpenAI e Deepseek exigem que seja role tool com id
                 $formattedMsg['role'] = 'tool';
+
+                // GUARDRAIL API: uma msg role=tool so eh valida se a anterior for
+                // assistant com tool_calls. Se o slice de $limit cortou no meio de
+                // um bloco tool, a tool response fica orfa e o DeepSeek devolve 400.
+                $last = end($history);
+                if (!$last || $last['role'] !== 'assistant' || empty($last['tool_calls'] ?? null)) {
+                    continue;
+                }
             }
 
             $history[] = $formattedMsg;
+        }
+
+        // GUARDRAIL API: assistant com tool_calls precisa ter tool response(s) depois.
+        // Se o loop terminou com um tool_call solto no final, remove — a proxima rodada
+        // do while do BruceConversation vai reperguntar do zero de forma valida.
+        while (!empty($history)) {
+            $last = end($history);
+            if ($last['role'] === 'assistant' && !empty($last['tool_calls'] ?? null)) {
+                array_pop($history);
+                continue;
+            }
+            break;
         }
 
         return $history;
