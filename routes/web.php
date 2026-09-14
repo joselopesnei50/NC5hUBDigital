@@ -161,6 +161,14 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::resource('conhecimento', \App\Http\Controllers\Customer\KnowledgeController::class)
         ->names('customer.conhecimento')
         ->except(['show']);
+
+    // Alertas proativos do Bruce
+    Route::get('alertas', [\App\Http\Controllers\Customer\AlertsController::class, 'index'])
+        ->name('customer.alertas.index');
+    Route::post('alertas/{alerta}/lido', [\App\Http\Controllers\Customer\AlertsController::class, 'marcarLido'])
+        ->name('customer.alertas.lido');
+    Route::post('alertas/{alerta}/dispensar', [\App\Http\Controllers\Customer\AlertsController::class, 'dispensar'])
+        ->name('customer.alertas.dispensar');
 });
 
 require __DIR__.'/auth.php';

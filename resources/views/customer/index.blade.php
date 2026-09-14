@@ -40,6 +40,51 @@
         </a>
         @endif
 
+        @if($alertasAtivosTotal > 0)
+        @php
+            $sevMap = [
+                'critico' => ['bg' => 'bg-rose-50', 'border' => 'border-rose-200', 'dot' => 'bg-rose-500', 'label' => 'Crítico', 'labelBg' => 'bg-rose-100 text-rose-700'],
+                'atencao' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-200', 'dot' => 'bg-amber-500', 'label' => 'Atenção', 'labelBg' => 'bg-amber-100 text-amber-800'],
+                'info'    => ['bg' => 'bg-sky-50',   'border' => 'border-sky-200',   'dot' => 'bg-sky-500',  'label' => 'Info',    'labelBg' => 'bg-sky-100 text-sky-800'],
+            ];
+        @endphp
+        <!-- Widget: Alertas do Bruce -->
+        <section class="bg-white border border-black/5 rounded-3xl p-5 sm:p-6 shadow-sm">
+            <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="Bruce" class="w-9 h-9">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-bruce">Alertas do Bruce</p>
+                        <p class="font-display font-bold text-ink text-lg leading-tight">{{ $alertasAtivosTotal }} {{ Str::plural('coisa', $alertasAtivosTotal) }} que merecem sua atenção</p>
+                    </div>
+                </div>
+                <a href="{{ route('customer.alertas.index') }}" class="text-xs font-bold uppercase tracking-wider text-bruce hover:text-ink transition-colors">
+                    Ver todos →
+                </a>
+            </div>
+
+            <div class="space-y-2">
+                @foreach($alertasAtivos as $a)
+                    @php $s = $sevMap[$a->severidade] ?? $sevMap['info']; @endphp
+                    <a href="{{ route('customer.alertas.index') }}" class="block {{ $s['bg'] }} border {{ $s['border'] }} rounded-2xl p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-start gap-3">
+                            <span class="mt-1.5 w-2 h-2 rounded-full {{ $s['dot'] }} shrink-0"></span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <span class="inline-flex text-[10px] font-bold uppercase tracking-wider {{ $s['labelBg'] }} px-1.5 py-0.5 rounded-full">
+                                        {{ $s['label'] }}
+                                    </span>
+                                    <span class="text-xs text-slate">{{ $a->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="font-display font-bold text-ink text-sm">{{ $a->titulo }}</p>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </section>
+        @endif
+
         <!-- KPIs -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div class="bg-white p-6 rounded-2xl border border-black/5 shadow-sm">

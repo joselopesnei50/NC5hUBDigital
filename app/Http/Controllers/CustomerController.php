@@ -22,7 +22,22 @@ class CustomerController extends Controller
         $materiaisAguardando = $cliente->materiais()->where('status_aprovacao', 'pendente')->count();
         $contratosPendentes = $cliente->contratos()->where('status_assinatura', '!=', 'assinado')->count();
 
-        return view('customer.index', compact('cliente', 'faturasPendentes', 'materiaisAguardando', 'contratosPendentes'));
+        // Alertas proativos do Bruce ainda ativos (nao dispensados)
+        $alertasAtivos = \App\Models\AgentAlert::doCliente($cliente->id)
+            ->ativos()
+            ->latest()
+            ->limit(3)
+            ->get();
+        $alertasAtivosTotal = \App\Models\AgentAlert::doCliente($cliente->id)->ativos()->count();
+
+        return view('customer.index', compact(
+            'cliente',
+            'faturasPendentes',
+            'materiaisAguardando',
+            'contratosPendentes',
+            'alertasAtivos',
+            'alertasAtivosTotal'
+        ));
     }
 
     public function contracts()
