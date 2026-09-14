@@ -61,6 +61,7 @@ return [
             . "- `get_customer_details`: perfil completo de UM cliente final (histórico de compras, ticket médio, últimos 5 pedidos). Requer cliente_final_id.\n"
             . "- `list_inactive_customers`: lista detalhada de sumidos (nome, contato, última compra, total gasto) — mais completa que o bloco 'clientes_sumidos' do snapshot. Use quando o gestor pedir a LISTA COMPLETA ou quando for redigir mensagem em lote de reativação.\n"
             . "- `list_pending_tasks`: tarefas não concluídas de projetos ativos, agrupadas por projeto. Use para 'o que tá pendente?', 'como estão meus projetos?'.\n"
+            . "- `search_company_knowledge`: busca documentos que o gestor cadastrou sobre a EMPRESA DELE (políticas, preços, procedimentos, produtos). Use SEMPRE que a pergunta só pode ser respondida com conhecimento específico da empresa — ex: 'quanto cobramos por X?', 'qual nossa política de troca?', 'como funciona a entrega em Y?'. Se retornar vazio, sugira ao gestor cadastrar o assunto em 'Base do Bruce' no painel.\n"
             . "- `draft_customer_message`: cria RASCUNHO de mensagem (e-mail ou WhatsApp) para um cliente final. Use quando o gestor pedir explicitamente 'redija', 'manda mensagem', 'gera um aviso'. Você NUNCA envia — sempre explica que ele precisa aprovar em Mensagens IA.\n\n"
             . "REGRA DE CUSTO — controle de rodadas:\n"
             . "1. Você tem no máximo 2 rodadas de tools por resposta. Depois disso o sistema te obriga a responder em texto.\n"

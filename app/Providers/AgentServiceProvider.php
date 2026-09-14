@@ -22,6 +22,7 @@ use App\Agent\Chat\Tools\GetCashFlowTool;
 use App\Agent\Chat\Tools\GetCustomerDetailsTool;
 use App\Agent\Chat\Tools\ListInactiveCustomersTool;
 use App\Agent\Chat\Tools\ListPendingTasksTool;
+use App\Agent\Chat\Tools\SearchCompanyKnowledgeTool;
 
 class AgentServiceProvider extends ServiceProvider
 {
@@ -62,6 +63,8 @@ class AgentServiceProvider extends ServiceProvider
             $registry->register($app->make(ListInactiveCustomersTool::class));
             // Operação
             $registry->register($app->make(ListPendingTasksTool::class));
+            // Conhecimento da empresa (RAG do cliente)
+            $registry->register($app->make(SearchCompanyKnowledgeTool::class));
             // Ação
             $registry->register($app->make(DraftCustomerMessageTool::class));
             return $registry;
