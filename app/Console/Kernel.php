@@ -15,7 +15,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Bruce proativo: analisa todos os clientes 1x por dia as 08:30
+        // e emite alertas (com dedup interno para nao repetir enquanto o
+        // alerta anterior nao for dispensado pelo gestor).
+        $schedule->command('bruce:proactive-alerts')
+                 ->dailyAt('08:30')
+                 ->withoutOverlapping()
+                 ->onOneServer();
     }
 
     /**
