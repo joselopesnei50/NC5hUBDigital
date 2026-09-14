@@ -156,6 +156,11 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('mensagens-ia', [\App\Http\Controllers\Customer\AgentDraftController::class, 'index'])->name('customer.agent-drafts.index');
     Route::post('mensagens-ia/{draft}/approve', [\App\Http\Controllers\Customer\AgentDraftController::class, 'approve'])->name('customer.agent-drafts.approve');
     Route::post('mensagens-ia/{draft}/discard', [\App\Http\Controllers\Customer\AgentDraftController::class, 'discard'])->name('customer.agent-drafts.discard');
+
+    // Base de Conhecimento do Bruce (RAG do cliente)
+    Route::resource('conhecimento', \App\Http\Controllers\Customer\KnowledgeController::class)
+        ->names('customer.conhecimento')
+        ->except(['show']);
 });
 
 require __DIR__.'/auth.php';
