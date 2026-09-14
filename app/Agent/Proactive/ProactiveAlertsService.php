@@ -18,27 +18,28 @@ class ProactiveAlertsService
 
     /**
      * Roda a analise proativa para UM tenant.
-     * Retorna quantos alertas foram criados (novos, apos dedup).
+     * Retorna a colecao dos AgentAlert efetivamente criados nesta rodada
+     * (apos dedup). Usada pelo command para disparar email quando ha criticos.
      */
-    public function analyzeTenant(int $tenantId, int $periodDays = 30): int
+    public function analyzeTenant(int $tenantId, int $periodDays = 30): \Illuminate\Support\Collection
     {
         try {
             $snapshot = $this->snapshotBuilder->build($tenantId, $periodDays);
         } catch (Throwable $e) {
             Log::warning('[ProactiveAlerts] snapshot falhou cliente=' . $tenantId . ' erro=' . $e->getMessage());
-            return 0;
+            return collect();
         }
 
         $metricas = $snapshot['metricas'] ?? [];
         $candidatos = $this->runRules($metricas);
-        $criados = 0;
+        $criados = collect();
 
         foreach ($candidatos as $c) {
             if ($this->jaExiste($tenantId, $c['tipo'])) {
                 continue;
             }
 
-            AgentAlert::create([
+            $alerta = AgentAlert::create([
                 'cliente_id' => $tenantId,
                 'tipo' => $c['tipo'],
                 'severidade' => $c['severidade'],
@@ -46,7 +47,7 @@ class ProactiveAlertsService
                 'mensagem' => $c['mensagem'],
                 'detalhes' => $c['detalhes'] ?? null,
             ]);
-            $criados++;
+            $criados->push($alerta);
         }
 
         return $criados;
