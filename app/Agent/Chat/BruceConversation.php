@@ -38,11 +38,17 @@ class BruceConversation
         $availableTools = $this->tools->getToolsForLlm();
 
         $turnCount = 0;
-        $toolsAlreadyRan = false;
+        $toolRoundsUsed = 0;
 
         // GUARDRAIL #2: LIMITE DE RECURSÃO (CUSTO)
         // Impede que o modelo entre num loop infinito conversando consigo mesmo.
         $maxTurns = 6;
+
+        // GUARDRAIL #3: TETO DE RODADAS DE TOOL_CALLS.
+        // Damos folga para sequencias legitimas (ex: listar sumidos e depois
+        // redigir mensagens em lote), mas apos 2 rodadas com tools forcamos
+        // texto final via tool_choice=none. Sem confiar no prompt.
+        $maxToolRounds = 2;
 
         while ($turnCount < $maxTurns) {
             $turnCount++;
@@ -50,11 +56,7 @@ class BruceConversation
             // 2. Compila as memórias curtas (Janela Deslizante) para o LLM
             $history = $this->memory->buildContext($conversation);
 
-            // GUARDRAIL #3: NO SEGUNDO TURNO EM DIANTE, PROIBE NOVAS TOOL CALLS.
-            // Se o modelo ja consumiu uma rodada de tools, forcamos texto final.
-            // Isso quebra qualquer tentativa de loop (chamar tool > ver resultado >
-            // chamar tool de novo) direto na API, sem depender do prompt.
-            $toolChoice = $toolsAlreadyRan ? 'none' : null;
+            $toolChoice = $toolRoundsUsed >= $maxToolRounds ? 'none' : null;
 
             $payload = new PromptPayload(
                 systemPrompt: $systemPrompt,
@@ -78,7 +80,7 @@ class BruceConversation
 
             // 4. Decisão de Ação (Tool Calling)
             if (!empty($response->toolCalls)) {
-                $toolsAlreadyRan = true;
+                $toolRoundsUsed++;
 
                 // O assistente decidiu chamar uma ou mais ferramentas. Gravamos essa intenção.
                 $this->memory->addMessage(

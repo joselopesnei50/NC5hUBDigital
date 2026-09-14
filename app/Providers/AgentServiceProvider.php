@@ -19,6 +19,9 @@ use App\Agent\Chat\ToolRegistry;
 use App\Agent\Chat\Tools\DraftCustomerMessageTool;
 use App\Agent\Chat\Tools\GetBusinessSnapshotTool;
 use App\Agent\Chat\Tools\GetCashFlowTool;
+use App\Agent\Chat\Tools\GetCustomerDetailsTool;
+use App\Agent\Chat\Tools\ListInactiveCustomersTool;
+use App\Agent\Chat\Tools\ListPendingTasksTool;
 
 class AgentServiceProvider extends ServiceProvider
 {
@@ -50,8 +53,16 @@ class AgentServiceProvider extends ServiceProvider
         // seja usado em toda requisição — e para o Bruce conseguir listá-las.
         $this->app->singleton(ToolRegistry::class, function ($app) {
             $registry = new ToolRegistry();
+            // Snapshot 360 (perguntas amplas)
             $registry->register($app->make(GetBusinessSnapshotTool::class));
+            // Recorte financeiro estreito
             $registry->register($app->make(GetCashFlowTool::class));
+            // Zoom em cliente ou lote pra reativação
+            $registry->register($app->make(GetCustomerDetailsTool::class));
+            $registry->register($app->make(ListInactiveCustomersTool::class));
+            // Operação
+            $registry->register($app->make(ListPendingTasksTool::class));
+            // Ação
             $registry->register($app->make(DraftCustomerMessageTool::class));
             return $registry;
         });
