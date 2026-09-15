@@ -54,16 +54,17 @@ class DeepSeekDriver implements LlmDriver
         $requestData = [
             'model' => $this->model,
             'messages' => $messages,
-            'response_format' => ['type' => 'json_object'],
         ];
 
-        if ($payload->tools !== null) {
+        // Force json_object only if explicitly requested in prompt to avoid 400 errors or hallucinations in Chat
+        if (stripos($payload->systemPrompt, 'SCHEMA JSON ABAIXO') !== false) {
+            $requestData['response_format'] = ['type' => 'json_object'];
+        }
+
+        if ($payload->tools !== null && $payload->toolChoice !== 'none') {
             $requestData['tools'] = $payload->tools;
-            // Desativa json_object force quando usando tools, pois a API pode conflitar
             unset($requestData['response_format']);
 
-            // Permite ao orquestrador forcar "none" (proibir novas tools) em turnos
-            // subsequentes, quebrando qualquer tentativa de loop de tool_calls.
             if ($payload->toolChoice !== null) {
                 $requestData['tool_choice'] = $payload->toolChoice;
             }
@@ -71,6 +72,7 @@ class DeepSeekDriver implements LlmDriver
 
         try {
             $response = Http::withToken($this->apiKey)
+                ->withOptions(['curl' => [\CURLOPT_IPRESOLVE => \CURL_IPRESOLVE_V4]])
                 ->baseUrl($this->baseUrl)
                 ->timeout($this->timeout)
                 ->retry(2, 1000) // Tenta novamente 2 vezes caso a API de IA engasgue (backoff de 1 seg)

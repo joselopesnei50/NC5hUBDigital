@@ -109,7 +109,7 @@ class ProactiveAlertsService
 
         foreach ($topClientes as $top) {
             $topId = (int) ($top['cliente_final_id'] ?? 0);
-            if ($topId && in_array($topId, $sumidosIds, true)) {
+            if ($topId && in_array($topId, $sumidosIds)) {
                 $alertas[] = [
                     'tipo' => 'top_cliente_sumido_' . $topId,
                     'severidade' => 'atencao',

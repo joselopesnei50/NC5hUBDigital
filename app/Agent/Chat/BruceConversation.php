@@ -39,16 +39,16 @@ class BruceConversation
         // reentrancy. Reprocessar duplicaria o custo de LLM, o registro no
         // banco e criaria o efeito "mensagem sendo inserida sozinha" no
         // painel. Aborta silenciosamente e devolve o que ja existir depois.
-        $ultima = $conversation->messages()->orderBy('id', 'desc')->first();
-        if ($ultima && $ultima->role === 'user' && $ultima->content === $userMessage) {
+        $ultimoUser = $conversation->messages()->where('role', 'user')->orderBy('id', 'desc')->first();
+        if ($ultimoUser && $ultimoUser->content === $userMessage && $ultimoUser->created_at->diffInSeconds(now()) < 120) {
             Log::warning('[Bruce Orquestrador] handleTurn duplicado ignorado', [
                 'conversation_id' => $conversation->id,
-                'last_message_id' => $ultima->id,
+                'last_message_id' => $ultimoUser->id,
             ]);
             $resposta = $conversation->messages()
                 ->where('role', 'assistant')
                 ->whereNotNull('content')
-                ->where('id', '>', $ultima->id)
+                ->where('id', '>', $ultimoUser->id)
                 ->orderBy('id', 'desc')
                 ->value('content');
             return $resposta ?? '';
