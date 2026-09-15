@@ -31,6 +31,29 @@ class BruceConversation
         // ==========================================
         $tenantId = $conversation->cliente_id;
 
+        // GUARDRAIL #0: IDEMPOTENCIA POR TURNO.
+        // Se a ULTIMA mensagem gravada nessa conversa ja for user com o mesmo
+        // texto, significa que este handleTurn esta sendo re-disparado antes
+        // do turno anterior fechar: pode ser reverse-proxy retentando o POST
+        // do Livewire por timeout, double-click do usuario ou qualquer outro
+        // reentrancy. Reprocessar duplicaria o custo de LLM, o registro no
+        // banco e criaria o efeito "mensagem sendo inserida sozinha" no
+        // painel. Aborta silenciosamente e devolve o que ja existir depois.
+        $ultima = $conversation->messages()->orderBy('id', 'desc')->first();
+        if ($ultima && $ultima->role === 'user' && $ultima->content === $userMessage) {
+            Log::warning('[Bruce Orquestrador] handleTurn duplicado ignorado', [
+                'conversation_id' => $conversation->id,
+                'last_message_id' => $ultima->id,
+            ]);
+            $resposta = $conversation->messages()
+                ->where('role', 'assistant')
+                ->whereNotNull('content')
+                ->where('id', '>', $ultima->id)
+                ->orderBy('id', 'desc')
+                ->value('content');
+            return $resposta ?? '';
+        }
+
         // 1. O usuário falou: Gravemos na memória.
         $this->memory->addMessage($conversation, 'user', $userMessage);
 
