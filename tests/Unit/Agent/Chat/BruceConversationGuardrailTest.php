@@ -103,11 +103,13 @@ class BruceConversationGuardrailTest extends TestCase
             'conversation_id' => $conversation->id,
             'role' => 'user',
             'content' => 'quanto entrou hoje?',
+            'created_at' => now()->subMinutes(3),
         ]);
         \App\Models\AgentMessage::create([
             'conversation_id' => $conversation->id,
             'role' => 'assistant',
             'content' => 'Entraram R$ 1.200 no caixa.',
+            'created_at' => now()->subMinutes(3),
         ]);
 
         $mockDriver = $this->createMock(LlmDriver::class);
