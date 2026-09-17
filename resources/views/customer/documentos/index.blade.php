@@ -13,8 +13,16 @@
         <div class="lg:col-span-1">
             <div class="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/50 sticky top-6">
                 <h3 class="font-bold text-lg text-[#0A1128] mb-4">Enviar Novo Arquivo</h3>
-                
-                <form action="{{ route('customer.documentos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+
+                @if($errors->any())
+                    <div class="mb-4 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('customer.documentos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4" x-data="{ arquivoNome: '' }">
                     @csrf
                     
                     <div>
@@ -41,11 +49,13 @@
                                 </svg>
                                 <div class="flex text-sm text-slate-600 justify-center">
                                     <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-[#FF7A1A] hover:text-orange-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#FF7A1A]">
-                                        <span>Fazer Upload</span>
-                                        <input id="file-upload" name="arquivo" type="file" class="sr-only" required>
+                                        <span x-text="arquivoNome ? 'Trocar arquivo' : 'Fazer Upload'">Fazer Upload</span>
+                                        <input id="file-upload" name="arquivo" type="file" class="sr-only" required
+                                               x-on:change="arquivoNome = $event.target.files[0] ? $event.target.files[0].name : ''">
                                     </label>
                                 </div>
-                                <p class="text-xs text-slate-500">PDF, DOC, XLS, PNG ou JPG até 10MB</p>
+                                <p x-show="arquivoNome" x-text="arquivoNome" style="display:none" class="text-sm font-bold text-[#0A1128] mt-2 break-all"></p>
+                                <p x-show="!arquivoNome" class="text-xs text-slate-500">PDF, DOC, XLS, PNG ou JPG até 10MB</p>
                             </div>
                         </div>
                     </div>
