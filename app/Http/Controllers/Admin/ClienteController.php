@@ -45,7 +45,7 @@ class ClienteController extends Controller
             'role'     => 'cliente',
         ]);
 
-        Cliente::create([
+        $cliente = Cliente::create([
             'user_id'      => $user->id,
             'tipo_pessoa'  => $request->tipo_pessoa,
             'cpf_cnpj'     => $request->cpf_cnpj,
@@ -53,6 +53,9 @@ class ClienteController extends Controller
             'telefone'     => $request->telefone,
             'status'       => 'ativo',
         ]);
+
+        // Vincula o owner ao próprio cliente pra habilitar múltiplos usuários no painel
+        $user->update(['cliente_id' => $cliente->id]);
 
         // Envia e-mail de boas-vindas com a senha temporária
         $emailEnviado = false;
@@ -74,8 +77,61 @@ class ClienteController extends Controller
 
     public function show($id)
     {
-        $cliente = Cliente::with(['user', 'contratos', 'faturas', 'materiais', 'tickets'])->findOrFail($id);
+        $cliente = Cliente::with(['user', 'users', 'contratos', 'faturas', 'materiais', 'tickets'])->findOrFail($id);
         return view('admin.clientes.show', compact('cliente'));
+    }
+
+    public function usersStore(Request $request, Cliente $cliente)
+    {
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+        ]);
+
+        if ($cliente->users()->count() >= Cliente::MAX_USERS_PAINEL) {
+            return back()->with('error', 'Limite de ' . Cliente::MAX_USERS_PAINEL . ' usuários por cliente atingido.');
+        }
+
+        $senhaTemp = Str::random(10);
+        $user = User::create([
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'password'   => Hash::make($senhaTemp),
+            'role'       => 'cliente',
+            'cliente_id' => $cliente->id,
+        ]);
+
+        $emailEnviado = false;
+        try {
+            Mail::to($user->email)->send(new ContaClienteCriadaMail($user, $senhaTemp));
+            $emailEnviado = true;
+        } catch (\Throwable $e) {
+            Log::error('Falha ao enviar e-mail pro usuário extra ' . $user->email . ': ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.clientes.show', $cliente->id)
+            ->with('usuario_criado', [
+                'nome'          => $user->name,
+                'email'         => $user->email,
+                'senha'         => $senhaTemp,
+                'email_enviado' => $emailEnviado,
+            ]);
+    }
+
+    public function usersDestroy(Cliente $cliente, User $user)
+    {
+        if ((int) $user->cliente_id !== (int) $cliente->id) {
+            abort(404);
+        }
+
+        if ((int) $cliente->user_id === (int) $user->id) {
+            return back()->with('error', 'O usuário titular do cliente não pode ser removido por aqui. Edite o cadastro do cliente.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.clientes.show', $cliente->id)
+            ->with('success', 'Usuário removido do painel do cliente.');
     }
 
     public function edit($id)

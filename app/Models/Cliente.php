@@ -16,6 +16,13 @@ class Cliente extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public const MAX_USERS_PAINEL = 5;
+
     public function contratos()
     {
         return $this->hasMany(Contrato::class);

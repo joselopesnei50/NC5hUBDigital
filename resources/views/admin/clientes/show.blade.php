@@ -54,7 +54,112 @@
 
         <!-- Coluna da Direita (Dados Conectados) -->
         <div class="lg:col-span-2 space-y-6">
-            
+
+            @if(session('usuario_criado'))
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+                    <p class="text-sm font-bold text-emerald-800 mb-2">Novo usuário criado</p>
+                    <p class="text-sm text-emerald-900">{{ session('usuario_criado.nome') }} — {{ session('usuario_criado.email') }}</p>
+                    <p class="text-sm text-emerald-900 mt-1">Senha temporária: <span class="font-mono font-bold">{{ session('usuario_criado.senha') }}</span></p>
+                    <p class="text-xs text-emerald-700 mt-2">
+                        @if(session('usuario_criado.email_enviado'))
+                            E-mail de boas-vindas enviado.
+                        @else
+                            Falha no envio do e-mail — repassar a senha manualmente.
+                        @endif
+                    </p>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-800">{{ session('error') }}</div>
+            @endif
+
+            @if(session('success'))
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-sm text-emerald-800">{{ session('success') }}</div>
+            @endif
+
+            <!-- Usuários do Painel -->
+            @php
+                $usuariosDoPainel = $cliente->users;
+                $limiteUsuarios = \App\Models\Cliente::MAX_USERS_PAINEL;
+                $podeAdicionar = $usuariosDoPainel->count() < $limiteUsuarios;
+            @endphp
+            <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm" x-data="{ modalUsuario: false }">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="font-bold text-[#0A1128] flex items-center gap-2">
+                        <svg class="w-5 h-5 text-[#8A8F9C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-5.13a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Usuários do Painel ({{ $usuariosDoPainel->count() }}/{{ $limiteUsuarios }})
+                    </h3>
+                    @if($podeAdicionar)
+                        <button @click="modalUsuario = true" class="text-xs font-bold text-[#FF7A1A] hover:text-[#0A1128] uppercase transition-colors">+ Adicionar Usuário</button>
+                    @else
+                        <span class="text-xs font-bold text-[#8A8F9C] uppercase">Limite atingido</span>
+                    @endif
+                </div>
+                <ul class="divide-y divide-gray-100">
+                    @forelse($usuariosDoPainel as $u)
+                        @php $isOwner = (int) $u->id === (int) $cliente->user_id; @endphp
+                        <li class="p-4 flex items-center justify-between hover:bg-gray-50">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="font-bold text-sm text-[#0A1128]">{{ $u->name }}</p>
+                                    @if($isOwner)
+                                        <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-[#0A1128] text-white uppercase">Titular</span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-[#8A8F9C]">{{ $u->email }}</p>
+                            </div>
+                            @if(!$isOwner)
+                                <form action="{{ route('admin.clientes.usuarios.destroy', [$cliente->id, $u->id]) }}" method="POST" onsubmit="return confirm('Remover este usuário do painel do cliente?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-800 uppercase">Remover</button>
+                                </form>
+                            @endif
+                        </li>
+                    @empty
+                        <li class="p-6 text-center text-sm text-[#8A8F9C]">Nenhum usuário vinculado ainda.</li>
+                    @endforelse
+                </ul>
+
+                <!-- Modal Novo Usuário -->
+                <div x-show="modalUsuario" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div x-show="modalUsuario" x-transition class="fixed inset-0 bg-[#0A1128] bg-opacity-75 transition-opacity" @click="modalUsuario = false"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                        <div x-show="modalUsuario" x-transition class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                            <form action="{{ route('admin.clientes.usuarios.store', $cliente->id) }}" method="POST" class="p-8">
+                                @csrf
+                                <h3 class="text-2xl font-bold text-[#0A1128] mb-2">Novo Usuário do Painel</h3>
+                                <p class="text-sm text-[#8A8F9C] mb-6">Limite de {{ $limiteUsuarios }} usuários por cliente. Uma senha temporária será gerada e enviada por e-mail.</p>
+
+                                @if($errors->any())
+                                    <ul class="mb-4 text-sm text-red-700 list-disc list-inside">
+                                        @foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach
+                                    </ul>
+                                @endif
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-bold text-[#0A1128] mb-1">Nome</label>
+                                        <input type="text" name="name" required value="{{ old('name') }}" class="w-full rounded-xl border-gray-300 focus:border-[#0A1128] focus:ring-[#0A1128]">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-[#0A1128] mb-1">E-mail</label>
+                                        <input type="email" name="email" required value="{{ old('email') }}" class="w-full rounded-xl border-gray-300 focus:border-[#0A1128] focus:ring-[#0A1128]">
+                                    </div>
+                                </div>
+
+                                <div class="mt-8 flex justify-end gap-3">
+                                    <button type="button" @click="modalUsuario = false" class="px-6 py-2.5 bg-white border border-gray-300 rounded-xl text-sm font-bold text-[#0A1128] hover:bg-gray-50">Cancelar</button>
+                                    <button type="submit" class="px-6 py-2.5 bg-[#0A1128] text-white rounded-xl text-sm font-bold hover:bg-[#FF7A1A] transition-colors shadow-lg">Criar usuário</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Contratos e Faturas -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Contratos -->

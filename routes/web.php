@@ -41,7 +41,11 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
     Route::resource('clientes', \App\Http\Controllers\Admin\ClienteController::class);
-    
+
+    // Usuários do painel do cliente (limite 5)
+    Route::post('clientes/{cliente}/usuarios', [\App\Http\Controllers\Admin\ClienteController::class, 'usersStore'])->name('clientes.usuarios.store');
+    Route::delete('clientes/{cliente}/usuarios/{user}', [\App\Http\Controllers\Admin\ClienteController::class, 'usersDestroy'])->name('clientes.usuarios.destroy');
+
     // Briefings no painel Admin (criar e visualizar resposta)
     Route::post('clientes/{cliente}/briefings', [\App\Http\Controllers\Admin\BriefingController::class, 'store'])->name('clientes.briefings.store');
     

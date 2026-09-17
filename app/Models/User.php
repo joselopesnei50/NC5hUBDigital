@@ -22,11 +22,17 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'cliente_id',
     ];
 
     public function cliente()
     {
-        return $this->hasOne(Cliente::class);
+        return $this->belongsTo(Cliente::class);
+    }
+
+    public function isClienteOwner(): bool
+    {
+        return $this->cliente && (int) $this->cliente->user_id === (int) $this->id;
     }
 
     /**
