@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cliente;
 use App\Models\Pagina;
 use App\Models\Post;
 use App\Models\Servico;
@@ -14,7 +15,11 @@ class PublicController extends Controller
         $posts = Post::where('status', 'publicado')->latest()->take(3)->get();
         $servicos = Servico::where('status', 'ativo')->take(3)->get();
         $paginaHome = Pagina::where('slug', 'home')->where('status', 'publicado')->first();
-        return view('public.home', compact('posts', 'servicos', 'paginaHome'));
+        $clientesVitrine = Cliente::where('exibir_home', true)
+            ->whereNotNull('logo_public_path')
+            ->orderBy('razao_social')
+            ->get();
+        return view('public.home', compact('posts', 'servicos', 'paginaHome', 'clientesVitrine'));
     }
 
     public function blog()

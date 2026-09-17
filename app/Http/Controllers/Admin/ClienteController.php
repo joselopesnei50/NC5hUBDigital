@@ -152,6 +152,9 @@ class ClienteController extends Controller
             'razao_social' => 'required|string',
             'telefone' => 'nullable|string',
             'status' => 'required|in:ativo,inativo',
+            'logo_public' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+            'exibir_home' => 'nullable|boolean',
+            'remover_logo' => 'nullable|boolean',
         ]);
 
         $cliente->user->update([
@@ -159,13 +162,28 @@ class ClienteController extends Controller
             'email' => $request->email,
         ]);
 
-        $cliente->update([
+        $dados = [
             'tipo_pessoa' => $request->tipo_pessoa,
             'cpf_cnpj' => $request->cpf_cnpj,
             'razao_social' => $request->razao_social,
             'telefone' => $request->telefone,
             'status' => $request->status,
-        ]);
+            'exibir_home' => $request->boolean('exibir_home'),
+        ];
+
+        if ($request->boolean('remover_logo') && $cliente->logo_public_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($cliente->logo_public_path);
+            $dados['logo_public_path'] = null;
+        }
+
+        if ($request->hasFile('logo_public')) {
+            if ($cliente->logo_public_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($cliente->logo_public_path);
+            }
+            $dados['logo_public_path'] = $request->file('logo_public')->store('logos-clientes', 'public');
+        }
+
+        $cliente->update($dados);
 
         return redirect()->route('admin.clientes.show', $cliente->id)
                          ->with('success', 'Cliente atualizado com sucesso.');

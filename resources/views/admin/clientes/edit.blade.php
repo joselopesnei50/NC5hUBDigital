@@ -20,7 +20,7 @@
     @endif
 
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 max-w-3xl">
-        <form action="{{ route('admin.clientes.update', $cliente->id) }}" method="POST">
+        <form action="{{ route('admin.clientes.update', $cliente->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -72,6 +72,34 @@
                         <option value="ativo" @selected(old('status', $cliente->status) == 'ativo')>Ativo</option>
                         <option value="inativo" @selected(old('status', $cliente->status) == 'inativo')>Inativo</option>
                     </select>
+                </div>
+
+                <div class="col-span-2 mt-4">
+                    <h3 class="text-lg font-bold text-[#0A1128] mb-4 border-b border-gray-100 pb-2">Vitrine Pública (Home do Site)</h3>
+                    <p class="text-sm text-[#8A8F9C] mb-4">Se marcado, a logo aparece na home no bloco "Clientes em Execução". PNG/JPG/SVG/WEBP até 2MB.</p>
+                </div>
+
+                <div class="col-span-2">
+                    @if($cliente->logo_public_path)
+                        <div class="mb-4 flex items-center gap-4 p-3 bg-[#F4F5F7] rounded-xl">
+                            <img src="{{ Storage::url($cliente->logo_public_path) }}" alt="Logo atual" class="h-12 w-auto object-contain">
+                            <label class="flex items-center gap-2 text-sm text-red-600 font-bold cursor-pointer">
+                                <input type="checkbox" name="remover_logo" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                Remover logo atual
+                            </label>
+                        </div>
+                    @endif
+                    <label class="block text-sm font-bold text-[#0A1128] mb-2">
+                        {{ $cliente->logo_public_path ? 'Substituir Logo' : 'Enviar Logo' }}
+                    </label>
+                    <input type="file" name="logo_public" accept="image/png,image/jpeg,image/svg+xml,image/webp" class="w-full text-sm text-[#8A8F9C] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-[#F4F5F7] file:text-[#0A1128] hover:file:bg-gray-200">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="flex items-center gap-2 text-sm font-bold text-[#0A1128] cursor-pointer">
+                        <input type="checkbox" name="exibir_home" value="1" @checked(old('exibir_home', $cliente->exibir_home)) class="rounded border-gray-300 text-[#FF7A1A] focus:ring-[#FF7A1A]">
+                        Exibir na home pública (bloco "Clientes em Execução")
+                    </label>
                 </div>
             </div>
 

@@ -169,6 +169,28 @@
     </section>
 
     {{-- =====================================================
+         CLIENTES EM EXECUÇÃO
+         ===================================================== --}}
+    @if(!empty($clientesVitrine) && $clientesVitrine->count() > 0)
+    <section class="relative py-20 lg:py-24 bg-[#050505] border-t border-white/5" x-data="{ shown: false }" x-intersect.margin.-100px="shown = true">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 reveal" :class="shown ? 'active' : ''">
+                <span class="text-xs font-extrabold uppercase tracking-widest text-[#FF7A1A] mb-3 block">Clientes em Execução</span>
+                <h2 class="font-display font-extrabold text-3xl md:text-4xl text-white leading-tight">Marcas com trabalho em andamento com a NC5.</h2>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center">
+                @foreach($clientesVitrine as $index => $cli)
+                    <div class="flex items-center justify-center h-24 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#FF7A1A]/40 transition-all duration-300 reveal" style="transition-delay: {{ ($index % 6) * 80 }}ms;" :class="shown ? 'active' : ''">
+                        <img src="{{ Storage::url($cli->logo_public_path) }}" alt="{{ $cli->razao_social }}" class="max-h-14 max-w-full object-contain opacity-80 hover:opacity-100 transition-opacity" loading="lazy">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    {{-- =====================================================
          INSIGHTS / BLOG
          ===================================================== --}}
     <section class="relative py-24 lg:py-32 bg-[#050505] border-t border-white/5" x-data="{ shown: false }" x-intersect.margin.-100px="shown = true">
