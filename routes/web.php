@@ -166,6 +166,11 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         ->names('customer.conhecimento')
         ->except(['show']);
 
+    // Trocar senha do próprio usuário logado
+    Route::get('/senha', function () {
+        return view('customer.senha');
+    })->name('customer.senha');
+
     // Alertas proativos do Bruce
     Route::get('alertas', [\App\Http\Controllers\Customer\AlertsController::class, 'index'])
         ->name('customer.alertas.index');
