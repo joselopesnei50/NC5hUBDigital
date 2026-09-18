@@ -37,7 +37,7 @@
                         
                         <div class="flex items-center gap-2">
                             <!-- Form para Importar CSV -->
-                            <form action="{{ route('customer.produtos.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center">
+                            <form action="{{ route('customer.produtos.importar') }}" method="POST" enctype="multipart/form-data" class="flex items-center">
                                 @csrf
                                 <input type="file" name="csv_file" accept=".csv" required class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100" />
                                 <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900 flex items-center text-sm">
