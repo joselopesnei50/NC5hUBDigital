@@ -215,8 +215,9 @@
                     <div class="md:col-span-2">
                         <h4 class="text-xs font-bold uppercase tracking-widest text-white/40 mb-4">Legal</h4>
                         <ul class="space-y-3 text-sm text-white/70">
-                            <li><a href="#" class="hover:text-white transition-colors">Privacidade</a></li>
-                            <li><a href="#" class="hover:text-white transition-colors">Termos</a></li>
+                            <li><a href="{{ route('privacidade') }}" class="hover:text-white transition-colors">Privacidade</a></li>
+                            <li><a href="{{ route('termos') }}" class="hover:text-white transition-colors">Termos</a></li>
+                            <li><a href="{{ route('cookies') }}" class="hover:text-white transition-colors">Cookies</a></li>
                         </ul>
                     </div>
                 </div>
@@ -227,5 +228,29 @@
                 </div>
             </div>
         </footer>
+
+        {{-- Banner de Cookies (LGPD) --}}
+        <div x-data="{ visible: !localStorage.getItem('nc5_cookies_choice') }"
+             x-show="visible"
+             x-cloak
+             x-transition
+             class="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 md:max-w-md z-50 bg-ink text-white rounded-2xl shadow-2xl border border-white/10 p-5">
+            <p class="text-sm leading-relaxed">
+                Este site usa cookies necessários pra funcionar e cookies opcionais (analíticos e marketing) pra melhorar sua experiência.
+                Veja mais na <a href="{{ route('cookies') }}" class="text-bruce font-bold hover:underline">Política de Cookies</a>.
+            </p>
+            <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                <button type="button"
+                        @click="localStorage.setItem('nc5_cookies_choice', 'accepted'); visible = false"
+                        class="flex-1 bg-bruce hover:bg-white hover:text-ink text-white font-bold text-sm px-4 py-2.5 rounded-xl transition-colors">
+                    Aceitar todos
+                </button>
+                <button type="button"
+                        @click="localStorage.setItem('nc5_cookies_choice', 'necessary'); visible = false"
+                        class="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition-colors">
+                    Só os necessários
+                </button>
+            </div>
+        </div>
     </body>
 </html>

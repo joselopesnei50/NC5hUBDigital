@@ -29,6 +29,11 @@ Route::post('/analise-gratuita/processar', [\App\Http\Controllers\AnalysisContro
 Route::get('/contato', [\App\Http\Controllers\ContatoController::class, 'index'])->name('contato.index');
 Route::post('/contato', [\App\Http\Controllers\ContatoController::class, 'store'])->name('contato.store');
 
+// Páginas legais
+Route::view('/privacidade', 'public.privacidade')->name('privacidade');
+Route::view('/termos', 'public.termos')->name('termos');
+Route::view('/cookies', 'public.cookies')->name('cookies');
+
 // Dashboard padrão do Breeze (redireciona por role)
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'admin') {
