@@ -9,7 +9,7 @@
         <h1 class="font-display font-extrabold text-4xl md:text-5xl text-[#0A1128] leading-tight mb-4">Termos de Uso</h1>
         <p class="text-sm text-slate-500 mb-12">Última atualização: 18/09/2026</p>
 
-        <div class="max-w-none space-y-8 text-slate-700 leading-relaxed">
+        <div class="max-w-none space-y-8 leading-relaxed" style="color: #334155;">
 
             <div>
                 <h2 class="font-display font-bold text-2xl text-[#0A1128] mb-3">1. Aceite</h2>
