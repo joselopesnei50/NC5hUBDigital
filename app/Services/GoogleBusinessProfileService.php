@@ -96,20 +96,24 @@ class GoogleBusinessProfileService
 
         try {
             $accountResponse = $httpClient->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
-            $rawBody = (string) $accountResponse->getBody();
-            $statusCode = $accountResponse->getStatusCode();
-            \Illuminate\Support\Facades\Log::info('[GoogleBusiness DEBUG] Cliente ' . $cliente->id . ' | status=' . $statusCode . ' | body=' . $rawBody);
-            $accounts = json_decode($rawBody, true) ?? [];
+            $accounts = json_decode((string) $accountResponse->getBody(), true) ?? [];
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('[GoogleBusiness] Falha ao listar contas do cliente ' . $cliente->id . ': ' . $e->getMessage() . ' | class=' . get_class($e));
-            if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
-                \Illuminate\Support\Facades\Log::error('[GoogleBusiness DEBUG] response body: ' . (string) $e->getResponse()->getBody());
+            $body = ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse())
+                ? (string) $e->getResponse()->getBody() : '';
+            \Illuminate\Support\Facades\Log::error('[GoogleBusiness] Falha ao listar contas do cliente ' . $cliente->id . ': ' . $e->getMessage() . ' | body=' . $body);
+
+            if (stripos($body, 'Quota exceeded') !== false || stripos($body, 'RESOURCE_EXHAUSTED') !== false) {
+                throw new \Exception("Sua integração ainda não foi liberada pelo Google. O acesso à API Business Profile está com cota zero — solicite aumento de cota no Google Cloud Console.");
             }
-            throw new \Exception("Não conseguimos consultar suas contas do Google. Verifique se as APIs estão ativadas no Google Cloud.");
+            if (stripos($body, 'SERVICE_DISABLED') !== false || stripos($body, 'PERMISSION_DENIED') !== false) {
+                throw new \Exception("A API do Google Meu Negócio não está habilitada ou seu projeto não tem permissão. Verifique no Google Cloud Console.");
+            }
+
+            throw new \Exception("Não conseguimos consultar suas contas do Google. Tente novamente em instantes.");
         }
 
         if (empty($accounts['accounts'])) {
-            \Illuminate\Support\Facades\Log::info('[GoogleBusiness] Cliente ' . $cliente->id . ' autenticou mas não tem contas associadas. Raw body: ' . $rawBody);
+            \Illuminate\Support\Facades\Log::info('[GoogleBusiness] Cliente ' . $cliente->id . ' autenticou mas não tem contas associadas.');
             throw new \Exception("Nenhuma conta do Google Meu Negócio encontrada nesta conta Google.");
         }
 
