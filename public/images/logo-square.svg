@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Fundo branco -->
+  <rect width="512" height="512" fill="#FFFFFF"/>
+
+  <!-- Marca: arco + ponto laranja (identidade NC5) -->
+  <g transform="translate(256, 180)">
+    <!-- Arco -->
+    <path d="M -70 0 A 70 70 0 1 1 0 70"
+          fill="none"
+          stroke="#0A1128"
+          stroke-width="14"
+          stroke-linecap="round"/>
+    <!-- Linha diagonal -->
+    <line x1="-20" y1="-40"
+          x2="20" y2="-70"
+          stroke="#0A1128"
+          stroke-width="8"
+          stroke-linecap="round"/>
+    <!-- Ponto laranja -->
+    <circle cx="20" cy="-70" r="14" fill="#FF7A1A"/>
+  </g>
+
+  <!-- NC5 -->
+  <text x="256" y="360"
+        font-family="Arial, Helvetica, sans-serif"
+        font-weight="900"
+        font-size="110"
+        fill="#0A1128"
+        text-anchor="middle"
+        letter-spacing="-3">NC5</text>
+
+  <!-- HUB DIGITAL -->
+  <text x="256" y="410"
+        font-family="Arial, Helvetica, sans-serif"
+        font-weight="600"
+        font-size="26"
+        fill="#8A8F9C"
+        text-anchor="middle"
+        letter-spacing="8">HUB DIGITAL</text>
+</svg>
