@@ -96,14 +96,20 @@ class GoogleBusinessProfileService
 
         try {
             $accountResponse = $httpClient->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
-            $accounts = json_decode((string) $accountResponse->getBody(), true) ?? [];
+            $rawBody = (string) $accountResponse->getBody();
+            $statusCode = $accountResponse->getStatusCode();
+            \Illuminate\Support\Facades\Log::info('[GoogleBusiness DEBUG] Cliente ' . $cliente->id . ' | status=' . $statusCode . ' | body=' . $rawBody);
+            $accounts = json_decode($rawBody, true) ?? [];
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('[GoogleBusiness] Falha ao listar contas do cliente ' . $cliente->id . ': ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('[GoogleBusiness] Falha ao listar contas do cliente ' . $cliente->id . ': ' . $e->getMessage() . ' | class=' . get_class($e));
+            if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
+                \Illuminate\Support\Facades\Log::error('[GoogleBusiness DEBUG] response body: ' . (string) $e->getResponse()->getBody());
+            }
             throw new \Exception("Não conseguimos consultar suas contas do Google. Verifique se as APIs estão ativadas no Google Cloud.");
         }
 
         if (empty($accounts['accounts'])) {
-            \Illuminate\Support\Facades\Log::info('[GoogleBusiness] Cliente ' . $cliente->id . ' autenticou mas não tem contas associadas.');
+            \Illuminate\Support\Facades\Log::info('[GoogleBusiness] Cliente ' . $cliente->id . ' autenticou mas não tem contas associadas. Raw body: ' . $rawBody);
             throw new \Exception("Nenhuma conta do Google Meu Negócio encontrada nesta conta Google.");
         }
 
