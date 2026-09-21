@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /area-cliente
+Disallow: /login
+Disallow: /register
+Disallow: /proposta
+Disallow: /eu/
+
+Sitemap: https://nc5hubdigital.com.br/sitemap.xml

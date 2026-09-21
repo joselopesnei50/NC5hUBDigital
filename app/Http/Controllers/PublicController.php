@@ -39,4 +39,24 @@ class PublicController extends Controller
         $servicos = Servico::where('status', 'ativo')->get();
         return view('public.servicos', compact('servicos'));
     }
+
+    public function sitemap()
+    {
+        $paginasEstaticas = [
+            ['loc' => route('home'),          'changefreq' => 'weekly',  'priority' => '1.0'],
+            ['loc' => route('servicos'),      'changefreq' => 'monthly', 'priority' => '0.9'],
+            ['loc' => route('blog'),          'changefreq' => 'weekly',  'priority' => '0.8'],
+            ['loc' => route('analise.index'), 'changefreq' => 'monthly', 'priority' => '0.8'],
+            ['loc' => route('contato.index'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => route('privacidade'),   'changefreq' => 'yearly',  'priority' => '0.3'],
+            ['loc' => route('termos'),        'changefreq' => 'yearly',  'priority' => '0.3'],
+            ['loc' => route('cookies'),       'changefreq' => 'yearly',  'priority' => '0.3'],
+        ];
+
+        $posts = Post::where('status', 'publicado')->latest()->get();
+
+        return response()
+            ->view('public.sitemap', compact('paginasEstaticas', 'posts'))
+            ->header('Content-Type', 'application/xml');
+    }
 }
