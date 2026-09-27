@@ -45,9 +45,9 @@ class Configuracao extends Model
     public static function get($chave, $default = null)
     {
         $configs = self::todas();
-        // Usar ?: para tambem cair no default quando a linha existir com string vazia
-        // (salvar o form em branco produz "" e nao null — antes o fallback pro .env
-        // nunca disparava e a DeepSeek acabava recebendo chave vazia -> 401).
-        return $configs[$chave] ?: $default;
+        // Usar ?? antes do ?: pra evitar "Undefined array key" quando a chave nunca
+        // foi salva (500 em prod). O ?: continua caindo no default pra string vazia
+        // (form salvo em branco), mantendo o fallback pro .env.
+        return ($configs[$chave] ?? null) ?: $default;
     }
 }
