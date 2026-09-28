@@ -147,6 +147,65 @@ class ProactiveAlertsService
             ];
         }
 
+        // ==== Google Meu Negócio ================================================
+        // Regras se auto-inibem quando o cliente não conectou o Google ou não
+        // selecionou uma ficha — evita spamar quem não usa o módulo.
+        $gbp = $metricas['google_business'] ?? [];
+        if (!empty($gbp['conectado']) && !empty($gbp['ficha_selecionada'])) {
+            // R7 — Média de estrelas caiu para menos de 4.0 (com base amostral > 5)
+            $media = (float) ($gbp['media_estrelas'] ?? 0);
+            $totalReviews = (int) ($gbp['total_reviews'] ?? 0);
+            if ($totalReviews >= 5 && $media > 0 && $media < 4.0) {
+                $alertas[] = [
+                    'tipo' => 'gbp_estrelas_baixas',
+                    'severidade' => 'critico',
+                    'titulo' => 'Sua média no Google caiu para ' . number_format($media, 1, ',', '.'),
+                    'mensagem' => 'A sua ficha do Google Meu Negócio está com média abaixo de 4,0 estrelas (' . number_format($media, 1, ',', '.') . ' em ' . $totalReviews . ' avaliações). Vale rever as últimas avaliações negativas e responder publicamente antes que o ranking caia.',
+                    'detalhes' => ['media' => $media, 'total_reviews' => $totalReviews],
+                ];
+            }
+
+            // R8 — Zero posts publicados no período (janela do próprio snapshot)
+            $posts30 = (int) ($gbp['posts_30d'] ?? 0);
+            if ($posts30 === 0) {
+                $alertas[] = [
+                    'tipo' => 'gbp_sem_posts',
+                    'severidade' => 'atencao',
+                    'titulo' => 'Nenhuma publicação no Google nos últimos 30 dias',
+                    'mensagem' => 'Fichas ativas com posts recentes aparecem mais no Google. Publique uma novidade, promoção ou horário especial pela aba Google Meu Negócio.',
+                    'detalhes' => ['posts_30d' => $posts30],
+                ];
+            }
+
+            // R9 — Queda maior que 20% nas visualizações (só faz sentido se
+            // havia base — anterior_impressoes > 0)
+            $deltaImp = $gbp['delta_impressoes_pct'] ?? null;
+            $anteriorImp = (int) ($gbp['anterior_impressoes'] ?? 0);
+            if ($deltaImp !== null && $anteriorImp > 0 && $deltaImp <= -20) {
+                $absDelta = abs((float) $deltaImp);
+                $alertas[] = [
+                    'tipo' => 'gbp_visualizacoes_caindo',
+                    'severidade' => 'atencao',
+                    'titulo' => 'Suas visualizações no Google caíram ' . number_format($absDelta, 1, ',', '.') . '%',
+                    'mensagem' => 'Nos últimos 30 dias a sua ficha teve ' . number_format($absDelta, 1, ',', '.') . '% menos visualizações que no período anterior. Confira se algo mudou na sua ficha (horário, fotos, descrição) e publique uma novidade.',
+                    'detalhes' => ['delta_pct' => (float) $deltaImp, 'anterior_impressoes' => $anteriorImp],
+                ];
+            }
+
+            // R10 — Avaliação sem resposta há 3+ dias
+            $diasMax = (int) ($gbp['reviews_sem_resposta_dias_max'] ?? 0);
+            $qtdSemResp = (int) ($gbp['reviews_sem_resposta_qtd'] ?? 0);
+            if ($diasMax >= 3 && $qtdSemResp > 0) {
+                $alertas[] = [
+                    'tipo' => 'gbp_avaliacao_sem_resposta',
+                    'severidade' => 'atencao',
+                    'titulo' => 'Você tem avaliação sem resposta há ' . $diasMax . ' dias',
+                    'mensagem' => 'Responder avaliações — inclusive as positivas — melhora o ranking da ficha no Google. Você tem ' . $qtdSemResp . ' avaliação(ões) pendente(s) de resposta.',
+                    'detalhes' => ['dias_max' => $diasMax, 'quantidade' => $qtdSemResp],
+                ];
+            }
+        }
+
         return $alertas;
     }
 
