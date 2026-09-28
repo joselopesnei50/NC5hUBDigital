@@ -4,162 +4,430 @@ namespace App\Services;
 
 use Google\Client as GoogleClient;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class GoogleBusinessProfileService
 {
-    protected $client;
+    protected GoogleClient $client;
 
     public function __construct()
     {
         $this->client = new GoogleClient();
-        // As credenciais vêm do banco de dados (Configurações Globais)
         $this->client->setClientId(\App\Models\Configuracao::get('google_client_id'));
         $this->client->setClientSecret(\App\Models\Configuracao::get('google_client_secret'));
         $this->client->setRedirectUri(\App\Models\Configuracao::get('google_redirect_uri'));
-        
-        // Escopo necessário para gerenciar a conta de negócios
+
         $this->client->addScope('https://www.googleapis.com/auth/business.manage');
         $this->client->setAccessType('offline');
-        $this->client->setPrompt('consent'); // Força a pedir o refresh token
+        $this->client->setPrompt('consent'); // força retorno do refresh_token
     }
 
-    public function getAuthUrl()
+    /**
+     * Convenção interna: google_location_id armazena o caminho v4 completo
+     * "accounts/{account}/locations/{location}". Este helper devolve só
+     * "locations/{location}", usado pela Performance API v1.
+     */
+    public static function locationOnly(string $v4Name): string
     {
+        if (preg_match('#(locations/[^/]+)#', $v4Name, $m)) {
+            return $m[1];
+        }
+        return $v4Name;
+    }
+
+    public function getAuthUrl(string $state): string
+    {
+        $this->client->setState($state);
         return $this->client->createAuthUrl();
     }
 
-    public function authenticateAndSaveTokens($code, $cliente)
+    public function authenticateAndSaveTokens(string $code, $cliente): void
     {
         $token = $this->client->fetchAccessTokenWithAuthCode($code);
-        
+
         if (isset($token['error'])) {
-            throw new \Exception("Erro de autenticação Google: " . $token['error']);
+            throw new \Exception('Erro de autenticação Google: ' . $token['error']);
         }
 
-        // Criptografar tokens sensíveis antes de salvar no banco
         $updateData = [
-            'google_access_token' => Crypt::encryptString($token['access_token']),
-            'google_token_expires_at' => Carbon::now()->addSeconds($token['expires_in']),
+            'google_access_token'     => Crypt::encryptString($token['access_token']),
+            'google_token_expires_at' => Carbon::now()->addSeconds((int) ($token['expires_in'] ?? 0)),
         ];
 
-        if (isset($token['refresh_token'])) {
+        if (!empty($token['refresh_token'])) {
             $updateData['google_refresh_token'] = Crypt::encryptString($token['refresh_token']);
         }
 
         $cliente->update($updateData);
     }
 
-    protected function setClientForCliente($cliente)
+    protected function setClientForCliente($cliente): void
     {
         if (!$cliente->google_access_token) {
-            throw new \Exception("Conta Google não conectada.");
+            throw new \Exception('Conta Google não conectada.');
         }
 
         try {
             $accessToken = Crypt::decryptString($cliente->google_access_token);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('[GoogleBusiness] Falha ao descriptografar access_token do cliente ' . $cliente->id);
-            throw new \Exception("Não conseguimos ler suas credenciais salvas. Desconecte e reconecte sua conta Google.");
+            Log::warning('[GoogleBusiness] Falha ao descriptografar access_token do cliente ' . $cliente->id);
+            throw new \Exception('Não conseguimos ler suas credenciais salvas. Desconecte e reconecte sua conta Google.');
         }
 
-        $this->client->setAccessToken($accessToken);
+        // A lib do Google só sabe se o token expirou quando recebe um array.
+        // Passando só a string, isAccessTokenExpired() volta sempre true e o
+        // refresh dispara em toda chamada (ou nem dispara se não tiver refresh).
+        $expiresAt = $cliente->google_token_expires_at
+            ? Carbon::parse($cliente->google_token_expires_at)->timestamp
+            : time();
+        $this->client->setAccessToken([
+            'access_token' => $accessToken,
+            'created'      => time(),
+            'expires_in'   => max(0, $expiresAt - time()),
+        ]);
 
-        // Se expirou e temos refresh token, renova e salva no banco
-        if ($this->client->isAccessTokenExpired() && $cliente->google_refresh_token) {
-            try {
-                $refreshToken = Crypt::decryptString($cliente->google_refresh_token);
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('[GoogleBusiness] Falha ao descriptografar refresh_token do cliente ' . $cliente->id);
-                throw new \Exception("Não conseguimos renovar seu acesso. Desconecte e reconecte sua conta Google.");
+        if (!$this->client->isAccessTokenExpired()) {
+            return;
+        }
+
+        if (!$cliente->google_refresh_token) {
+            throw new \Exception('Sua sessão do Google expirou. Reconecte a conta para continuar.');
+        }
+
+        try {
+            $refreshToken = Crypt::decryptString($cliente->google_refresh_token);
+        } catch (\Throwable $e) {
+            Log::warning('[GoogleBusiness] Falha ao descriptografar refresh_token do cliente ' . $cliente->id);
+            throw new \Exception('Não conseguimos renovar seu acesso. Desconecte e reconecte sua conta Google.');
+        }
+
+        $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+        if (isset($newToken['error'])) {
+            Log::warning('[GoogleBusiness] Refresh falhou para cliente ' . $cliente->id . ': ' . ($newToken['error'] ?? ''));
+            throw new \Exception('Sua sessão do Google expirou. Reconecte a conta para continuar.');
+        }
+
+        $cliente->update([
+            'google_access_token'     => Crypt::encryptString($newToken['access_token']),
+            'google_token_expires_at' => Carbon::now()->addSeconds((int) ($newToken['expires_in'] ?? 0)),
+        ]);
+    }
+
+    /**
+     * Wrapper único de HTTP com tradução de erro do Google pra pt-BR.
+     * Todos os endpoints (v1 + v4 + Performance) passam por aqui — se algo
+     * quebrar, o log tem status+body pra diagnóstico.
+     */
+    protected function request($cliente, string $method, string $url, array $options, string $contexto): array
+    {
+        $http = $this->client->authorize();
+
+        try {
+            $response = $http->request($method, $url, $options);
+            $body = (string) $response->getBody();
+            return $body === '' ? [] : (json_decode($body, true) ?? []);
+        } catch (\Throwable $e) {
+            $status = 0;
+            $body = '';
+            $googleMsg = '';
+            if ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse()) {
+                $resp = $e->getResponse();
+                $status = $resp->getStatusCode();
+                $body = (string) $resp->getBody();
+                $decoded = json_decode($body, true);
+                $googleMsg = $decoded['error']['message'] ?? '';
             }
 
-            $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+            Log::error("[GoogleBusiness] {$contexto} falhou para cliente {$cliente->id} status={$status} body={$body}");
 
-            if (isset($newToken['error'])) {
-                \Illuminate\Support\Facades\Log::warning('[GoogleBusiness] Refresh falhou para cliente ' . $cliente->id . ': ' . ($newToken['error'] ?? ''));
-                throw new \Exception("Sua sessão do Google expirou. Reconecte a conta para continuar.");
+            if (stripos($body, 'SERVICE_DISABLED') !== false || stripos($body, 'has not been used in project') !== false) {
+                throw new \Exception('A API do Google Meu Negócio não está ativada neste projeto do Cloud Console. Fale com o suporte.');
+            }
+            if ($status === 429 || stripos($body, 'RESOURCE_EXHAUSTED') !== false || stripos($body, 'Quota exceeded') !== false) {
+                throw new \Exception('A cota da API do Google foi atingida ou ainda está zerada para este projeto. Tente novamente mais tarde.');
+            }
+            if ($status === 401) {
+                throw new \Exception('Sua sessão do Google expirou. Reconecte a conta para continuar.');
+            }
+            if ($status === 403) {
+                throw new \Exception('O Google recusou o acesso' . ($googleMsg ? ': ' . $googleMsg : '.'));
+            }
+            if ($status === 404) {
+                throw new \Exception('Recurso não encontrado no Google (' . $contexto . ').');
+            }
+            if ($status === 400) {
+                throw new \Exception('O Google recusou os dados enviados' . ($googleMsg ? ': ' . $googleMsg : '.'));
             }
 
-            $cliente->update([
-                'google_access_token' => Crypt::encryptString($newToken['access_token']),
-                'google_token_expires_at' => Carbon::now()->addSeconds($newToken['expires_in']),
-            ]);
+            throw new \Exception('Falha temporária na comunicação com o Google. Tente novamente em instantes.');
         }
     }
 
-    public function getLocations($cliente)
+    /**
+     * Lista fichas do cliente com paginação em contas e locations.
+     * Retorna array de locations, cada uma com _account, _account_name e _v4_name.
+     */
+    public function getLocations($cliente): array
     {
         $this->setClientForCliente($cliente);
 
-        $httpClient = $this->client->authorize();
-
-        try {
-            $accountResponse = $httpClient->get('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
-            $accounts = json_decode((string) $accountResponse->getBody(), true) ?? [];
-        } catch (\Throwable $e) {
-            $body = ($e instanceof \GuzzleHttp\Exception\RequestException && $e->hasResponse())
-                ? (string) $e->getResponse()->getBody() : '';
-            \Illuminate\Support\Facades\Log::error('[GoogleBusiness] Falha ao listar contas do cliente ' . $cliente->id . ': ' . $e->getMessage() . ' | body=' . $body);
-
-            if (stripos($body, 'Quota exceeded') !== false || stripos($body, 'RESOURCE_EXHAUSTED') !== false) {
-                throw new \Exception("Sua integração ainda não foi liberada pelo Google. O acesso à API Business Profile está com cota zero — solicite aumento de cota no Google Cloud Console.");
+        $accounts = [];
+        $pageToken = null;
+        do {
+            $query = ['pageSize' => 20];
+            if ($pageToken) $query['pageToken'] = $pageToken;
+            $data = $this->request(
+                $cliente,
+                'GET',
+                'https://mybusinessaccountmanagement.googleapis.com/v1/accounts',
+                ['query' => $query],
+                'listar contas'
+            );
+            foreach (($data['accounts'] ?? []) as $acc) {
+                $accounts[] = $acc;
             }
-            if (stripos($body, 'SERVICE_DISABLED') !== false || stripos($body, 'PERMISSION_DENIED') !== false) {
-                throw new \Exception("A API do Google Meu Negócio não está habilitada ou seu projeto não tem permissão. Verifique no Google Cloud Console.");
-            }
+            $pageToken = $data['nextPageToken'] ?? null;
+        } while ($pageToken);
 
-            throw new \Exception("Não conseguimos consultar suas contas do Google. Tente novamente em instantes.");
-        }
-
-        if (empty($accounts['accounts'])) {
-            \Illuminate\Support\Facades\Log::info('[GoogleBusiness] Cliente ' . $cliente->id . ' autenticou mas não tem contas associadas.');
-            throw new \Exception("Nenhuma conta do Google Meu Negócio encontrada nesta conta Google.");
+        if (empty($accounts)) {
+            Log::info('[GoogleBusiness] Cliente ' . $cliente->id . ' autenticou mas não tem contas associadas.');
+            throw new \Exception('Nenhuma conta do Google Meu Negócio encontrada nesta conta Google.');
         }
 
         $locations = [];
-        foreach ($accounts['accounts'] as $account) {
-            $accountId = $account['name'] ?? null;
-            if (!$accountId) continue;
+        foreach ($accounts as $account) {
+            $accountPath = $account['name'] ?? null; // "accounts/123"
+            if (!$accountPath) continue;
 
-            try {
-                $locResponse = $httpClient->get("https://mybusinessbusinessinformation.googleapis.com/v1/{$accountId}/locations?readMask=name,title,storeCode");
-                $locData = json_decode((string) $locResponse->getBody(), true) ?? [];
+            $locPageToken = null;
+            do {
+                $query = [
+                    'pageSize' => 100,
+                    'readMask' => 'name,title,storeCode,storefrontAddress,websiteUri',
+                ];
+                if ($locPageToken) $query['pageToken'] = $locPageToken;
 
-                if (!empty($locData['locations'])) {
-                    $locations = array_merge($locations, $locData['locations']);
+                $locData = $this->request(
+                    $cliente,
+                    'GET',
+                    "https://mybusinessbusinessinformation.googleapis.com/v1/{$accountPath}/locations",
+                    ['query' => $query],
+                    "listar fichas de {$accountPath}"
+                );
+
+                foreach (($locData['locations'] ?? []) as $loc) {
+                    $loc['_account']      = $accountPath;
+                    $loc['_account_name'] = $account['accountName'] ?? $accountPath;
+                    // v4 name = "accounts/{a}/locations/{l}"
+                    $loc['_v4_name']      = $accountPath . '/' . ($loc['name'] ?? '');
+                    $locations[] = $loc;
                 }
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning("[GoogleBusiness] Falha em locations de {$accountId} (cliente {$cliente->id}): " . $e->getMessage());
-            }
+
+                $locPageToken = $locData['nextPageToken'] ?? null;
+            } while ($locPageToken);
         }
 
         return $locations;
     }
 
-    public function getPerformanceMetrics($cliente, $locationName)
+    /**
+     * Métricas de desempenho (Business Profile Performance API v1).
+     * Termina ontem porque o dado do dia atual raramente está pronto.
+     */
+    public function getPerformanceMetrics($cliente, string $v4Name, int $dias = 30): array
     {
         $this->setClientForCliente($cliente);
-        $httpClient = $this->client->authorize();
 
-        $url = "https://businessprofileperformance.googleapis.com/v1/{$locationName}:fetchMultiDailyMetricsTimeSeries";
-        
-        // Retornando mock temporário
-        return []; 
-    }
+        $locOnly = self::locationOnly($v4Name);
 
-    public function createPost($cliente, $locationName, $content)
-    {
-        $this->setClientForCliente($cliente);
-        $httpClient = $this->client->authorize();
+        $end   = Carbon::yesterday();
+        $start = $end->copy()->subDays(max(1, $dias) - 1);
 
-        $postData = [
-            'languageCode' => 'pt-BR',
-            'summary' => $content,
-            'topicType' => 'STANDARD',
+        $metricas = [
+            'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
+            'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
+            'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
+            'BUSINESS_IMPRESSIONS_MOBILE_SEARCH',
+            'WEBSITE_CLICKS',
+            'CALL_CLICKS',
+            'BUSINESS_DIRECTION_REQUESTS',
         ];
 
-        $url = "https://mybusiness.googleapis.com/v4/{$locationName}/localPosts";
-        // mock
+        // Query string montada NA MÃO: o Guzzle serializaria como
+        // dailyMetrics[0]=X&dailyMetrics[1]=Y e a API do Google rejeita.
+        // Ela quer dailyMetrics=X&dailyMetrics=Y repetido.
+        $params = [];
+        foreach ($metricas as $m) {
+            $params[] = 'dailyMetrics=' . rawurlencode($m);
+        }
+        $params[] = 'dailyRange.start_date.year='  . $start->year;
+        $params[] = 'dailyRange.start_date.month=' . $start->month;
+        $params[] = 'dailyRange.start_date.day='   . $start->day;
+        $params[] = 'dailyRange.end_date.year='    . $end->year;
+        $params[] = 'dailyRange.end_date.month='   . $end->month;
+        $params[] = 'dailyRange.end_date.day='     . $end->day;
+        $qs = implode('&', $params);
+
+        $url = "https://businessprofileperformance.googleapis.com/v1/{$locOnly}:fetchMultiDailyMetricsTimeSeries?{$qs}";
+
+        $data = $this->request($cliente, 'GET', $url, [], 'métricas de desempenho');
+
+        // Somas
+        $total = array_fill_keys($metricas, 0);
+        $serie = []; // 'Y-m-d' => int (impressões por dia)
+
+        foreach (($data['multiDailyMetricTimeSeries'] ?? []) as $multi) {
+            foreach (($multi['dailyMetricTimeSeries'] ?? []) as $seriesEntry) {
+                $metric = $seriesEntry['dailyMetric'] ?? null;
+                $dated  = $seriesEntry['timeSeries']['datedValues'] ?? [];
+                foreach ($dated as $dv) {
+                    // "value" vem como string; é omitido quando vale 0.
+                    $valor = isset($dv['value']) ? (int) $dv['value'] : 0;
+                    if ($metric && isset($total[$metric])) {
+                        $total[$metric] += $valor;
+                    }
+                    if (in_array($metric, [
+                        'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
+                        'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
+                        'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
+                        'BUSINESS_IMPRESSIONS_MOBILE_SEARCH',
+                    ], true)) {
+                        $d = $dv['date'] ?? null;
+                        if ($d && isset($d['year'], $d['month'], $d['day'])) {
+                            $key = sprintf('%04d-%02d-%02d', $d['year'], $d['month'], $d['day']);
+                            $serie[$key] = ($serie[$key] ?? 0) + $valor;
+                        }
+                    }
+                }
+            }
+        }
+
+        ksort($serie);
+
+        $maps = $total['BUSINESS_IMPRESSIONS_DESKTOP_MAPS']   + $total['BUSINESS_IMPRESSIONS_MOBILE_MAPS'];
+        $busca = $total['BUSINESS_IMPRESSIONS_DESKTOP_SEARCH'] + $total['BUSINESS_IMPRESSIONS_MOBILE_SEARCH'];
+
+        return [
+            'periodo'          => ['inicio' => $start->toDateString(), 'fim' => $end->toDateString(), 'dias' => $dias],
+            'impressoes'       => $maps + $busca,
+            'impressoes_maps'  => $maps,
+            'impressoes_busca' => $busca,
+            'cliques_site'     => $total['WEBSITE_CLICKS'],
+            'ligacoes'         => $total['CALL_CLICKS'],
+            'rotas'            => $total['BUSINESS_DIRECTION_REQUESTS'],
+            'serie'            => $serie,
+        ];
+    }
+
+    // -----------------------------------------------------------------
+    // Posts (API v4)
+    // -----------------------------------------------------------------
+
+    public function listPosts($cliente, string $v4Name): array
+    {
+        $this->setClientForCliente($cliente);
+        $data = $this->request(
+            $cliente,
+            'GET',
+            "https://mybusiness.googleapis.com/v4/{$v4Name}/localPosts",
+            ['query' => ['pageSize' => 10]],
+            'listar posts'
+        );
+        return $data['localPosts'] ?? [];
+    }
+
+    public function createPost($cliente, string $v4Name, string $summary, array $opts = []): array
+    {
+        $this->setClientForCliente($cliente);
+
+        $body = [
+            'languageCode' => 'pt-BR',
+            'summary'      => $summary,
+            'topicType'    => 'STANDARD',
+        ];
+
+        $ctaType = $opts['cta_type'] ?? null;
+        $ctaUrl  = $opts['cta_url']  ?? null;
+        if ($ctaType) {
+            $cta = ['actionType' => $ctaType];
+            if ($ctaType !== 'CALL' && $ctaUrl) {
+                $cta['url'] = $ctaUrl;
+            }
+            $body['callToAction'] = $cta;
+        }
+
+        $imageUrl = $opts['image_url'] ?? null;
+        if ($imageUrl) {
+            $body['media'] = [[
+                'mediaFormat' => 'PHOTO',
+                'sourceUrl'   => $imageUrl,
+            ]];
+        }
+
+        return $this->request(
+            $cliente,
+            'POST',
+            "https://mybusiness.googleapis.com/v4/{$v4Name}/localPosts",
+            ['json' => $body],
+            'criar post'
+        );
+    }
+
+    public function deletePost($cliente, string $postName): array
+    {
+        $this->setClientForCliente($cliente);
+        return $this->request(
+            $cliente,
+            'DELETE',
+            "https://mybusiness.googleapis.com/v4/{$postName}",
+            [],
+            'remover post'
+        );
+    }
+
+    // -----------------------------------------------------------------
+    // Avaliações (API v4)
+    // -----------------------------------------------------------------
+
+    public function listReviews($cliente, string $v4Name): array
+    {
+        $this->setClientForCliente($cliente);
+        $data = $this->request(
+            $cliente,
+            'GET',
+            "https://mybusiness.googleapis.com/v4/{$v4Name}/reviews",
+            ['query' => ['pageSize' => 20, 'orderBy' => 'updateTime desc']],
+            'listar avaliações'
+        );
+
+        return [
+            'media'   => (float) ($data['averageRating'] ?? 0),
+            'total'   => (int)   ($data['totalReviewCount'] ?? 0),
+            'reviews' => $data['reviews'] ?? [],
+        ];
+    }
+
+    public function replyReview($cliente, string $reviewName, string $comment): array
+    {
+        $this->setClientForCliente($cliente);
+        return $this->request(
+            $cliente,
+            'PUT',
+            "https://mybusiness.googleapis.com/v4/{$reviewName}/reply",
+            ['json' => ['comment' => $comment]],
+            'responder avaliação'
+        );
+    }
+
+    public static function estrelas(?string $starRating): int
+    {
+        return [
+            'ONE'   => 1,
+            'TWO'   => 2,
+            'THREE' => 3,
+            'FOUR'  => 4,
+            'FIVE'  => 5,
+        ][$starRating ?? ''] ?? 0;
     }
 }

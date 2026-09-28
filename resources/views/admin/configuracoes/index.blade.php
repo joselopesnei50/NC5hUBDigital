@@ -183,7 +183,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     <div>
                         <label class="block text-sm font-bold text-[#0A1128] mb-2">Chave do motor de IA</label>
-                        <input type="password" name="deepseek_api_key" value="{{ $configuracoes['deepseek_api_key'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                        <input type="password" name="deepseek_api_key" value="" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="{{ !empty($configuracoes['deepseek_api_key'] ?? '') ? '•••••••• (já configurado)' : 'sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' }}">
                         <p class="mt-1 text-xs text-gray-500">Interno: o BruceIA opera hoje sobre a API DeepSeek. Cole aqui a secret key gerada no painel de desenvolvedores do provedor.</p>
                     </div>
                 </div>
@@ -202,11 +202,11 @@
                 <div class="grid grid-cols-1 gap-6">
                     <div>
                         <label class="block text-sm font-bold text-[#0A1128] mb-2">Chave da API (Bearer Token)</label>
-                        <input type="password" name="abacatepay_api_key" value="{{ $configuracoes['abacatepay_api_key'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="sua-api-key-aqui">
+                        <input type="password" name="abacatepay_api_key" value="" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="{{ !empty($configuracoes['abacatepay_api_key'] ?? '') ? '•••••••• (já configurado)' : 'sua-api-key-aqui' }}">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-[#0A1128] mb-2">Segredo do Webhook (HMAC)</label>
-                        <input type="password" name="abacatepay_webhook_secret" value="{{ $configuracoes['abacatepay_webhook_secret'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="sua_chave_secreta_aqui">
+                        <input type="password" name="abacatepay_webhook_secret" value="" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="{{ !empty($configuracoes['abacatepay_webhook_secret'] ?? '') ? '•••••••• (já configurado)' : 'sua_chave_secreta_aqui' }}">
                         <p class="mt-1 text-xs text-gray-500">Usado para validar a autenticidade dos webhooks recebidos.</p>
                     </div>
                 </div>
@@ -225,7 +225,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     <div>
                         <label class="block text-sm font-bold text-[#0A1128] mb-2">Personal API Token</label>
-                        <input type="password" name="apify_token" value="{{ $configuracoes['apify_token'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="apify_api_xxxxxxxxxxxxxxxxxxxxxxx">
+                        <input type="password" name="apify_token" value="" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="{{ !empty($configuracoes['apify_token'] ?? '') ? '•••••••• (já configurado)' : 'apify_api_xxxxxxxxxxxxxxxxxxxxxxx' }}">
                         <p class="mt-1 text-xs text-gray-500">Deixe em branco para manter a atual (não exibida por segurança).</p>
                     </div>
                 </div>
@@ -248,7 +248,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-[#0A1128] mb-2">Client Secret</label>
-                        <input type="password" name="google_client_secret" value="{{ $configuracoes['google_client_secret'] ?? '' }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxx">
+                        <input type="password" name="google_client_secret" value="" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="{{ !empty($configuracoes['google_client_secret'] ?? '') ? '•••••••• (já configurado)' : 'Ex: GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxx' }}">
                         <p class="mt-1 text-xs text-gray-500">Deixe em branco para manter a atual (não exibida por segurança).</p>
                     </div>
                 </div>

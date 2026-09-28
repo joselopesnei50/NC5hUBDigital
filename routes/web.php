@@ -126,6 +126,10 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('/google-business/connect', [\App\Http\Controllers\GoogleBusinessController::class, 'redirectToGoogle'])->name('customer.google-business.connect');
     Route::get('/google-business/callback', [\App\Http\Controllers\GoogleBusinessController::class, 'handleGoogleCallback'])->name('customer.google-business.callback');
     Route::post('/google-business/disconnect', [\App\Http\Controllers\GoogleBusinessController::class, 'disconnect'])->name('customer.google-business.disconnect');
+    Route::post('/google-business/ficha', [\App\Http\Controllers\GoogleBusinessController::class, 'selectLocation'])->name('customer.google-business.location');
+    Route::post('/google-business/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'storePost'])->middleware('throttle:10,1')->name('customer.google-business.posts.store');
+    Route::delete('/google-business/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'destroyPost'])->name('customer.google-business.posts.destroy');
+    Route::post('/google-business/avaliacoes/responder', [\App\Http\Controllers\GoogleBusinessController::class, 'replyReview'])->middleware('throttle:20,1')->name('customer.google-business.reviews.reply');
 
     // Gestão de Clientes (CRM do Cliente)
     Route::resource('gestao-clientes', \App\Http\Controllers\Customer\ClienteFinalController::class)
