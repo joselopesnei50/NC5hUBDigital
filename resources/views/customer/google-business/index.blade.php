@@ -95,6 +95,22 @@
                            class="text-xs font-bold text-ink hover:text-white hover:bg-ink px-4 py-2 rounded-full border border-black/10 hover:border-ink transition-colors">
                             Atualizar dados
                         </a>
+                        @if($selected ?? false)
+                            <div x-data="{ open: false }" class="relative">
+                                <button type="button" x-on:click="open = !open"
+                                        class="text-xs font-bold text-ink hover:text-white hover:bg-ink px-4 py-2 rounded-full border border-black/10 hover:border-ink transition-colors inline-flex items-center gap-1.5">
+                                    Exportar
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                <div x-show="open" x-cloak x-on:click.outside="open = false"
+                                     class="absolute right-0 mt-2 w-40 bg-white border border-black/10 rounded-xl shadow-lg z-10 py-1">
+                                    <a href="{{ route('customer.google-business.export.csv') }}"
+                                       class="block px-4 py-2 text-xs font-bold text-ink hover:bg-mist">CSV (Excel)</a>
+                                    <a href="{{ route('customer.google-business.export.pdf') }}"
+                                       class="block px-4 py-2 text-xs font-bold text-ink hover:bg-mist">PDF</a>
+                                </div>
+                            </div>
+                        @endif
                         <form action="{{ route('customer.google-business.disconnect') }}" method="POST"
                               onsubmit="return confirm('Tem certeza que deseja desconectar? Você precisará autorizar novamente no Google para reconectar.');">
                             @csrf
@@ -193,6 +209,24 @@
                                 $totalDevice = $mobile + $desktop;
                                 $pctMobile  = $totalDevice > 0 ? round(($mobile  / $totalDevice) * 100, 1) : 0;
                                 $pctDesktop = $totalDevice > 0 ? round(($desktop / $totalDevice) * 100, 1) : 0;
+
+                                // Heatmap dia da semana (0=dom, 6=sab). Agrega serie_impressoes.
+                                // Nomes curtos pt-BR pra caber no card estreito.
+                                $diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                                $porDia = array_fill(0, 7, 0);
+                                $porDiaCount = array_fill(0, 7, 0);
+                                foreach (($atual['serie_impressoes'] ?? []) as $dataStr => $v) {
+                                    $dow = (int) \Carbon\Carbon::parse($dataStr)->dayOfWeek; // 0..6
+                                    $porDia[$dow] += (int) $v;
+                                    $porDiaCount[$dow]++;
+                                }
+                                // Media por dia (compensa dias que aparecem 4x vs 5x no mes)
+                                $porDiaMedia = [];
+                                foreach ($porDia as $i => $soma) {
+                                    $porDiaMedia[$i] = $porDiaCount[$i] > 0 ? round($soma / $porDiaCount[$i]) : 0;
+                                }
+                                $maxHeat = max($porDiaMedia) ?: 1;
+                                $melhorDia = array_search(max($porDiaMedia), $porDiaMedia, true);
                             @endphp
 
                             {{-- 4 cards com sparkline + comparativo --}}
@@ -282,6 +316,45 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {{-- Heatmap por dia da semana (media de visualizacoes por DOW) --}}
+                            @if(array_sum($porDiaMedia) > 0)
+                                <div class="mt-4 p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
+                                    <div class="flex items-start justify-between gap-3 mb-4 flex-wrap">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wider text-slate">Melhor dia da semana</p>
+                                            <p class="text-sm text-ink mt-1">
+                                                Você aparece mais nas <span class="font-bold">{{ $diasSemana[$melhorDia] ?? '—' }}</span>
+                                                — média de <span class="font-bold">{{ number_format($porDiaMedia[$melhorDia] ?? 0, 0, ',', '.') }}</span>
+                                                visualizações por dia.
+                                            </p>
+                                        </div>
+                                        <span class="inline-flex items-center bg-bruce/10 text-bruce text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
+                                            Dica pra postar
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-2">
+                                        @foreach($diasSemana as $i => $nome)
+                                            @php
+                                                $val = $porDiaMedia[$i];
+                                                $intensidade = round(($val / $maxHeat), 2);
+                                                $bgOpacity = 0.10 + ($intensidade * 0.85);
+                                            @endphp
+                                            <div class="flex flex-col items-center gap-1">
+                                                <div class="w-full h-16 rounded-xl flex items-center justify-center text-[11px] font-bold text-white {{ $i === $melhorDia ? 'ring-2 ring-bruce ring-offset-2' : '' }}"
+                                                     style="background-color: rgba(255, 122, 26, {{ $bgOpacity }})"
+                                                     title="{{ $nome }}: média {{ number_format($val, 0, ',', '.') }}">
+                                                    {{ number_format($val, 0, ',', '.') }}
+                                                </div>
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate">{{ $nome }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <p class="text-[11px] text-slate mt-3">
+                                        Publique nas {{ $diasSemana[$melhorDia] ?? '—' }} pra pegar o momento em que sua ficha aparece mais.
+                                    </p>
+                                </div>
+                            @endif
 
                             {{-- Chart.js + inicialização --}}
                             <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -538,7 +611,7 @@
                                             </div>
                                         @endif
 
-                                        <details class="mt-3">
+                                        <details class="mt-3" x-data="{ loadingSuggest: false, suggestErr: '' }">
                                             <summary class="cursor-pointer text-[11px] font-bold uppercase tracking-wider text-bruce hover:text-ink transition-colors">
                                                 {{ $reply ? 'Editar resposta' : 'Responder' }}
                                             </summary>
@@ -546,11 +619,46 @@
                                                 @csrf
                                                 <input type="hidden" name="review_name" value="{{ $review['name'] ?? '' }}">
                                                 <textarea name="comment" rows="3" required maxlength="4000"
+                                                          x-ref="respostaText"
                                                           class="w-full rounded-xl border-gray-300 focus:border-bruce focus:ring-bruce text-sm"
                                                           placeholder="Responda com educação...">{{ $reply }}</textarea>
-                                                <button type="submit" class="px-4 py-1.5 bg-ink hover:bg-bruce text-white rounded-full text-xs font-bold transition-colors">
-                                                    Enviar resposta
-                                                </button>
+                                                <div class="flex items-center gap-2 flex-wrap">
+                                                    <button type="submit" class="px-4 py-1.5 bg-ink hover:bg-bruce text-white rounded-full text-xs font-bold transition-colors">
+                                                        Enviar resposta
+                                                    </button>
+                                                    <button type="button"
+                                                            x-bind:disabled="loadingSuggest"
+                                                            x-on:click="
+                                                                loadingSuggest = true; suggestErr = '';
+                                                                fetch('{{ route('customer.google-business.reviews.suggest') }}', {
+                                                                    method: 'POST',
+                                                                    headers: {
+                                                                        'Content-Type': 'application/json',
+                                                                        'Accept': 'application/json',
+                                                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                                                                    },
+                                                                    body: JSON.stringify({
+                                                                        stars: {{ $estrelas ?: 3 }},
+                                                                        comment: {{ json_encode($reviewComment ?? '') }},
+                                                                        reviewer: {{ json_encode($reviewer ?? 'Cliente') }},
+                                                                        tom: {{ $estrelas && $estrelas <= 3 ? "'formal'" : "'amistoso'" }}
+                                                                    })
+                                                                })
+                                                                .then(r => r.json().then(d => ({ok: r.ok, d})))
+                                                                .then(({ok, d}) => {
+                                                                    if (!ok || d.error) throw new Error(d.error || 'Falha na sugestão');
+                                                                    $refs.respostaText.value = d.sugestao;
+                                                                    $refs.respostaText.dispatchEvent(new Event('input'));
+                                                                })
+                                                                .catch(e => { suggestErr = e.message; })
+                                                                .finally(() => { loadingSuggest = false; })
+                                                            "
+                                                            class="px-4 py-1.5 bg-white hover:bg-mist text-bruce border border-bruce rounded-full text-xs font-bold transition-colors inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                        <span x-text="loadingSuggest ? 'Gerando...' : 'Sugerir com Bruce'"></span>
+                                                    </button>
+                                                </div>
+                                                <p x-show="suggestErr" x-cloak x-text="suggestErr" class="text-[11px] text-rose-600"></p>
                                             </form>
                                         </details>
                                     </div>

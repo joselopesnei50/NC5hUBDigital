@@ -130,6 +130,9 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::post('/google-business/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'storePost'])->middleware('throttle:10,1')->name('customer.google-business.posts.store');
     Route::delete('/google-business/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'destroyPost'])->name('customer.google-business.posts.destroy');
     Route::post('/google-business/avaliacoes/responder', [\App\Http\Controllers\GoogleBusinessController::class, 'replyReview'])->middleware('throttle:20,1')->name('customer.google-business.reviews.reply');
+    Route::post('/google-business/avaliacoes/sugerir', [\App\Http\Controllers\GoogleBusinessController::class, 'suggestReply'])->middleware('throttle:20,1')->name('customer.google-business.reviews.suggest');
+    Route::get('/google-business/exportar/csv', [\App\Http\Controllers\GoogleBusinessController::class, 'exportCsv'])->name('customer.google-business.export.csv');
+    Route::get('/google-business/exportar/pdf', [\App\Http\Controllers\GoogleBusinessController::class, 'exportPdf'])->name('customer.google-business.export.pdf');
 
     // Gestão de Clientes (CRM do Cliente)
     Route::resource('gestao-clientes', \App\Http\Controllers\Customer\ClienteFinalController::class)
