@@ -11,16 +11,6 @@
 
     <div class="space-y-6">
 
-        @if(session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm text-sm">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 shadow-sm text-sm">
-                {{ session('error') }}
-            </div>
-        @endif
         @if($errors->any())
             <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 shadow-sm text-sm">
                 <ul class="list-disc pl-5 space-y-0.5">
@@ -163,60 +153,196 @@
                                 {{ $erros['metricas'] }}
                             </div>
                         @elseif($metricas)
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div class="p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
-                                    <p class="text-xs font-bold uppercase tracking-wider text-slate">Visualizações</p>
-                                    <p class="font-display text-3xl font-bold text-ink mt-1">{{ number_format($metricas['impressoes'], 0, ',', '.') }}</p>
-                                    <p class="text-[11px] text-slate mt-1">
-                                        Busca: {{ number_format($metricas['impressoes_busca'], 0, ',', '.') }}
-                                        · Maps: {{ number_format($metricas['impressoes_maps'], 0, ',', '.') }}
+                            @php
+                                $atual    = $metricas['atual']    ?? [];
+                                $anterior = $metricas['anterior'] ?? [];
+                                $delta    = $metricas['delta']    ?? [];
+
+                                $cards = [
+                                    'impressoes'   => ['label' => 'Visualizações',   'valor' => $atual['impressoes']   ?? 0, 'valor_ant' => $anterior['impressoes']   ?? 0, 'delta' => $delta['impressoes']   ?? 0, 'serie' => $atual['serie_impressoes'] ?? []],
+                                    'cliques_site' => ['label' => 'Cliques no site', 'valor' => $atual['cliques_site'] ?? 0, 'valor_ant' => $anterior['cliques_site'] ?? 0, 'delta' => $delta['cliques_site'] ?? 0, 'serie' => $atual['serie_cliques']    ?? []],
+                                    'ligacoes'     => ['label' => 'Ligações',        'valor' => $atual['ligacoes']     ?? 0, 'valor_ant' => $anterior['ligacoes']     ?? 0, 'delta' => $delta['ligacoes']     ?? 0, 'serie' => $atual['serie_ligacoes']   ?? []],
+                                    'rotas'        => ['label' => 'Pedidos de rota', 'valor' => $atual['rotas']        ?? 0, 'valor_ant' => $anterior['rotas']        ?? 0, 'delta' => $delta['rotas']        ?? 0, 'serie' => $atual['serie_rotas']      ?? []],
+                                ];
+
+                                // Helper de sparkline SVG (polyline). Devolve d="M x,y L x,y..."
+                                $sparkPoints = function (array $serie): string {
+                                    if (empty($serie)) return '';
+                                    $valores = array_values($serie);
+                                    $n = count($valores);
+                                    $max = max($valores) ?: 1;
+                                    $w = 100; $h = 30;
+                                    $pontos = [];
+                                    foreach ($valores as $i => $v) {
+                                        $x = $n > 1 ? round(($i / ($n - 1)) * $w, 2) : 0;
+                                        $y = round($h - (($v / $max) * $h), 2);
+                                        $pontos[] = $x . ',' . $y;
+                                    }
+                                    return implode(' ', $pontos);
+                                };
+
+                                // Dados do gráfico principal
+                                $labels = array_keys($atual['serie_impressoes'] ?? []);
+                                $chartLabels     = array_map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m'), $labels);
+                                $chartImpressoes = array_values($atual['serie_impressoes'] ?? []);
+                                $chartCliques    = array_values($atual['serie_cliques']    ?? []);
+
+                                // Mobile vs Desktop
+                                $mobile  = $atual['impressoes_mobile']  ?? 0;
+                                $desktop = $atual['impressoes_desktop'] ?? 0;
+                                $totalDevice = $mobile + $desktop;
+                                $pctMobile  = $totalDevice > 0 ? round(($mobile  / $totalDevice) * 100, 1) : 0;
+                                $pctDesktop = $totalDevice > 0 ? round(($desktop / $totalDevice) * 100, 1) : 0;
+                            @endphp
+
+                            {{-- 4 cards com sparkline + comparativo --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                @foreach($cards as $c)
+                                    @php
+                                        $d = $c['delta'];
+                                        if ($d === null) { $badgeClass = 'bg-emerald-50 text-emerald-700'; $badgeText = 'novo'; }
+                                        elseif ($d > 0)  { $badgeClass = 'bg-emerald-50 text-emerald-700'; $badgeText = '+' . number_format($d, 1, ',', '.') . '%'; }
+                                        elseif ($d < 0)  { $badgeClass = 'bg-rose-50 text-rose-700';       $badgeText = number_format($d, 1, ',', '.') . '%'; }
+                                        else             { $badgeClass = 'bg-slate-100 text-slate-600';    $badgeText = '0%'; }
+                                    @endphp
+                                    <div class="p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
+                                        <div class="flex items-start justify-between gap-2 mb-2">
+                                            <p class="text-xs font-bold uppercase tracking-wider text-slate">{{ $c['label'] }}</p>
+                                            <span class="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full {{ $badgeClass }}">
+                                                {{ $badgeText }}
+                                            </span>
+                                        </div>
+                                        <p class="font-display text-3xl font-bold text-ink">{{ number_format($c['valor'], 0, ',', '.') }}</p>
+                                        <div class="mt-3">
+                                            @if(!empty($c['serie']))
+                                                <svg viewBox="0 0 100 30" preserveAspectRatio="none" class="w-full h-8 text-bruce">
+                                                    <polyline fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="{{ $sparkPoints($c['serie']) }}"/>
+                                                </svg>
+                                            @else
+                                                <div class="h-8"></div>
+                                            @endif
+                                        </div>
+                                        <p class="text-[11px] text-slate mt-1">
+                                            vs {{ number_format($c['valor_ant'], 0, ',', '.') }} nos 30 dias anteriores
+                                        </p>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            {{-- Gráfico principal + Mobile/Desktop --}}
+                            <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                <div class="lg:col-span-2 p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
+                                    <p class="text-xs font-bold uppercase tracking-wider text-slate mb-3">Evolução diária</p>
+                                    <div class="relative" style="height: 240px;">
+                                        <canvas id="gbpChart"></canvas>
+                                    </div>
+                                    <p class="text-[11px] text-slate mt-3">
+                                        Dados do Google com 2-3 dias de atraso — o período termina em {{ \Carbon\Carbon::parse($atual['periodo']['fim'])->format('d/m/Y') }}.
                                     </p>
                                 </div>
+
                                 <div class="p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
-                                    <p class="text-xs font-bold uppercase tracking-wider text-slate">Cliques no site</p>
-                                    <p class="font-display text-3xl font-bold text-ink mt-1">{{ number_format($metricas['cliques_site'], 0, ',', '.') }}</p>
-                                </div>
-                                <div class="p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
-                                    <p class="text-xs font-bold uppercase tracking-wider text-slate">Ligações</p>
-                                    <p class="font-display text-3xl font-bold text-ink mt-1">{{ number_format($metricas['ligacoes'], 0, ',', '.') }}</p>
-                                </div>
-                                <div class="p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
-                                    <p class="text-xs font-bold uppercase tracking-wider text-slate">Pedidos de rota</p>
-                                    <p class="font-display text-3xl font-bold text-ink mt-1">{{ number_format($metricas['rotas'], 0, ',', '.') }}</p>
+                                    <p class="text-xs font-bold uppercase tracking-wider text-slate mb-3">Onde você aparece</p>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <div class="flex items-center justify-between text-sm mb-1">
+                                                <span class="font-bold text-ink flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 text-bruce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                    Mobile
+                                                </span>
+                                                <span class="text-slate">{{ number_format($mobile, 0, ',', '.') }} · {{ number_format($pctMobile, 1, ',', '.') }}%</span>
+                                            </div>
+                                            <div class="w-full h-2 bg-mist rounded-full overflow-hidden">
+                                                <div class="h-full bg-bruce" style="width: {{ $pctMobile }}%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center justify-between text-sm mb-1">
+                                                <span class="font-bold text-ink flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                    Desktop
+                                                </span>
+                                                <span class="text-slate">{{ number_format($desktop, 0, ',', '.') }} · {{ number_format($pctDesktop, 1, ',', '.') }}%</span>
+                                            </div>
+                                            <div class="w-full h-2 bg-mist rounded-full overflow-hidden">
+                                                <div class="h-full bg-ink" style="width: {{ $pctDesktop }}%"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-3 border-t border-black/5 text-xs text-slate space-y-1">
+                                            <div class="flex justify-between">
+                                                <span>Busca</span>
+                                                <span class="font-bold text-ink">{{ number_format($atual['impressoes_busca'] ?? 0, 0, ',', '.') }}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Maps</span>
+                                                <span class="font-bold text-ink">{{ number_format($atual['impressoes_maps'] ?? 0, 0, ',', '.') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            @php
-                                $serie = $metricas['serie'] ?? [];
-                                $maxSerie = !empty($serie) ? max($serie) : 0;
-                            @endphp
-                            @if(!empty($serie))
-                                <div class="mt-6 p-5 rounded-2xl border border-black/5 bg-white shadow-sm">
-                                    <p class="text-xs font-bold uppercase tracking-wider text-slate mb-3">Visualizações por dia</p>
-                                    <div class="flex items-end gap-1 h-32">
-                                        @foreach($serie as $dia => $valor)
-                                            @php $altura = $maxSerie > 0 ? max(2, round(($valor / $maxSerie) * 100)) : 2; @endphp
-                                            <div class="flex-1 group relative">
-                                                <div class="w-full bg-bruce/70 hover:bg-bruce rounded-t transition-colors" style="height: {{ $altura }}%"></div>
-                                                <span class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 whitespace-nowrap text-[10px] bg-ink text-white px-2 py-0.5 rounded pointer-events-none">
-                                                    {{ \Carbon\Carbon::parse($dia)->format('d/m') }} · {{ number_format($valor, 0, ',', '.') }}
-                                                </span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <p class="text-[11px] text-slate mt-3">
-                                        Os dados do Google são atualizados com 2-3 dias de atraso — o período termina em {{ \Carbon\Carbon::parse($metricas['periodo']['fim'])->format('d/m/Y') }}.
-                                    </p>
-                                </div>
-                            @endif
+                            {{-- Chart.js + inicialização --}}
+                            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    var ctx = document.getElementById('gbpChart');
+                                    if (!ctx || typeof Chart === 'undefined') return;
+                                    new Chart(ctx, {
+                                        type: 'line',
+                                        data: {
+                                            labels: @json($chartLabels),
+                                            datasets: [
+                                                {
+                                                    label: 'Visualizações',
+                                                    data: @json($chartImpressoes),
+                                                    borderColor: '#FF7A1A',
+                                                    backgroundColor: 'rgba(255, 122, 26, 0.12)',
+                                                    borderWidth: 2,
+                                                    pointRadius: 0,
+                                                    pointHoverRadius: 4,
+                                                    tension: 0.35,
+                                                    fill: true,
+                                                },
+                                                {
+                                                    label: 'Cliques no site',
+                                                    data: @json($chartCliques),
+                                                    borderColor: '#0A1128',
+                                                    backgroundColor: 'transparent',
+                                                    borderWidth: 2,
+                                                    pointRadius: 0,
+                                                    pointHoverRadius: 4,
+                                                    tension: 0.35,
+                                                    fill: false,
+                                                },
+                                            ],
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            interaction: { mode: 'index', intersect: false },
+                                            plugins: {
+                                                legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, font: { size: 11 } } },
+                                                tooltip: { backgroundColor: '#0A1128', padding: 10, cornerRadius: 8, displayColors: true },
+                                            },
+                                            scales: {
+                                                x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 0, autoSkipPadding: 20 } },
+                                                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, precision: 0 } },
+                                            },
+                                        },
+                                    });
+                                });
+                            </script>
                         @endif
                     </div>
 
                     {{-- Publicações --}}
-                    <div class="mb-8" x-data="{ ctaType: '', chars: 0 }">
+                    <div class="mb-8" x-data="{ ctaType: '', chars: 0, imagePreview: null, imageName: '' }">
                         <h3 class="font-display text-lg font-bold text-ink mb-4">Publicar na ficha</h3>
 
-                        <form action="{{ route('customer.google-business.posts.store') }}" method="POST" class="p-5 rounded-2xl border border-black/5 bg-white shadow-sm space-y-4">
+                        <form action="{{ route('customer.google-business.posts.store') }}" method="POST" enctype="multipart/form-data"
+                              class="p-5 rounded-2xl border border-black/5 bg-white shadow-sm space-y-4">
                             @csrf
                             <div>
                                 <label for="summary" class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Conteúdo</label>
@@ -250,11 +376,43 @@
                             </div>
 
                             <div>
-                                <label for="image_url" class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Imagem por URL (opcional)</label>
-                                <input type="url" id="image_url" name="image_url" value="{{ old('image_url') }}"
-                                       class="w-full rounded-xl border-gray-300 focus:border-bruce focus:ring-bruce text-sm"
-                                       placeholder="https://.../foto.jpg">
-                                <p class="text-[11px] text-slate mt-1">O Google baixa a imagem por HTTPS. Formatos JPG/PNG, 250×250 pixels no mínimo.</p>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-2">Imagem (opcional)</label>
+                                <label class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-dashed border-gray-300 hover:border-bruce cursor-pointer transition-colors">
+                                    <input type="file" name="image" accept="image/jpeg,image/png" class="hidden"
+                                           x-on:change="
+                                               var f = $event.target.files[0];
+                                               if (!f) { imagePreview = null; imageName = ''; return; }
+                                               imageName = f.name;
+                                               var r = new FileReader();
+                                               r.onload = function (e) { imagePreview = e.target.result; };
+                                               r.readAsDataURL(f);
+                                           ">
+                                    <div x-show="!imagePreview" class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-mist text-slate flex items-center justify-center">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold text-ink">Escolher imagem</p>
+                                            <p class="text-[11px] text-slate">JPG ou PNG · mínimo 250×250 · até 5 MB</p>
+                                        </div>
+                                    </div>
+                                    <div x-show="imagePreview" x-cloak class="flex items-center gap-3 w-full">
+                                        <img :src="imagePreview" alt="prévia" class="w-16 h-16 rounded-xl object-cover border border-black/10">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-bold text-ink truncate" x-text="imageName"></p>
+                                            <button type="button"
+                                                    class="text-[11px] font-bold text-rose-600 hover:underline mt-1"
+                                                    x-on:click.prevent="
+                                                        imagePreview = null;
+                                                        imageName = '';
+                                                        $el.closest('label').querySelector('input[type=file]').value = '';
+                                                    ">
+                                                Remover imagem
+                                            </button>
+                                        </div>
+                                    </div>
+                                </label>
+                                <p class="text-[11px] text-slate mt-1">A imagem é enviada ao Google via URL pública do painel.</p>
                             </div>
 
                             <div class="flex justify-end">
@@ -282,6 +440,10 @@
                                         };
                                     @endphp
                                     <div class="p-4 rounded-2xl border border-black/5 bg-white flex items-start gap-4 flex-wrap">
+                                        @php $postImg = $post['media'][0]['googleUrl'] ?? $post['media'][0]['sourceUrl'] ?? null; @endphp
+                                        @if($postImg)
+                                            <img src="{{ $postImg }}" alt="post" class="w-16 h-16 rounded-xl object-cover border border-black/10 flex-shrink-0">
+                                        @endif
                                         <div class="flex-1 min-w-[200px]">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <span class="inline-flex items-center bg-{{ $badge[0] }}-50 text-{{ $badge[0] }}-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
