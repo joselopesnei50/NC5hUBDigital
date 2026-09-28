@@ -55,8 +55,19 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Fornecedor (Para despesas)</label>
-                    <input type="text" name="fornecedor" value="{{ $lancamento->fornecedor }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-bold text-[#0A1128]">Fornecedor (Para despesas)</label>
+                        <a href="{{ route('customer.fornecedores.create') }}" target="_blank" class="text-xs font-bold text-[#FF7A1A] hover:underline">
+                            + Cadastrar novo
+                        </a>
+                    </div>
+                    <input type="text" name="fornecedor" list="fornecedores-list" value="{{ $lancamento->fornecedor }}"
+                           class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
+                    <datalist id="fornecedores-list">
+                        @foreach($fornecedores as $f)
+                            <option value="{{ $f->nome }}">
+                        @endforeach
+                    </datalist>
                 </div>
 
                 <div class="md:col-span-2">

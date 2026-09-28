@@ -139,6 +139,11 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         ->names('customer.clientes-finais')
         ->parameters(['gestao-clientes' => 'clientes_finai']);
 
+    // Fornecedores
+    Route::resource('fornecedores', \App\Http\Controllers\Customer\FornecedorController::class)
+        ->names('customer.fornecedores')
+        ->except(['show']);
+
     // Dashboard de Vendas
     Route::get('dashboard-vendas', [\App\Http\Controllers\Customer\DashboardVendasController::class, 'index'])
         ->name('customer.dashboard-vendas');

@@ -72,4 +72,9 @@ class Cliente extends Model
     {
         return $this->hasMany(ProdutoServico::class);
     }
+
+    public function fornecedores()
+    {
+        return $this->hasMany(Fornecedor::class);
+    }
 }
