@@ -10,6 +10,7 @@ use App\Agent\LlmManager;
 use App\Agent\SnapshotBuilder;
 use App\Agent\Metrics\CashFlowMetric;
 use App\Agent\Metrics\CustomerSegmentMetric;
+use App\Agent\Metrics\GoogleBusinessMetric;
 use App\Agent\Metrics\InactiveCustomersMetric;
 use App\Agent\Metrics\PendingInvoicesMetric;
 use App\Agent\Metrics\ProductsPerformanceMetric;
@@ -47,6 +48,7 @@ class AgentServiceProvider extends ServiceProvider
                 $app->make(InactiveCustomersMetric::class),
                 $app->make(ProductsPerformanceMetric::class),
                 $app->make(ProjectDeliveryMetric::class),
+                $app->make(GoogleBusinessMetric::class),
             ]);
         });
 
