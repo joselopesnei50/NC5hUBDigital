@@ -46,21 +46,21 @@
         <div class="space-y-1">
             {{-- Visao Geral (solto no topo, sem grupo) --}}
             @php $overviewActive = request()->routeIs('customer.index'); @endphp
-            <a href="{{ route('customer.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $overviewActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-slate-300 hover:text-white hover:bg-white/10' }}">
+            <a href="{{ route('customer.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $overviewActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-white/85 hover:text-white hover:bg-white/10' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 Visão Geral
             </a>
 
             {{-- Grupo 1: Minha Conta NC5 (relacao com a agencia) --}}
             <details class="group pt-4" @if($groupIsActive($groupNC5)) open @endif>
-                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-bold text-white/40 uppercase tracking-widest hover:text-white/60 transition-colors">
+                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-bold text-white/70 uppercase tracking-widest hover:text-white transition-colors">
                     <span>Minha Conta NC5</span>
                     <svg class="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
                 <div class="space-y-1">
                     @foreach($groupNC5 as $item)
                         @php $isActive = request()->routeIs($item['match']); @endphp
-                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-slate-300 hover:text-white hover:bg-white/10' }}">
+                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-white/85 hover:text-white hover:bg-white/10' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/></svg>
                             {{ $item['label'] }}
                         </a>
@@ -70,14 +70,14 @@
 
             {{-- Grupo 2: Meu Negocio (uso das ferramentas do cliente) --}}
             <details class="group pt-4" @if($groupIsActive($groupNegocio)) open @endif>
-                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-bold text-white/40 uppercase tracking-widest hover:text-white/60 transition-colors">
+                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-bold text-white/70 uppercase tracking-widest hover:text-white transition-colors">
                     <span>Meu Negócio</span>
                     <svg class="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
                 <div class="space-y-1">
                     @foreach($groupNegocio as $item)
                         @php $isActive = request()->routeIs($item['match']); @endphp
-                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-slate-300 hover:text-white hover:bg-white/10' }}">
+                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-white/85 hover:text-white hover:bg-white/10' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/></svg>
                             {{ $item['label'] }}
                         </a>
@@ -87,14 +87,14 @@
 
             {{-- Grupo 3: Bruce IA (assistente) --}}
             <details class="group pt-4" @if($groupIsActive($groupBruce)) open @endif>
-                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-bold text-white/40 uppercase tracking-widest hover:text-white/60 transition-colors">
+                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-bold text-white/70 uppercase tracking-widest hover:text-white transition-colors">
                     <span>Bruce IA</span>
                     <svg class="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
                 <div class="space-y-1">
                     @foreach($groupBruce as $item)
                         @php $isActive = request()->routeIs($item['match']); @endphp
-                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-slate-300 hover:text-white hover:bg-white/10' }}">
+                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-white/85 hover:text-white hover:bg-white/10' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/></svg>
                             {{ $item['label'] }}
                         </a>
@@ -115,13 +115,13 @@
                 <p class="text-[10px] text-bruce font-bold uppercase tracking-wider">Conta Corporativa</p>
             </div>
         </div>
-        <a href="{{ route('customer.senha') }}" class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 font-semibold mb-1">
+        <a href="{{ route('customer.senha') }}" class="w-full text-left px-3 py-2 text-xs text-white/85 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 font-semibold mb-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             Trocar Senha
         </a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-rose-500/20 rounded-xl transition-all flex items-center gap-2 font-semibold">
+            <button type="submit" class="w-full text-left px-3 py-2 text-xs text-white/85 hover:text-white hover:bg-rose-500/20 rounded-xl transition-all flex items-center gap-2 font-semibold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 Sair
             </button>
