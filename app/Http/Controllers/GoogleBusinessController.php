@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Agent\Contracts\LlmDriver;
+use App\Agent\DTOs\PromptPayload;
 use App\Services\GoogleBusinessProfileService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GoogleBusinessController extends Controller
 {
@@ -333,6 +337,68 @@ class GoogleBusinessController extends Controller
             ->with('success', 'Publicação removida.');
     }
 
+    /**
+     * Pede pro Bruce (DeepSeek) sugerir uma resposta pra avaliação. Recebe
+     * estrelas + comentário + tom e devolve JSON com o rascunho — o cliente
+     * ainda precisa clicar "Enviar resposta" pra ir pro Google.
+     */
+    public function suggestReply(Request $request, LlmDriver $llm)
+    {
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) {
+            return response()->json(['error' => 'Cliente não autenticado.'], 401);
+        }
+
+        $validated = $request->validate([
+            'stars'    => 'required|integer|min:1|max:5',
+            'comment'  => 'nullable|string|max:4000',
+            'reviewer' => 'nullable|string|max:200',
+            'tom'      => 'nullable|in:formal,amistoso',
+        ]);
+
+        $stars    = (int) $validated['stars'];
+        $comment  = trim((string) ($validated['comment'] ?? ''));
+        $reviewer = trim((string) ($validated['reviewer'] ?? 'Cliente'));
+        $tom      = $validated['tom'] ?? 'amistoso';
+
+        $tomInstr = $tom === 'formal'
+            ? 'Escreva num tom cordial e profissional, sem gírias.'
+            : 'Escreva num tom próximo e amistoso, mantendo o profissionalismo.';
+
+        $system = <<<TXT
+Você é assistente de atendimento de uma empresa que responde avaliações do Google Meu Negócio em pt-BR.
+Regras rígidas:
+- No máximo 3 frases curtas (até ~400 caracteres).
+- {$tomInstr}
+- Se a avaliação for negativa (1-3 estrelas): reconheça o problema com empatia, evite defesa, chame pra continuar a conversa por canal privado.
+- Se a avaliação for positiva (4-5 estrelas): agradeça de forma genuína e específica, sem parecer script.
+- Nunca prometa reembolso/desconto sem contexto.
+- Nunca peça dados sensíveis (CPF, cartão, senha).
+- Nunca cite valores, produtos ou promoções que você não sabe.
+- Responda APENAS com o texto da resposta, sem prefixo ("Resposta:", aspas, markdown).
+TXT;
+
+        $razao = $cliente->razao_social ?? 'nossa empresa';
+        $user = "Avaliação de {$reviewer} — {$stars} estrelas.\n"
+              . ($comment !== '' ? "Comentário: {$comment}\n" : "(sem comentário)\n")
+              . "Empresa: {$razao}\n"
+              . "Escreva a resposta.";
+
+        try {
+            $response = $llm->complete(new PromptPayload($system, $user));
+            $sugestao = trim($response->content);
+            // Remove aspas envolventes caso o LLM insista
+            $sugestao = trim($sugestao, "\"'");
+            if ($sugestao === '') {
+                return response()->json(['error' => 'O Bruce não conseguiu gerar uma sugestão agora. Tente de novo.'], 502);
+            }
+            return response()->json(['sugestao' => $sugestao]);
+        } catch (\Throwable $e) {
+            Log::warning('[GoogleBusiness] Bruce falhou na sugestao cliente=' . $cliente->id . ' erro=' . $e->getMessage());
+            return response()->json(['error' => 'Não foi possível gerar a sugestão agora. Tente de novo em instantes.'], 502);
+        }
+    }
+
     public function replyReview(Request $request)
     {
         $cliente = $this->requireCliente();
@@ -363,5 +429,140 @@ class GoogleBusinessController extends Controller
 
         return redirect()->route('customer.google-business.index')
             ->with('success', 'Resposta enviada.');
+    }
+
+    /**
+     * Junta metricas + posts + reviews do cache (ou busca fresco) — usado
+     * pelos exports pra evitar duplicar a orquestracao da index.
+     */
+    protected function loadDadosExport($cliente): array
+    {
+        if (empty($cliente->google_location_id)) {
+            return ['ok' => false, 'msg' => 'Selecione uma ficha antes de exportar.'];
+        }
+
+        try {
+            $metricas = Cache::remember($this->cacheKey($cliente, 'metricas'), 3600, function () use ($cliente) {
+                return $this->googleService->getPerformanceComparison($cliente, $cliente->google_location_id, 30);
+            });
+            $posts = Cache::remember($this->cacheKey($cliente, 'posts'), 300, function () use ($cliente) {
+                return $this->googleService->listPosts($cliente, $cliente->google_location_id);
+            });
+            $reviews = Cache::remember($this->cacheKey($cliente, 'reviews'), 300, function () use ($cliente) {
+                return $this->googleService->listReviews($cliente, $cliente->google_location_id);
+            });
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'msg' => $e->getMessage()];
+        }
+
+        return [
+            'ok'       => true,
+            'metricas' => $metricas,
+            'posts'    => $posts,
+            'reviews'  => $reviews,
+            'gerado_em'=> now(),
+        ];
+    }
+
+    public function exportCsv()
+    {
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) return $cliente;
+
+        $data = $this->loadDadosExport($cliente);
+        if (!$data['ok']) {
+            return redirect()->route('customer.google-business.index')
+                ->with('error', 'Não foi possível exportar: ' . $data['msg']);
+        }
+
+        $filename = 'gmn-' . $cliente->id . '-' . now()->format('Y-m-d') . '.csv';
+
+        return new StreamedResponse(function () use ($data, $cliente) {
+            $out = fopen('php://output', 'w');
+            // BOM UTF-8 pra Excel abrir com acentos corretos
+            fwrite($out, "\xEF\xBB\xBF");
+
+            $atual = $data['metricas']['atual'] ?? [];
+            $anterior = $data['metricas']['anterior'] ?? [];
+            $delta = $data['metricas']['delta'] ?? [];
+
+            fputcsv($out, ['Google Meu Negócio — Relatório de desempenho']);
+            fputcsv($out, ['Empresa', $cliente->razao_social ?? '—']);
+            fputcsv($out, ['Gerado em', $data['gerado_em']->format('d/m/Y H:i')]);
+            if (!empty($atual['periodo'])) {
+                fputcsv($out, ['Período', $atual['periodo']['inicio'] . ' a ' . $atual['periodo']['fim']]);
+            }
+            fputcsv($out, []);
+
+            fputcsv($out, ['Métrica', 'Atual (30d)', 'Anterior (30d)', 'Variação %']);
+            $formatDelta = fn ($d) => $d === null ? 'novo' : (number_format($d, 1, ',', '.') . '%');
+            fputcsv($out, ['Visualizações',    $atual['impressoes'] ?? 0,   $anterior['impressoes'] ?? 0,   $formatDelta($delta['impressoes'] ?? 0)]);
+            fputcsv($out, ['Cliques no site',  $atual['cliques_site'] ?? 0, $anterior['cliques_site'] ?? 0, $formatDelta($delta['cliques_site'] ?? 0)]);
+            fputcsv($out, ['Ligações',         $atual['ligacoes'] ?? 0,     $anterior['ligacoes'] ?? 0,     $formatDelta($delta['ligacoes'] ?? 0)]);
+            fputcsv($out, ['Pedidos de rota',  $atual['rotas'] ?? 0,        $anterior['rotas'] ?? 0,        $formatDelta($delta['rotas'] ?? 0)]);
+            fputcsv($out, []);
+            fputcsv($out, ['Distribuição', 'Total']);
+            fputcsv($out, ['Impressões via Busca', $atual['impressoes_busca'] ?? 0]);
+            fputcsv($out, ['Impressões via Maps',  $atual['impressoes_maps'] ?? 0]);
+            fputcsv($out, ['Impressões Mobile',    $atual['impressoes_mobile'] ?? 0]);
+            fputcsv($out, ['Impressões Desktop',   $atual['impressoes_desktop'] ?? 0]);
+            fputcsv($out, []);
+
+            fputcsv($out, ['Publicações recentes']);
+            fputcsv($out, ['Data', 'Status', 'Resumo', 'Link']);
+            foreach (($data['posts'] ?? []) as $p) {
+                fputcsv($out, [
+                    !empty($p['createTime']) ? \Carbon\Carbon::parse($p['createTime'])->format('d/m/Y H:i') : '',
+                    $p['state'] ?? '',
+                    Str::limit((string) ($p['summary'] ?? ''), 200),
+                    $p['searchUrl'] ?? '',
+                ]);
+            }
+            fputcsv($out, []);
+
+            fputcsv($out, ['Avaliações']);
+            fputcsv($out, ['Média', 'Total']);
+            fputcsv($out, [number_format((float) ($data['reviews']['media'] ?? 0), 1, ',', '.'), $data['reviews']['total'] ?? 0]);
+            fputcsv($out, []);
+            fputcsv($out, ['Data', 'Estrelas', 'Autor', 'Comentário', 'Sua resposta']);
+            foreach (($data['reviews']['reviews'] ?? []) as $r) {
+                fputcsv($out, [
+                    !empty($r['updateTime']) ? \Carbon\Carbon::parse($r['updateTime'])->format('d/m/Y') : '',
+                    \App\Services\GoogleBusinessProfileService::estrelas($r['starRating'] ?? null),
+                    $r['reviewer']['displayName'] ?? '',
+                    $r['comment'] ?? '',
+                    $r['reviewReply']['comment'] ?? '',
+                ]);
+            }
+
+            fclose($out);
+        }, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control'       => 'no-store, no-cache',
+        ]);
+    }
+
+    public function exportPdf()
+    {
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) return $cliente;
+
+        $data = $this->loadDadosExport($cliente);
+        if (!$data['ok']) {
+            return redirect()->route('customer.google-business.index')
+                ->with('error', 'Não foi possível exportar: ' . $data['msg']);
+        }
+
+        $pdf = Pdf::loadView('customer.google-business.pdf', [
+            'cliente'  => $cliente,
+            'metricas' => $data['metricas'],
+            'posts'    => $data['posts'],
+            'reviews'  => $data['reviews'],
+            'geradoEm' => $data['gerado_em'],
+        ])->setPaper('a4');
+
+        $filename = 'gmn-' . $cliente->id . '-' . now()->format('Y-m-d') . '.pdf';
+        return $pdf->download($filename);
     }
 }
