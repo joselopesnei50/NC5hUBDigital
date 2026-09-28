@@ -18,11 +18,14 @@ class CustomerController extends Controller
             abort(403, 'Acesso negado. Sua conta não está vinculada a um cliente.');
         }
 
-        $faturasPendentes = $cliente->faturas()->where('status', 'pendente')->count();
+        // === Da NC5 pra você (o que a agência envia) ===
+        $faturasPendentes    = $cliente->faturas()->where('status', 'pendente')->count();
         $materiaisAguardando = $cliente->materiais()->where('status_aprovacao', 'pendente')->count();
-        $contratosPendentes = $cliente->contratos()->where('status_assinatura', '!=', 'assinado')->count();
+        $contratosPendentes  = $cliente->contratos()->where('status_assinatura', '!=', 'assinado')->count();
+        $briefingsPendentes  = $cliente->briefings()->where('status', 'pendente')->count();
+        $ticketsAbertos      = $cliente->tickets()->where('status', '!=', 'fechado')->count();
 
-        // Alertas proativos do Bruce ainda ativos (nao dispensados)
+        // === Alertas proativos do Bruce ainda ativos ===
         $alertasAtivos = \App\Models\AgentAlert::doCliente($cliente->id)
             ->ativos()
             ->latest()
@@ -30,13 +33,59 @@ class CustomerController extends Controller
             ->get();
         $alertasAtivosTotal = \App\Models\AgentAlert::doCliente($cliente->id)->ativos()->count();
 
+        // === Seu negócio na plataforma (uso das ferramentas do cliente) ===
+        $inicioMes = \Carbon\Carbon::now()->startOfMonth();
+        $em7dias   = \Carbon\Carbon::now()->addDays(7)->endOfDay();
+
+        $financeiroMes = \App\Models\LancamentoFinanceiro::where('cliente_id', $cliente->id)
+            ->where('data_vencimento', '>=', $inicioMes)
+            ->selectRaw("SUM(CASE WHEN tipo = 'receber' AND status = 'pago' THEN valor ELSE 0 END) as receitas")
+            ->selectRaw("SUM(CASE WHEN tipo = 'pagar' AND status = 'pago' THEN valor ELSE 0 END) as despesas")
+            ->first();
+        $saldoMes = (float) ($financeiroMes->receitas ?? 0) - (float) ($financeiroMes->despesas ?? 0);
+
+        $aVencer7d = \App\Models\LancamentoFinanceiro::where('cliente_id', $cliente->id)
+            ->where('tipo', 'pagar')
+            ->where('status', 'pendente')
+            ->whereBetween('data_vencimento', [now(), $em7dias])
+            ->count();
+
+        $clientesFinaisTotal = $cliente->clientesFinais()->count();
+        $projetosAtivos = \App\Models\Projeto::where('cliente_id', $cliente->id)
+            ->whereIn('status', ['pendente', 'em_andamento', 'aguardando_cliente'])
+            ->count();
+        $proximoProjeto = \App\Models\Projeto::where('cliente_id', $cliente->id)
+            ->whereIn('status', ['pendente', 'em_andamento', 'aguardando_cliente'])
+            ->whereNotNull('data_previsao')
+            ->orderBy('data_previsao', 'asc')
+            ->first();
+        $fornecedoresTotal = $cliente->fornecedores()->count();
+
+        // Google Meu Negócio: só usa cache já quente da tela do módulo — NUNCA
+        // dispara chamada à API do Google no dashboard (arriscado + lento).
+        $gbpConectado = !empty($cliente->google_refresh_token);
+        $gbpMetricas  = null;
+        if ($gbpConectado && !empty($cliente->google_location_id)) {
+            $gbpMetricas = \Illuminate\Support\Facades\Cache::get("gbp:{$cliente->id}:metricas");
+        }
+
         return view('customer.index', compact(
             'cliente',
             'faturasPendentes',
             'materiaisAguardando',
             'contratosPendentes',
+            'briefingsPendentes',
+            'ticketsAbertos',
             'alertasAtivos',
-            'alertasAtivosTotal'
+            'alertasAtivosTotal',
+            'saldoMes',
+            'aVencer7d',
+            'clientesFinaisTotal',
+            'projetosAtivos',
+            'proximoProjeto',
+            'fornecedoresTotal',
+            'gbpConectado',
+            'gbpMetricas'
         ));
     }
 
