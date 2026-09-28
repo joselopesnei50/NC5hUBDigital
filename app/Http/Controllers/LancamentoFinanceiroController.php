@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LancamentoFinanceiro;
 use App\Models\ClienteFinal;
+use App\Models\Fornecedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,8 +24,10 @@ class LancamentoFinanceiroController extends Controller
 
     public function create()
     {
-        $clientesFinais = ClienteFinal::where('cliente_id', Auth::user()->cliente->id)->get();
-        return view('customer.lancamentos.create', compact('clientesFinais'));
+        $clienteId = Auth::user()->cliente->id;
+        $clientesFinais = ClienteFinal::where('cliente_id', $clienteId)->get();
+        $fornecedores  = Fornecedor::where('cliente_id', $clienteId)->orderBy('nome')->get();
+        return view('customer.lancamentos.create', compact('clientesFinais', 'fornecedores'));
     }
 
     public function store(Request $request)
@@ -50,8 +53,10 @@ class LancamentoFinanceiroController extends Controller
     {
         if ($lancamento->cliente_id !== Auth::user()->cliente->id) abort(403);
 
-        $clientesFinais = ClienteFinal::where('cliente_id', Auth::user()->cliente->id)->get();
-        return view('customer.lancamentos.edit', compact('lancamento', 'clientesFinais'));
+        $clienteId = Auth::user()->cliente->id;
+        $clientesFinais = ClienteFinal::where('cliente_id', $clienteId)->get();
+        $fornecedores  = Fornecedor::where('cliente_id', $clienteId)->orderBy('nome')->get();
+        return view('customer.lancamentos.edit', compact('lancamento', 'clientesFinais', 'fornecedores'));
     }
 
     public function update(Request $request, LancamentoFinanceiro $lancamento)

@@ -54,8 +54,22 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-[#0A1128] mb-2">Fornecedor (Para despesas)</label>
-                    <input type="text" name="fornecedor" placeholder="Ex: AWS, Google" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-bold text-[#0A1128]">Fornecedor (Para despesas)</label>
+                        <a href="{{ route('customer.fornecedores.create') }}" target="_blank" class="text-xs font-bold text-[#FF7A1A] hover:underline">
+                            + Cadastrar novo
+                        </a>
+                    </div>
+                    <input type="text" name="fornecedor" list="fornecedores-list" placeholder="Digite ou escolha um cadastrado"
+                           class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128]">
+                    <datalist id="fornecedores-list">
+                        @foreach($fornecedores as $f)
+                            <option value="{{ $f->nome }}">
+                        @endforeach
+                    </datalist>
+                    @if($fornecedores->isEmpty())
+                        <p class="mt-1 text-[11px] text-gray-500">Você ainda não tem fornecedores cadastrados. <a href="{{ route('customer.fornecedores.index') }}" target="_blank" class="text-[#FF7A1A] font-bold hover:underline">Cadastrar</a> agiliza os próximos lançamentos.</p>
+                    @endif
                 </div>
 
                 <div class="md:col-span-2">
