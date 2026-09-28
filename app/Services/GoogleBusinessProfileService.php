@@ -233,15 +233,16 @@ class GoogleBusinessProfileService
 
     /**
      * Métricas de desempenho (Business Profile Performance API v1).
-     * Termina ontem porque o dado do dia atual raramente está pronto.
+     * Se $end não vier, usa ontem (o Google leva 2-3 dias pra fechar o dado atual).
+     * Retorna totais, breakdown mobile/desktop, séries diárias por métrica.
      */
-    public function getPerformanceMetrics($cliente, string $v4Name, int $dias = 30): array
+    public function getPerformanceMetrics($cliente, string $v4Name, int $dias = 30, ?Carbon $end = null): array
     {
         $this->setClientForCliente($cliente);
 
         $locOnly = self::locationOnly($v4Name);
 
-        $end   = Carbon::yesterday();
+        $end   = $end ? $end->copy() : Carbon::yesterday();
         $start = $end->copy()->subDays(max(1, $dias) - 1);
 
         $metricas = [
@@ -275,7 +276,11 @@ class GoogleBusinessProfileService
 
         // Somas
         $total = array_fill_keys($metricas, 0);
-        $serie = []; // 'Y-m-d' => int (impressões por dia)
+        // Séries por métrica agregada ('Y-m-d' => int)
+        $serieImpressoes = [];
+        $serieCliques    = [];
+        $serieLigacoes   = [];
+        $serieRotas      = [];
 
         foreach (($data['multiDailyMetricTimeSeries'] ?? []) as $multi) {
             foreach (($multi['dailyMetricTimeSeries'] ?? []) as $seriesEntry) {
@@ -287,36 +292,88 @@ class GoogleBusinessProfileService
                     if ($metric && isset($total[$metric])) {
                         $total[$metric] += $valor;
                     }
-                    if (in_array($metric, [
-                        'BUSINESS_IMPRESSIONS_DESKTOP_MAPS',
-                        'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH',
-                        'BUSINESS_IMPRESSIONS_MOBILE_MAPS',
-                        'BUSINESS_IMPRESSIONS_MOBILE_SEARCH',
-                    ], true)) {
-                        $d = $dv['date'] ?? null;
-                        if ($d && isset($d['year'], $d['month'], $d['day'])) {
-                            $key = sprintf('%04d-%02d-%02d', $d['year'], $d['month'], $d['day']);
-                            $serie[$key] = ($serie[$key] ?? 0) + $valor;
-                        }
+
+                    $d = $dv['date'] ?? null;
+                    if (!$d || !isset($d['year'], $d['month'], $d['day'])) continue;
+                    $key = sprintf('%04d-%02d-%02d', $d['year'], $d['month'], $d['day']);
+
+                    switch ($metric) {
+                        case 'BUSINESS_IMPRESSIONS_DESKTOP_MAPS':
+                        case 'BUSINESS_IMPRESSIONS_DESKTOP_SEARCH':
+                        case 'BUSINESS_IMPRESSIONS_MOBILE_MAPS':
+                        case 'BUSINESS_IMPRESSIONS_MOBILE_SEARCH':
+                            $serieImpressoes[$key] = ($serieImpressoes[$key] ?? 0) + $valor;
+                            break;
+                        case 'WEBSITE_CLICKS':
+                            $serieCliques[$key] = ($serieCliques[$key] ?? 0) + $valor;
+                            break;
+                        case 'CALL_CLICKS':
+                            $serieLigacoes[$key] = ($serieLigacoes[$key] ?? 0) + $valor;
+                            break;
+                        case 'BUSINESS_DIRECTION_REQUESTS':
+                            $serieRotas[$key] = ($serieRotas[$key] ?? 0) + $valor;
+                            break;
                     }
                 }
             }
         }
 
-        ksort($serie);
+        ksort($serieImpressoes);
+        ksort($serieCliques);
+        ksort($serieLigacoes);
+        ksort($serieRotas);
 
-        $maps = $total['BUSINESS_IMPRESSIONS_DESKTOP_MAPS']   + $total['BUSINESS_IMPRESSIONS_MOBILE_MAPS'];
+        $maps  = $total['BUSINESS_IMPRESSIONS_DESKTOP_MAPS']   + $total['BUSINESS_IMPRESSIONS_MOBILE_MAPS'];
         $busca = $total['BUSINESS_IMPRESSIONS_DESKTOP_SEARCH'] + $total['BUSINESS_IMPRESSIONS_MOBILE_SEARCH'];
+        $desktop = $total['BUSINESS_IMPRESSIONS_DESKTOP_MAPS'] + $total['BUSINESS_IMPRESSIONS_DESKTOP_SEARCH'];
+        $mobile  = $total['BUSINESS_IMPRESSIONS_MOBILE_MAPS']  + $total['BUSINESS_IMPRESSIONS_MOBILE_SEARCH'];
 
         return [
             'periodo'          => ['inicio' => $start->toDateString(), 'fim' => $end->toDateString(), 'dias' => $dias],
             'impressoes'       => $maps + $busca,
             'impressoes_maps'  => $maps,
             'impressoes_busca' => $busca,
+            'impressoes_desktop' => $desktop,
+            'impressoes_mobile'  => $mobile,
             'cliques_site'     => $total['WEBSITE_CLICKS'],
             'ligacoes'         => $total['CALL_CLICKS'],
             'rotas'            => $total['BUSINESS_DIRECTION_REQUESTS'],
-            'serie'            => $serie,
+            // 'serie' é a de impressões (compat com view antiga)
+            'serie'            => $serieImpressoes,
+            'serie_impressoes' => $serieImpressoes,
+            'serie_cliques'    => $serieCliques,
+            'serie_ligacoes'   => $serieLigacoes,
+            'serie_rotas'      => $serieRotas,
+        ];
+    }
+
+    /**
+     * Compara $dias atuais (ontem - $dias + 1 .. ontem) com os $dias imediatamente
+     * anteriores. Devolve totais, deltas em % (null quando o anterior é 0 e o
+     * atual não, pra view renderizar "novo" em vez de infinito).
+     */
+    public function getPerformanceComparison($cliente, string $v4Name, int $dias = 30): array
+    {
+        $ontem = Carbon::yesterday();
+        $atual    = $this->getPerformanceMetrics($cliente, $v4Name, $dias, $ontem);
+        $anterior = $this->getPerformanceMetrics($cliente, $v4Name, $dias, $ontem->copy()->subDays($dias));
+
+        $delta = function ($novo, $velho) {
+            if ($velho === 0) {
+                return $novo === 0 ? 0.0 : null; // null = "novo"
+            }
+            return round((($novo - $velho) / $velho) * 100, 1);
+        };
+
+        return [
+            'atual'    => $atual,
+            'anterior' => $anterior,
+            'delta'    => [
+                'impressoes'   => $delta($atual['impressoes'],   $anterior['impressoes']),
+                'cliques_site' => $delta($atual['cliques_site'], $anterior['cliques_site']),
+                'ligacoes'     => $delta($atual['ligacoes'],     $anterior['ligacoes']),
+                'rotas'        => $delta($atual['rotas'],        $anterior['rotas']),
+            ],
         ];
     }
 

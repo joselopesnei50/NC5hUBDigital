@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class GoogleBusinessController extends Controller
@@ -99,7 +100,7 @@ class GoogleBusinessController extends Controller
 
             try {
                 $metricas = Cache::remember($this->cacheKey($cliente, 'metricas'), 3600, function () use ($cliente, $v4Name) {
-                    return $this->googleService->getPerformanceMetrics($cliente, $v4Name, 30);
+                    return $this->googleService->getPerformanceComparison($cliente, $v4Name, 30);
                 });
             } catch (\Throwable $e) {
                 $erros['metricas'] = $e->getMessage();
@@ -250,18 +251,32 @@ class GoogleBusinessController extends Controller
         }
 
         $validated = $request->validate([
-            'summary'   => 'required|string|max:1500',
-            'cta_type'  => 'nullable|in:LEARN_MORE,BOOK,ORDER,SHOP,SIGN_UP,CALL',
-            'cta_url'   => 'nullable|url|required_if:cta_type,LEARN_MORE|required_if:cta_type,BOOK|required_if:cta_type,ORDER|required_if:cta_type,SHOP|required_if:cta_type,SIGN_UP',
-            'image_url' => 'nullable|url',
+            'summary'  => 'required|string|max:1500',
+            'cta_type' => 'nullable|in:LEARN_MORE,BOOK,ORDER,SHOP,SIGN_UP,CALL',
+            'cta_url'  => 'nullable|url|required_if:cta_type,LEARN_MORE|required_if:cta_type,BOOK|required_if:cta_type,ORDER|required_if:cta_type,SHOP|required_if:cta_type,SIGN_UP',
+            'image'    => 'nullable|image|mimes:jpg,jpeg,png|max:5120|dimensions:min_width=250,min_height=250',
         ], [
             'summary.required'    => 'Escreva o conteúdo da publicação.',
             'summary.max'         => 'A publicação não pode passar de 1500 caracteres.',
             'cta_type.in'         => 'Tipo de botão inválido.',
             'cta_url.url'         => 'Informe uma URL válida para o botão.',
             'cta_url.required_if' => 'Este tipo de botão exige uma URL de destino.',
-            'image_url.url'       => 'Informe uma URL de imagem válida.',
+            'image.image'         => 'O arquivo enviado precisa ser uma imagem.',
+            'image.mimes'         => 'Use JPG ou PNG.',
+            'image.max'           => 'A imagem não pode passar de 5 MB.',
+            'image.dimensions'    => 'A imagem precisa ter no mínimo 250×250 pixels (exigência do Google).',
         ]);
+
+        // Upload: o Google precisa baixar por HTTPS público, então salva em
+        // storage/app/public/gbp-posts/ (exige `php artisan storage:link`).
+        $imageUrl = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $ext  = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $name = 'c' . $cliente->id . '-' . Str::random(20) . '.' . $ext;
+            $file->storeAs('gbp-posts', $name, 'public');
+            $imageUrl = asset('storage/gbp-posts/' . $name);
+        }
 
         try {
             $this->googleService->createPost(
@@ -269,12 +284,16 @@ class GoogleBusinessController extends Controller
                 $cliente->google_location_id,
                 $validated['summary'],
                 [
-                    'cta_type'  => $validated['cta_type']  ?? null,
-                    'cta_url'   => $validated['cta_url']   ?? null,
-                    'image_url' => $validated['image_url'] ?? null,
+                    'cta_type'  => $validated['cta_type'] ?? null,
+                    'cta_url'   => $validated['cta_url']  ?? null,
+                    'image_url' => $imageUrl,
                 ]
             );
         } catch (\Throwable $e) {
+            // Se falhou publicando no Google, remove o arquivo local pra não deixar orfão
+            if ($imageUrl && isset($name)) {
+                Storage::disk('public')->delete('gbp-posts/' . $name);
+            }
             return redirect()->route('customer.google-business.index')
                 ->with('error', 'Não foi possível publicar: ' . $e->getMessage());
         }
