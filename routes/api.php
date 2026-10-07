@@ -19,3 +19,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/webhooks/abacatepay', [\App\Http\Controllers\Api\WebhookController::class, 'handleAbacatePay']);
+Route::post('/webhooks/evolution/{token}', [\App\Http\Controllers\Api\WhatsappWebhookController::class, 'handle']);

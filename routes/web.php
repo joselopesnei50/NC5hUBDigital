@@ -198,6 +198,19 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         ->name('customer.alertas.lido');
     Route::post('alertas/{alerta}/dispensar', [\App\Http\Controllers\Customer\AlertsController::class, 'dispensar'])
         ->name('customer.alertas.dispensar');
+
+    // WhatsApp (Evolution API) - Onda 1: inbox mínimo
+    Route::prefix('whatsapp')->name('customer.whatsapp.')->group(function () {
+        Route::get('conexao', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'index'])->name('conexao');
+        Route::post('conexao/connect', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'connect'])->name('connect');
+        Route::get('conexao/qr', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'qr'])->name('qr');
+        Route::get('conexao/status', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'status'])->name('status');
+        Route::post('conexao/disconnect', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'disconnect'])->name('disconnect');
+
+        Route::get('inbox', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'index'])->name('inbox');
+        Route::get('inbox/{chat}', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'show'])->name('chat');
+        Route::post('inbox/{chat}/send', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'send'])->name('send');
+    });
 });
 
 require __DIR__.'/auth.php';
