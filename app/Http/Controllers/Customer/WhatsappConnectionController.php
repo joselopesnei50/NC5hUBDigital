@@ -44,7 +44,15 @@ class WhatsappConnectionController extends Controller
         $result = $this->evo->createInstance($instance->instance_name, $instance->instance_token);
 
         if (isset($result['error'])) {
-            return back()->with('error', $result['error']);
+            $msg = $result['error'];
+            if (!empty($result['details'])) {
+                $msg .= ' — Evolution respondeu: ' . mb_substr((string) $result['details'], 0, 300);
+            }
+            if (!$instance->wasRecentlyCreated) {
+                return back()->with('error', $msg);
+            }
+            $instance->delete();
+            return back()->with('error', $msg);
         }
 
         $instance->update(['status' => 'connecting']);
