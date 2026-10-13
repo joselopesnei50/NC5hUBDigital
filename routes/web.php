@@ -29,6 +29,11 @@ Route::post('/analise-gratuita/processar', [\App\Http\Controllers\AnalysisContro
 Route::get('/contato', [\App\Http\Controllers\ContatoController::class, 'index'])->name('contato.index');
 Route::post('/contato', [\App\Http\Controllers\ContatoController::class, 'store'])->name('contato.store');
 
+// Assinatura pública de contrato de prestador (link por token)
+Route::get('/contrato-prestador/{token}', [\App\Http\Controllers\PublicContratoPrestadorController::class, 'show'])->name('public.contrato-prestador.show');
+Route::post('/contrato-prestador/{token}/assinar', [\App\Http\Controllers\PublicContratoPrestadorController::class, 'sign'])->middleware('throttle:5,1')->name('public.contrato-prestador.sign');
+Route::get('/contrato-prestador/{token}/pdf', [\App\Http\Controllers\PublicContratoPrestadorController::class, 'downloadPdf'])->name('public.contrato-prestador.pdf');
+
 // Páginas legais
 Route::view('/privacidade', 'public.privacidade')->name('privacidade');
 Route::view('/termos', 'public.termos')->name('termos');
@@ -59,6 +64,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::resource('contratos', \App\Http\Controllers\Admin\ContratoController::class);
     Route::get('contratos/{id}/pdf', [\App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('contratos.pdf');
+
+    // Prestadores de serviço (NC5)
+    Route::resource('prestadores', \App\Http\Controllers\Admin\PrestadorController::class)
+        ->parameters(['prestadores' => 'prestador']);
+
+    // Contratos com prestadores (template separado)
+    Route::get('contratos-prestadores/{contrato}/pdf', [\App\Http\Controllers\Admin\ContratoPrestadorController::class, 'downloadPdf'])->name('contratos-prestadores.pdf');
+    Route::post('contratos-prestadores/{contrato}/enviar-email', [\App\Http\Controllers\Admin\ContratoPrestadorController::class, 'enviarEmail'])->name('contratos-prestadores.enviar-email');
+    Route::resource('contratos-prestadores', \App\Http\Controllers\Admin\ContratoPrestadorController::class)
+        ->parameters(['contratos-prestadores' => 'contrato']);
     Route::resource('faturas', \App\Http\Controllers\Admin\FaturaController::class);
     Route::post('faturas/{id}/enviar-email', [\App\Http\Controllers\Admin\FaturaController::class, 'enviarEmail'])->name('faturas.enviar_email');
     Route::resource('materiais', \App\Http\Controllers\Admin\MaterialController::class);
