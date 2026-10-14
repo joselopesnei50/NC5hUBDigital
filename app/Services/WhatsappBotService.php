@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Agent\Chat\ToolRegistry;
+use App\Agent\Chat\Tools\CancelarAgendamentoWhatsappTool;
 use App\Agent\Chat\Tools\ConsultarAgendaWhatsappTool;
 use App\Agent\Chat\Tools\CriarAgendamentoWhatsappTool;
+use App\Agent\Chat\Tools\ListarMeusAgendamentosWhatsappTool;
 use App\Agent\DTOs\PromptPayload;
 use App\Agent\LlmManager;
 use App\Models\ClienteFinal;
@@ -33,6 +35,8 @@ class WhatsappBotService
         $this->tools = new ToolRegistry();
         $this->tools->register(new CriarAgendamentoWhatsappTool());
         $this->tools->register(new ConsultarAgendaWhatsappTool());
+        $this->tools->register(new ListarMeusAgendamentosWhatsappTool());
+        $this->tools->register(new CancelarAgendamentoWhatsappTool());
     }
 
     public function generateReply(WhatsappChat $chat, string $inboundText, ?string $inboundMessageId = null): ?string
@@ -254,9 +258,13 @@ class WhatsappBotService
             ->count();
         $isFirstInteraction = $outboundCount === 0;
 
+        $training = WhatsappBotTraining::where('cliente_id', $chat->cliente_id)->first();
+
         $context = [
             'hoje' => now()->format('Y-m-d'),
             'dia_da_semana_hoje' => now()->isoFormat('dddd'),
+            'horario_comercial' => $this->summarizeBusinessHours($training),
+            'duracao_padrao_minutos' => (int) ($training?->duracao_padrao_atendimento_min ?: 60),
             'is_first_interaction' => $isFirstInteraction,
             'is_returning_customer' => false,
             'customer_name' => $chat->contact_name,
@@ -340,14 +348,20 @@ class WhatsappBotService
         }
 
         $parts[] = "AGENDAMENTOS (FERRAMENTAS DISPONIVEIS):\n"
-            . "- Voce tem duas tools: consultar_agenda e criar_agendamento.\n"
-            . "- Quando o cliente pedir pra marcar/agendar, SIGA ESTE FLUXO:\n"
+            . "- Tools: consultar_agenda, criar_agendamento, listar_meus_agendamentos, cancelar_agendamento.\n"
+            . "- NUNCA proponha ou agende horario fora do horario_comercial do snapshot. Se o cliente pedir fora, informe o horario de funcionamento e sugira o proximo horario valido.\n"
+            . "- Fluxo pra MARCAR:\n"
             . "  1. Entenda o que ele quer agendar e para quando.\n"
-            . "  2. Opcional: use consultar_agenda pra ver se o horario ja esta ocupado.\n"
-            . "  3. REPITA pro cliente a proposta por escrito: \"Deixa confirmar: X dia Y as Z horas, pode ser?\". ESPERE ele responder sim/confirmo.\n"
-            . "  4. SOMENTE depois do SIM EXPLICITO, chame criar_agendamento. Nunca antes.\n"
-            . "- Se o cliente quiser desmarcar ou alterar, oriente a falar com atendente humano (retorne " . self::ESCALATION_SENTINEL . ").\n"
-            . "- Interprete datas relativas (\"amanha\", \"sexta\", \"dia 15\") pra YYYY-MM-DD baseando-se na data de hoje do snapshot.";
+            . "  2. Opcional: consultar_agenda pra ver ocupacao do dia.\n"
+            . "  3. REPITA a proposta: \"Deixa confirmar: X dia Y as Z, pode ser?\". ESPERE o SIM explicito.\n"
+            . "  4. Chame criar_agendamento. Se a tool retornar erro conflito_de_horario ou horario_fora_do_expediente, OFERECA pro cliente as sugestoes retornadas pela tool e espere ele escolher uma antes de tentar criar de novo.\n"
+            . "- Fluxo pra CANCELAR ou REMARCAR:\n"
+            . "  1. Chame listar_meus_agendamentos pra pegar o id correto.\n"
+            . "  2. Se tiver mais de um, pergunte ao cliente QUAL (data+titulo) ele quer alterar.\n"
+            . "  3. CONFIRME: \"Vou cancelar o agendamento de X dia Y, confirma?\". ESPERE o SIM.\n"
+            . "  4. Chame cancelar_agendamento com o appointment_id.\n"
+            . "  5. Se for remarcacao, apos cancelar siga o fluxo pra MARCAR com o novo horario.\n"
+            . "- Interprete datas relativas (\"amanha\", \"sexta\", \"dia 15\") pra YYYY-MM-DD baseando-se em hoje do snapshot.";
 
         $parts[] = "REGRAS GERAIS:\n"
             . "- Responda em portugues brasileiro, humano e natural.\n"
@@ -437,6 +451,23 @@ class WhatsappBotService
             ];
         }
         return $history;
+    }
+
+    protected function summarizeBusinessHours(?WhatsappBotTraining $training): ?array
+    {
+        if (!$training || empty($training->horario_comercial)) {
+            return null;
+        }
+        $out = [];
+        foreach (WhatsappBotTraining::DIAS_SEMANA as $dia) {
+            $h = $training->horario_comercial[$dia] ?? null;
+            if (!$h || empty($h['aberto'])) {
+                $out[$dia] = 'fechado';
+                continue;
+            }
+            $out[$dia] = ($h['abre'] ?? '09:00') . '-' . ($h['fecha'] ?? '18:00');
+        }
+        return $out;
     }
 
     protected function inboundRequestsHuman(string $inboundText): bool

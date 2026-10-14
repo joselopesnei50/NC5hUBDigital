@@ -44,7 +44,21 @@ class WhatsappBotController extends Controller
             'cases_exemplo' => ['nullable', 'string', 'max:8000'],
             'reminder_hours_before' => ['nullable', 'integer', 'min:1', 'max:48'],
             'duracao_padrao_atendimento_min' => ['nullable', 'integer', 'min:5', 'max:1440'],
+            'horario_comercial' => ['nullable', 'array'],
+            'horario_comercial.*.aberto' => ['nullable', 'boolean'],
+            'horario_comercial.*.abre' => ['nullable', 'date_format:H:i'],
+            'horario_comercial.*.fecha' => ['nullable', 'date_format:H:i'],
         ]);
+
+        $horario = [];
+        foreach (\App\Models\WhatsappBotTraining::DIAS_SEMANA as $dia) {
+            $entry = $validated['horario_comercial'][$dia] ?? [];
+            $horario[$dia] = [
+                'aberto' => (bool) ($entry['aberto'] ?? false),
+                'abre' => $entry['abre'] ?? '09:00',
+                'fecha' => $entry['fecha'] ?? '18:00',
+            ];
+        }
 
         WhatsappBotProfile::updateOrCreate(
             ['cliente_id' => $cliente->id],
@@ -72,6 +86,7 @@ class WhatsappBotController extends Controller
                 'cases_exemplo' => $validated['cases_exemplo'] ?? null,
                 'reminder_hours_before' => $validated['reminder_hours_before'] ?? 2,
                 'duracao_padrao_atendimento_min' => $validated['duracao_padrao_atendimento_min'] ?? 60,
+                'horario_comercial' => $horario,
             ]
         );
 

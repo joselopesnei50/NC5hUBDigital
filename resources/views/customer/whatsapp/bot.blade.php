@@ -149,7 +149,7 @@
             {{-- Agendamento --}}
             <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
                 <h3 class="font-display font-bold text-lg text-ink mb-1">6. Agendamentos pelo WhatsApp</h3>
-                <p class="text-slate text-sm mb-5">O bot pode criar agendamentos direto na sua <a href="{{ route('customer.agenda.index') }}" class="text-bruce font-bold hover:underline">agenda</a>. Configure duração e lembrete:</p>
+                <p class="text-slate text-sm mb-5">O bot pode criar agendamentos direto na sua <a href="{{ route('customer.agenda.index') }}" class="text-bruce font-bold hover:underline">agenda</a>. Configure duração, lembrete e horário de funcionamento:</p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
@@ -167,6 +167,39 @@
                                min="1" max="48"
                                class="w-full px-4 py-2 border border-black/10 rounded-xl text-sm focus:border-bruce focus:outline-none">
                         <p class="text-slate text-xs mt-1">O bot envia uma mensagem automática no WhatsApp N horas antes do horário.</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 border-t border-black/5 pt-6">
+                    <p class="text-sm font-bold text-ink mb-1">Horário comercial</p>
+                    <p class="text-slate text-xs mb-4">O bot nunca vai marcar fora destes horários. Marque "Aberto" nos dias que você atende.</p>
+
+                    @php
+                        $horario = old('horario_comercial', $training->horario_comercial ?? []);
+                        $dias = \App\Models\WhatsappBotTraining::DIAS_SEMANA;
+                        $labels = \App\Models\WhatsappBotTraining::DIAS_SEMANA_LABEL;
+                    @endphp
+
+                    <div class="space-y-2">
+                        @foreach($dias as $dia)
+                            @php
+                                $d = $horario[$dia] ?? [];
+                                $aberto = (bool) ($d['aberto'] ?? false);
+                                $abre = $d['abre'] ?? '09:00';
+                                $fecha = $d['fecha'] ?? '18:00';
+                            @endphp
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <label class="flex items-center gap-2 w-32">
+                                    <input type="checkbox" name="horario_comercial[{{ $dia }}][aberto]" value="1" {{ $aberto ? 'checked' : '' }}>
+                                    <span class="text-sm font-bold text-ink">{{ $labels[$dia] }}</span>
+                                </label>
+                                <input type="time" name="horario_comercial[{{ $dia }}][abre]" value="{{ $abre }}"
+                                       class="px-3 py-1.5 border border-black/10 rounded-lg text-sm focus:border-bruce focus:outline-none">
+                                <span class="text-slate text-sm">até</span>
+                                <input type="time" name="horario_comercial[{{ $dia }}][fecha]" value="{{ $fecha }}"
+                                       class="px-3 py-1.5 border border-black/10 rounded-lg text-sm focus:border-bruce focus:outline-none">
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

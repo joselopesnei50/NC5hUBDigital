@@ -6,7 +6,9 @@ namespace App\Agent\Chat\Tools;
 
 use App\Agent\Chat\Contracts\ToolInterface;
 use App\Models\Appointment;
+use App\Models\WhatsappBotTraining;
 use App\Models\WhatsappChat;
+use App\Services\AppointmentScheduler;
 use Illuminate\Support\Carbon;
 
 class CriarAgendamentoWhatsappTool implements ToolInterface
@@ -87,6 +89,30 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
 
         $descricao = trim((string) ($arguments['descricao'] ?? '')) ?: null;
 
+        $training = WhatsappBotTraining::where('cliente_id', $tenantId)->first();
+        $scheduler = app(AppointmentScheduler::class);
+
+        if (!$scheduler->isWithinBusinessHours($when, $duracao, $training)) {
+            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3);
+            return [
+                'ok' => false,
+                'erro' => 'horario_fora_do_expediente',
+                'mensagem' => "O horario {$when->format('d/m H:i')} esta fora do expediente do negocio.",
+                'sugestoes' => $this->formatSlots($sugestoes),
+            ];
+        }
+
+        $conflict = $scheduler->findConflict($tenantId, $when, $duracao);
+        if ($conflict) {
+            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3);
+            return [
+                'ok' => false,
+                'erro' => 'conflito_de_horario',
+                'mensagem' => "Ja existe um compromisso em {$conflict->scheduled_at->format('d/m H:i')} ({$conflict->duration_minutes}min). Oferecer outro horario.",
+                'sugestoes' => $this->formatSlots($sugestoes),
+            ];
+        }
+
         $appointment = Appointment::create([
             'cliente_id' => $tenantId,
             'cliente_final_id' => $chat->cliente_final_id,
@@ -109,5 +135,13 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
             'titulo' => $titulo,
             'mensagem_para_cliente' => "Agendamento confirmado pra {$when->format('d/m/Y')} as {$when->format('H:i')}. Vou te mandar um lembrete antes.",
         ];
+    }
+
+    protected function formatSlots(array $slots): array
+    {
+        return array_map(fn ($s) => [
+            'data_hora' => $s->format('Y-m-d H:i'),
+            'legivel' => $s->isoFormat('ddd DD/MM HH:mm'),
+        ], $slots);
     }
 }
