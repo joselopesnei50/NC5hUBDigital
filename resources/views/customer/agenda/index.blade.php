@@ -6,10 +6,16 @@
                 <h2 class="font-display font-bold text-3xl text-ink leading-tight">Agenda</h2>
                 <p class="text-slate text-sm mt-1">Seus agendamentos, criados manualmente ou pelo bot do WhatsApp.</p>
             </div>
-            <a href="{{ route('customer.agenda.create') }}"
-               class="px-5 py-2.5 bg-bruce hover:bg-bruce/90 text-white rounded-xl font-bold text-sm transition-colors">
-                + Novo agendamento
-            </a>
+            <div class="flex items-center gap-2">
+                <div class="inline-flex rounded-xl bg-white border border-black/10 p-1 text-sm">
+                    <a href="{{ route('customer.agenda.index') }}" class="px-3 py-1.5 rounded-lg font-bold bg-bruce text-white">Lista</a>
+                    <a href="{{ route('customer.agenda.index', ['view' => 'week']) }}" class="px-3 py-1.5 rounded-lg font-bold text-slate hover:text-ink">Semana</a>
+                </div>
+                <a href="{{ route('customer.agenda.create') }}"
+                   class="px-5 py-2.5 bg-bruce hover:bg-bruce/90 text-white rounded-xl font-bold text-sm transition-colors">
+                    + Novo
+                </a>
+            </div>
         </div>
     </x-slot>
 

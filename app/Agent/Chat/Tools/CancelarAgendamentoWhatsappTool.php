@@ -80,6 +80,7 @@ class CancelarAgendamentoWhatsappTool implements ToolInterface
 
         $apt->update([
             'status' => 'cancelado',
+            'cancelled_at' => now(),
             'notes' => $notes,
         ]);
 

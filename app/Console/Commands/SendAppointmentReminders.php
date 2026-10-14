@@ -16,7 +16,7 @@ use Throwable;
 class SendAppointmentReminders extends Command
 {
     protected $signature = 'appointments:send-reminders';
-    protected $description = 'Envia lembretes WhatsApp pros agendamentos N horas antes conforme config do cliente';
+    protected $description = 'Envia lembretes WhatsApp (ate 2 janelas por agendamento) conforme config do cliente';
 
     public function handle(EvolutionApiService $evo): int
     {
@@ -27,72 +27,33 @@ class SendAppointmentReminders extends Command
 
         $windowStart = now()->subMinutes(5);
         $windowEnd = now()->addMinutes(20);
-        $sent = 0;
 
         $trainings = WhatsappBotTraining::query()
-            ->select('cliente_id', 'reminder_hours_before', 'business_name')
+            ->select('cliente_id', 'reminder_hours_before', 'enable_second_reminder', 'reminder_hours_before_second', 'business_name')
             ->get()
             ->keyBy('cliente_id');
 
-        $defaultHours = 2;
-        $maxLookahead = (int) ($trainings->max('reminder_hours_before') ?: $defaultHours) + 1;
-        $horizonEnd = now()->addHours($maxLookahead);
+        $maxLookahead = 48;
+        foreach ($trainings as $t) {
+            $maxLookahead = max($maxLookahead, (int) ($t->reminder_hours_before ?? 2), (int) ($t->reminder_hours_before_second ?? 24));
+        }
+        $horizonEnd = now()->addHours($maxLookahead + 1);
 
         $candidates = Appointment::query()
             ->whereIn('status', ['agendado', 'confirmado'])
-            ->whereNull('reminder_sent_at')
             ->whereBetween('scheduled_at', [now(), $horizonEnd])
             ->get();
+
+        $sent = 0;
 
         foreach ($candidates as $apt) {
             try {
                 $training = $trainings->get($apt->cliente_id);
-                $hoursBefore = (int) ($training?->reminder_hours_before ?? $defaultHours);
-                $sendAt = $apt->scheduled_at->copy()->subHours($hoursBefore);
+                $sent += $this->maybeSend($evo, $apt, $training, $windowStart, $windowEnd, 'primary');
 
-                if ($sendAt->lt($windowStart) || $sendAt->gt($windowEnd)) {
-                    continue;
+                if ($training && $training->enable_second_reminder) {
+                    $sent += $this->maybeSend($evo, $apt, $training, $windowStart, $windowEnd, 'second');
                 }
-
-                $phone = $apt->contato_telefone ?: ($apt->chat?->contact_phone ?: $apt->chat?->wa_id);
-                if (!$phone) {
-                    continue;
-                }
-
-                $instance = WhatsappInstance::where('cliente_id', $apt->cliente_id)
-                    ->where('status', 'open')
-                    ->first();
-                if (!$instance) {
-                    continue;
-                }
-
-                $msg = $this->buildReminderMessage($apt, $training?->business_name);
-                $result = $evo->sendText($instance->instance_name, $phone, $msg);
-
-                if (isset($result['error'])) {
-                    Log::warning('appointments:send-reminders falha envio', [
-                        'appointment_id' => $apt->id,
-                        'details' => $result['details'] ?? null,
-                    ]);
-                    continue;
-                }
-
-                $apt->update(['reminder_sent_at' => now()]);
-
-                if ($apt->chat_id) {
-                    $outboundId = $result['key']['id'] ?? ('reminder_' . Str::random(16));
-                    WhatsappMessage::create([
-                        'cliente_id' => $apt->cliente_id,
-                        'chat_id' => $apt->chat_id,
-                        'wa_message_id' => $outboundId,
-                        'direction' => 'outbound',
-                        'type' => 'chat',
-                        'content' => $msg,
-                        'status' => 'sent',
-                    ]);
-                }
-
-                $sent++;
             } catch (Throwable $e) {
                 Log::warning('appointments:send-reminders excecao', [
                     'appointment_id' => $apt->id,
@@ -105,13 +66,80 @@ class SendAppointmentReminders extends Command
         return self::SUCCESS;
     }
 
-    protected function buildReminderMessage(Appointment $apt, ?string $businessName): string
+    protected function maybeSend(EvolutionApiService $evo, Appointment $apt, ?WhatsappBotTraining $training, Carbon $windowStart, Carbon $windowEnd, string $slot): int
+    {
+        if ($slot === 'primary') {
+            if ($apt->reminder_sent_at) {
+                return 0;
+            }
+            $hoursBefore = (int) ($training?->reminder_hours_before ?? 2);
+            $field = 'reminder_sent_at';
+        } else {
+            if ($apt->reminder_second_sent_at) {
+                return 0;
+            }
+            $hoursBefore = (int) ($training?->reminder_hours_before_second ?? 24);
+            $field = 'reminder_second_sent_at';
+        }
+
+        $sendAt = $apt->scheduled_at->copy()->subHours($hoursBefore);
+        if ($sendAt->lt($windowStart) || $sendAt->gt($windowEnd)) {
+            return 0;
+        }
+
+        $phone = $apt->contato_telefone ?: ($apt->chat?->contact_phone ?: $apt->chat?->wa_id);
+        if (!$phone) {
+            return 0;
+        }
+
+        $instance = WhatsappInstance::where('cliente_id', $apt->cliente_id)
+            ->where('status', 'open')
+            ->first();
+        if (!$instance) {
+            return 0;
+        }
+
+        $msg = $this->buildReminderMessage($apt, $training?->business_name, $slot);
+        $result = $evo->sendText($instance->instance_name, $phone, $msg);
+
+        if (isset($result['error'])) {
+            Log::warning('appointments:send-reminders falha envio', [
+                'appointment_id' => $apt->id,
+                'slot' => $slot,
+                'details' => $result['details'] ?? null,
+            ]);
+            return 0;
+        }
+
+        $apt->update([$field => now()]);
+
+        if ($apt->chat_id) {
+            $outboundId = $result['key']['id'] ?? ('reminder_' . Str::random(16));
+            WhatsappMessage::create([
+                'cliente_id' => $apt->cliente_id,
+                'chat_id' => $apt->chat_id,
+                'wa_message_id' => $outboundId,
+                'direction' => 'outbound',
+                'type' => 'chat',
+                'content' => $msg,
+                'status' => 'sent',
+            ]);
+        }
+
+        return 1;
+    }
+
+    protected function buildReminderMessage(Appointment $apt, ?string $businessName, string $slot): string
     {
         $hora = $apt->scheduled_at->format('H:i');
         $data = $apt->scheduled_at->format('d/m');
         $nome = $apt->contato_nome ?: ($apt->clienteFinal?->nome_responsavel ?: 'tudo bem');
         $titulo = $apt->titulo;
         $prefix = $businessName ? "Oi {$nome}! Aqui e do {$businessName}." : "Oi {$nome}!";
+
+        if ($slot === 'second') {
+            return "{$prefix} So passando pra avisar: temos seu agendamento ({$titulo}) marcado pra {$data} as {$hora}. Qualquer coisa so chamar aqui.";
+        }
 
         return "{$prefix} Passando pra lembrar: {$titulo} em {$data} as {$hora}. Qualquer coisa so chamar aqui. Ate la!";
     }

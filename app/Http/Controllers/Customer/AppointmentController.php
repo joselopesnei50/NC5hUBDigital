@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\ClienteFinal;
+use App\Models\WhatsappBotTraining;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,11 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $cliente = Auth::user()->cliente;
+        $view = $request->query('view') === 'week' ? 'week' : 'list';
+
+        if ($view === 'week') {
+            return $this->weekView($request, $cliente);
+        }
 
         $upcoming = Appointment::where('cliente_id', $cliente->id)
             ->whereIn('status', ['agendado', 'confirmado'])
@@ -32,6 +38,49 @@ class AppointmentController extends Controller
             ->paginate(20);
 
         return view('customer.agenda.index', compact('upcoming', 'history'));
+    }
+
+    protected function weekView(Request $request, $cliente)
+    {
+        $weekRef = $request->query('week');
+        try {
+            $weekStart = $weekRef ? Carbon::createFromFormat('Y-m-d', $weekRef) : now();
+        } catch (\Throwable $e) {
+            $weekStart = now();
+        }
+        $weekStart = $weekStart->copy()->startOfWeek(Carbon::MONDAY);
+        $weekEnd = $weekStart->copy()->endOfWeek(Carbon::SUNDAY);
+
+        $appointments = Appointment::where('cliente_id', $cliente->id)
+            ->whereBetween('scheduled_at', [$weekStart, $weekEnd])
+            ->orderBy('scheduled_at')
+            ->with('clienteFinal')
+            ->get()
+            ->groupBy(fn (Appointment $a) => $a->scheduled_at->format('Y-m-d'));
+
+        $training = WhatsappBotTraining::where('cliente_id', $cliente->id)->first();
+
+        $days = [];
+        for ($i = 0; $i < 7; $i++) {
+            $d = $weekStart->copy()->addDays($i);
+            $days[] = [
+                'date' => $d,
+                'key' => $d->format('Y-m-d'),
+                'label' => $d->isoFormat('ddd DD/MM'),
+                'isToday' => $d->isSameDay(now()),
+                'appointments' => $appointments->get($d->format('Y-m-d'), collect())->sortBy('scheduled_at'),
+            ];
+        }
+
+        return view('customer.agenda.week', [
+            'weekStart' => $weekStart,
+            'weekEnd' => $weekEnd,
+            'prevWeek' => $weekStart->copy()->subWeek()->format('Y-m-d'),
+            'nextWeek' => $weekStart->copy()->addWeek()->format('Y-m-d'),
+            'thisWeek' => now()->startOfWeek(Carbon::MONDAY)->format('Y-m-d'),
+            'days' => $days,
+            'training' => $training,
+        ]);
     }
 
     public function create()
@@ -104,7 +153,7 @@ class AppointmentController extends Controller
     {
         $cliente = Auth::user()->cliente;
         abort_unless((int) $agenda->cliente_id === (int) $cliente->id, 404);
-        $agenda->update(['status' => 'cancelado']);
+        $agenda->update(['status' => 'cancelado', 'cancelled_at' => now()]);
 
         return back()->with('success', 'Agendamento cancelado.');
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\PedidoCliente;
 use App\Models\WhatsappBotInteraction;
 use App\Models\WhatsappChat;
@@ -62,6 +63,7 @@ class WhatsappDashboardController extends Controller
             : 0;
 
         $daily = $this->buildDailySeries($cliente->id, $start, $end, $range);
+        $agenda = $this->buildAgendaMetrics($cliente->id, $start, $end);
 
         return view('customer.whatsapp.dashboard', [
             'range' => $range,
@@ -78,7 +80,38 @@ class WhatsappDashboardController extends Controller
             'dailyLabels' => $daily['labels'],
             'dailyInbound' => $daily['inbound'],
             'dailyReplies' => $daily['replies'],
+            'agenda' => $agenda,
         ]);
+    }
+
+    protected function buildAgendaMetrics(int $clienteId, Carbon $start, Carbon $end): array
+    {
+        $createdTotal = Appointment::where('cliente_id', $clienteId)
+            ->whereBetween('created_at', [$start, $end])
+            ->count();
+        $createdByBot = Appointment::where('cliente_id', $clienteId)
+            ->where('created_via', 'bot')
+            ->whereBetween('created_at', [$start, $end])
+            ->count();
+        $cancelled = Appointment::where('cliente_id', $clienteId)
+            ->whereBetween('cancelled_at', [$start, $end])
+            ->count();
+
+        $errorsByCode = WhatsappBotInteraction::where('cliente_id', $clienteId)
+            ->whereBetween('created_at', [$start, $end])
+            ->whereNotNull('tool_errors')
+            ->get(['tool_errors'])
+            ->flatMap(fn ($i) => collect($i->tool_errors ?? [])->pluck('error'))
+            ->countBy()
+            ->toArray();
+
+        return [
+            'created_total' => $createdTotal,
+            'created_by_bot' => $createdByBot,
+            'cancelled' => $cancelled,
+            'conflito_count' => (int) ($errorsByCode['conflito_de_horario'] ?? 0),
+            'fora_expediente_count' => (int) ($errorsByCode['horario_fora_do_expediente'] ?? 0),
+        ];
     }
 
     protected function buildDailySeries(int $clienteId, Carbon $start, Carbon $end, int $range): array

@@ -87,6 +87,36 @@
             @endif
         </div>
 
+        {{-- Agenda --}}
+        <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <h3 class="font-display font-bold text-lg text-ink mb-1">Agenda do período</h3>
+            <p class="text-slate text-sm mb-5">Agendamentos criados, cancelamentos e ocorrências de conflito nos últimos {{ $range }} dias.</p>
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-6">
+                <div>
+                    <p class="text-xs text-slate uppercase tracking-wider font-bold">Agendamentos criados</p>
+                    <p class="font-display font-bold text-3xl text-ink mt-1">{{ number_format($agenda['created_total'], 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-emerald-700 uppercase tracking-wider font-bold">Pelo bot</p>
+                    <p class="font-display font-bold text-3xl text-emerald-700 mt-1">{{ number_format($agenda['created_by_bot'], 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate uppercase tracking-wider font-bold">Cancelamentos</p>
+                    <p class="font-display font-bold text-3xl text-slate mt-1">{{ number_format($agenda['cancelled'], 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate uppercase tracking-wider font-bold">Conflitos de horário</p>
+                    <p class="font-display font-bold text-3xl text-amber-700 mt-1">{{ number_format($agenda['conflito_count'], 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate mt-1">bot teve que oferecer outro horário</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate uppercase tracking-wider font-bold">Fora do expediente</p>
+                    <p class="font-display font-bold text-3xl text-amber-700 mt-1">{{ number_format($agenda['fora_expediente_count'], 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate mt-1">cliente pediu em horário fechado</p>
+                </div>
+            </div>
+        </div>
+
         @if($totalInteractions === 0)
             <div class="bg-amber-50 border border-amber-200 text-amber-900 px-5 py-4 rounded-2xl text-sm">
                 <strong>Sem interações no período.</strong> Verifique se o bot está <a href="{{ route('customer.whatsapp.bot.index') }}" class="underline font-bold">ativado</a> e se o WhatsApp está <a href="{{ route('customer.whatsapp.conexao') }}" class="underline font-bold">conectado</a>.

@@ -43,6 +43,8 @@ class WhatsappBotController extends Controller
             'regras_proibicoes' => ['nullable', 'string', 'max:4000'],
             'cases_exemplo' => ['nullable', 'string', 'max:8000'],
             'reminder_hours_before' => ['nullable', 'integer', 'min:1', 'max:48'],
+            'enable_second_reminder' => ['nullable', 'boolean'],
+            'reminder_hours_before_second' => ['nullable', 'integer', 'min:1', 'max:168'],
             'duracao_padrao_atendimento_min' => ['nullable', 'integer', 'min:5', 'max:1440'],
             'horario_comercial' => ['nullable', 'array'],
             'horario_comercial.*.aberto' => ['nullable', 'boolean'],
@@ -85,6 +87,8 @@ class WhatsappBotController extends Controller
                 'regras_proibicoes' => $validated['regras_proibicoes'] ?? null,
                 'cases_exemplo' => $validated['cases_exemplo'] ?? null,
                 'reminder_hours_before' => $validated['reminder_hours_before'] ?? 2,
+                'enable_second_reminder' => (bool) ($validated['enable_second_reminder'] ?? false),
+                'reminder_hours_before_second' => $validated['reminder_hours_before_second'] ?? 24,
                 'duracao_padrao_atendimento_min' => $validated['duracao_padrao_atendimento_min'] ?? 60,
                 'horario_comercial' => $horario,
             ]

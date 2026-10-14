@@ -15,6 +15,7 @@ class WhatsappBotInteraction extends Model
         'cost' => 'decimal:6',
         'escalated' => 'boolean',
         'failed' => 'boolean',
+        'tool_errors' => 'array',
     ];
 
     public function chat()

@@ -170,6 +170,23 @@
                     </div>
                 </div>
 
+                <div class="mt-5 pt-5 border-t border-black/5">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="enable_second_reminder" value="1"
+                               {{ old('enable_second_reminder', $training->enable_second_reminder) ? 'checked' : '' }}
+                               class="w-5 h-5 rounded">
+                        <span class="text-sm font-bold text-ink">Enviar um segundo lembrete mais cedo</span>
+                    </label>
+                    <div class="mt-3 ml-8 max-w-xs">
+                        <label class="block text-sm text-slate mb-1">Horas antes (padrão 24h)</label>
+                        <input type="number" name="reminder_hours_before_second"
+                               value="{{ old('reminder_hours_before_second', $training->reminder_hours_before_second ?: 24) }}"
+                               min="1" max="168"
+                               class="w-full px-4 py-2 border border-black/10 rounded-xl text-sm focus:border-bruce focus:outline-none">
+                        <p class="text-slate text-xs mt-1">Útil pro cliente lembrar com antecedência (ex: 24h antes). O lembrete acima continua indo mais perto do horário.</p>
+                    </div>
+                </div>
+
                 <div class="mt-6 border-t border-black/5 pt-6">
                     <p class="text-sm font-bold text-ink mb-1">Horário comercial</p>
                     <p class="text-slate text-xs mb-4">O bot nunca vai marcar fora destes horários. Marque "Aberto" nos dias que você atende.</p>

@@ -115,6 +115,7 @@ class WhatsappBotService
     }
 
     protected ?array $pendingInteraction = null;
+    protected array $pendingToolErrors = [];
 
     public function registerOutbound(?string $outboundMessageId, bool $sendFailed = false): void
     {
@@ -148,10 +149,12 @@ class WhatsappBotService
                 'response_time_ms' => $elapsedMs,
                 'escalated' => $escalated,
                 'failed' => $failed,
+                'tool_errors' => !empty($this->pendingToolErrors) ? $this->pendingToolErrors : null,
             ]);
         } catch (Throwable $e) {
             Log::warning('WhatsappBot: falha ao registrar interacao', ['msg' => $e->getMessage()]);
         }
+        $this->pendingToolErrors = [];
     }
 
     protected function shouldReply(WhatsappChat $chat): bool
@@ -175,6 +178,7 @@ class WhatsappBotService
         $totalTokensOut = 0;
         $totalCost = 0.0;
         $finalContent = '';
+        $this->pendingToolErrors = [];
 
         for ($i = 0; $i < self::MAX_TOOL_ITERATIONS; $i++) {
             $payload = new PromptPayload(
@@ -223,6 +227,14 @@ class WhatsappBotService
                         $result = ['erro' => 'excecao ao executar tool: ' . $e->getMessage()];
                         Log::warning('WhatsappBot: tool falhou', ['tool' => $toolName, 'msg' => $e->getMessage()]);
                     }
+                }
+
+                $errCode = $result['erro'] ?? null;
+                if ($errCode || (isset($result['ok']) && $result['ok'] === false)) {
+                    $this->pendingToolErrors[] = [
+                        'tool' => $toolName,
+                        'error' => (string) ($errCode ?: 'falha'),
+                    ];
                 }
 
                 $workingHistory[] = [

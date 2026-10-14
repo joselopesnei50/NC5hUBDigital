@@ -14,6 +14,8 @@ class Appointment extends Model
     protected $casts = [
         'scheduled_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
+        'reminder_second_sent_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'duration_minutes' => 'integer',
     ];
 
