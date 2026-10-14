@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Agent\DTOs\PromptPayload;
 use App\Agent\LlmManager;
 use App\Models\ClienteFinal;
+use App\Models\WhatsappBotInteraction;
 use App\Models\WhatsappBotProfile;
 use App\Models\WhatsappBotTraining;
 use App\Models\WhatsappChat;
@@ -25,7 +26,7 @@ class WhatsappBotService
     {
     }
 
-    public function generateReply(WhatsappChat $chat, string $inboundText): ?string
+    public function generateReply(WhatsappChat $chat, string $inboundText, ?string $inboundMessageId = null): ?string
     {
         if (!$this->shouldReply($chat)) {
             return null;
@@ -44,6 +45,7 @@ class WhatsappBotService
 
         if ($this->inboundRequestsHuman($inboundText)) {
             $chat->update(['is_bot_active' => false]);
+            $this->recordInteraction($chat, $inboundMessageId, null, null, 0, true, false);
             Log::info('WhatsappBot: escalacao detectada no inbound', [
                 'chat_id' => $chat->id,
                 'cliente_id' => $chat->cliente_id,
@@ -56,6 +58,8 @@ class WhatsappBotService
 
         $systemPrompt = $this->composeSystemPrompt($preset, $training, $customerContext);
         $history = $this->buildHistory($chat);
+
+        $startedAt = microtime(true);
 
         try {
             $response = $this->llm->driver('deepseek')->complete(new PromptPayload(
@@ -71,13 +75,16 @@ class WhatsappBotService
                 'chat_id' => $chat->id,
                 'msg' => $e->getMessage(),
             ]);
+            $this->recordInteraction($chat, $inboundMessageId, null, null, (int) ((microtime(true) - $startedAt) * 1000), false, true);
             return null;
         }
 
+        $elapsedMs = (int) ((microtime(true) - $startedAt) * 1000);
         $reply = trim($response->content);
 
         if (Str::contains($reply, self::ESCALATION_SENTINEL)) {
             $chat->update(['is_bot_active' => false]);
+            $this->recordInteraction($chat, $inboundMessageId, null, $response, $elapsedMs, true, false);
             Log::info('WhatsappBot: escalacao detectada pelo LLM', [
                 'chat_id' => $chat->id,
                 'cliente_id' => $chat->cliente_id,
@@ -85,7 +92,59 @@ class WhatsappBotService
             return null;
         }
 
-        return $reply !== '' ? $reply : null;
+        if ($reply === '') {
+            $this->recordInteraction($chat, $inboundMessageId, null, $response, $elapsedMs, false, true);
+            return null;
+        }
+
+        $this->pendingInteraction = [
+            'chat' => $chat,
+            'inbound_message_id' => $inboundMessageId,
+            'response' => $response,
+            'elapsed_ms' => $elapsedMs,
+        ];
+
+        return $reply;
+    }
+
+    protected ?array $pendingInteraction = null;
+
+    public function registerOutbound(?string $outboundMessageId, bool $sendFailed = false): void
+    {
+        if (!$this->pendingInteraction) {
+            return;
+        }
+        $p = $this->pendingInteraction;
+        $this->recordInteraction(
+            $p['chat'],
+            $p['inbound_message_id'],
+            $outboundMessageId,
+            $p['response'],
+            $p['elapsed_ms'],
+            false,
+            $sendFailed
+        );
+        $this->pendingInteraction = null;
+    }
+
+    protected function recordInteraction(WhatsappChat $chat, ?string $inboundId, ?string $outboundId, $response, int $elapsedMs, bool $escalated, bool $failed): void
+    {
+        try {
+            WhatsappBotInteraction::create([
+                'cliente_id' => $chat->cliente_id,
+                'chat_id' => $chat->id,
+                'inbound_message_id' => $inboundId,
+                'outbound_message_id' => $outboundId,
+                'tokens_in' => $response->tokensIn ?? 0,
+                'tokens_out' => $response->tokensOut ?? 0,
+                'cost' => $response->estimatedCost ?? 0,
+                'response_time_ms' => $elapsedMs,
+                'escalated' => $escalated,
+                'failed' => $failed,
+            ]);
+        } catch (Throwable $e) {
+            Log::warning('WhatsappBot: falha ao registrar interacao', ['msg' => $e->getMessage()]);
+        }
     }
 
     protected function shouldReply(WhatsappChat $chat): bool

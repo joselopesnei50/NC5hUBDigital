@@ -1,0 +1,154 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-end justify-between gap-4 flex-wrap">
+            <div>
+                <p class="text-xs font-bold text-bruce uppercase tracking-widest mb-2">Atendimento</p>
+                <h2 class="font-display font-bold text-3xl text-ink leading-tight">Dashboard do Bot IA</h2>
+                <p class="text-slate text-sm mt-1">Como seu bot tá performando — resposta, custo, clientes atendidos e pedidos gerados.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('customer.whatsapp.dashboard', ['range' => '7d']) }}"
+                   class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $range === 7 ? 'bg-bruce text-white' : 'bg-white border border-black/10 text-slate hover:bg-slate-50' }}">
+                    7 dias
+                </a>
+                <a href="{{ route('customer.whatsapp.dashboard', ['range' => '30d']) }}"
+                   class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $range === 30 ? 'bg-bruce text-white' : 'bg-white border border-black/10 text-slate hover:bg-slate-50' }}">
+                    30 dias
+                </a>
+            </div>
+        </div>
+    </x-slot>
+
+    <div class="space-y-6">
+        {{-- KPIs --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white border border-black/5 rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-slate uppercase tracking-wider font-bold">Mensagens recebidas</p>
+                <p class="font-display font-bold text-3xl text-ink mt-2">{{ number_format($inboundCount, 0, ',', '.') }}</p>
+                <p class="text-xs text-slate mt-1">últimos {{ $range }} dias</p>
+            </div>
+            <div class="bg-white border border-black/5 rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-slate uppercase tracking-wider font-bold">Respondidas pelo bot</p>
+                <p class="font-display font-bold text-3xl text-emerald-700 mt-2">{{ number_format($successfulReplies, 0, ',', '.') }}</p>
+                <p class="text-xs text-slate mt-1">
+                    @if($avgResponseMs > 0)
+                        tempo médio: {{ number_format($avgResponseMs / 1000, 1, ',', '.') }}s
+                    @else
+                        tempo médio: —
+                    @endif
+                </p>
+            </div>
+            <div class="bg-white border border-black/5 rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-slate uppercase tracking-wider font-bold">Taxa de resposta</p>
+                <p class="font-display font-bold text-3xl text-ink mt-2">{{ number_format($responseRate, 1, ',', '.') }}%</p>
+                <p class="text-xs text-slate mt-1">respondidas / recebidas</p>
+            </div>
+            <div class="bg-white border border-black/5 rounded-2xl p-5 shadow-sm">
+                <p class="text-xs text-slate uppercase tracking-wider font-bold">Escalações pra humano</p>
+                <p class="font-display font-bold text-3xl text-amber-700 mt-2">{{ number_format($escalations, 0, ',', '.') }}</p>
+                <p class="text-xs text-slate mt-1">bot pausado automaticamente</p>
+            </div>
+        </div>
+
+        {{-- Gráfico --}}
+        <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <h3 class="font-display font-bold text-lg text-ink mb-1">Mensagens por dia</h3>
+            <p class="text-slate text-sm mb-4">Volume de entrada versus respostas do bot ao longo dos últimos {{ $range }} dias.</p>
+            <div style="height: 320px;">
+                <canvas id="chart-messages"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Custo --}}
+            <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <h3 class="font-display font-bold text-lg text-ink mb-1">Custo DeepSeek</h3>
+                <p class="text-slate text-sm mb-5">Estimativa baseada em tokens consumidos pelas respostas do bot.</p>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Total no período</p>
+                        <p class="font-display font-bold text-2xl text-ink mt-1">US$ {{ number_format($totalCost, 4, ',', '.') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Média por conversa</p>
+                        <p class="font-display font-bold text-xl text-slate mt-1">US$ {{ number_format($avgCostPerConversation, 4, ',', '.') }}</p>
+                    </div>
+                    @if($failures > 0)
+                        <div class="pt-3 border-t border-black/5">
+                            <p class="text-xs text-rose-700 font-bold">⚠ {{ $failures }} falha(s) no período</p>
+                            <p class="text-xs text-slate mt-1">O bot não conseguiu gerar/enviar resposta. Veja logs se persistir.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Clientes + pedidos --}}
+            <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <h3 class="font-display font-bold text-lg text-ink mb-1">Clientes atendidos</h3>
+                <p class="text-slate text-sm mb-5">Quem o bot conversou e quantos pedidos foram gerados.</p>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Conversas únicas</p>
+                        <p class="font-display font-bold text-2xl text-ink mt-1">{{ number_format($uniqueCustomers, 0, ',', '.') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Retornantes</p>
+                        <p class="font-display font-bold text-xl text-slate mt-1">{{ number_format($returningCustomers, 0, ',', '.') }}</p>
+                        <p class="text-xs text-slate mt-1">clientes que já falaram antes do período</p>
+                    </div>
+                    <div class="pt-3 border-t border-black/5">
+                        <p class="text-xs text-emerald-700 uppercase tracking-wider font-bold">Pedidos gerados</p>
+                        <p class="font-display font-bold text-2xl text-emerald-700 mt-1">{{ number_format($pedidosGerados, 0, ',', '.') }}</p>
+                        <p class="text-xs text-slate mt-1">de clientes que conversaram no período</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if($totalInteractions === 0)
+            <div class="bg-amber-50 border border-amber-200 text-amber-900 px-5 py-4 rounded-2xl text-sm">
+                <strong>Sem interações no período.</strong> Verifique se o bot está <a href="{{ route('customer.whatsapp.bot.index') }}" class="underline font-bold">ativado</a> e se o WhatsApp está <a href="{{ route('customer.whatsapp.conexao') }}" class="underline font-bold">conectado</a>.
+            </div>
+        @endif
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            const ctx = document.getElementById('chart-messages');
+            if (!ctx) return;
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: @json($dailyLabels),
+                    datasets: [
+                        {
+                            label: 'Recebidas',
+                            data: @json($dailyInbound),
+                            borderColor: '#64748b',
+                            backgroundColor: 'rgba(100, 116, 139, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                        },
+                        {
+                            label: 'Respondidas pelo bot',
+                            data: @json($dailyReplies),
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    }
+                }
+            });
+        })();
+    </script>
+</x-app-layout>

@@ -230,6 +230,9 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         Route::get('bot', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'index'])->name('bot.index');
         Route::post('bot', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'update'])->name('bot.update');
         Route::post('inbox/{chat}/bot-toggle', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'toggleChatBot'])->name('bot.toggle');
+
+        // Dashboard do bot
+        Route::get('dashboard', [\App\Http\Controllers\Customer\WhatsappDashboardController::class, 'index'])->name('dashboard');
     });
 });
 

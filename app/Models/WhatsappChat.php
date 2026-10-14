@@ -13,6 +13,7 @@ class WhatsappChat extends Model
 
     protected $casts = [
         'is_group' => 'boolean',
+        'is_bot_active' => 'boolean',
         'last_message_at' => 'datetime',
     ];
 

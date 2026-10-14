@@ -102,10 +102,10 @@ class ProcessEvolutionWebhook implements ShouldQueue
 
         Cache::forget("wa_bot_ctx:{$chat->id}");
 
-        $this->maybeReplyWithBot($instance, $chat, $extracted);
+        $this->maybeReplyWithBot($instance, $chat, $extracted, $messageId);
     }
 
-    protected function maybeReplyWithBot(WhatsappInstance $instance, WhatsappChat $chat, array $extracted): void
+    protected function maybeReplyWithBot(WhatsappInstance $instance, WhatsappChat $chat, array $extracted, ?string $inboundMessageId = null): void
     {
         if ($extracted['type'] !== 'chat' || empty($extracted['content'])) {
             return;
@@ -117,7 +117,7 @@ class ProcessEvolutionWebhook implements ShouldQueue
         try {
             /** @var WhatsappBotService $bot */
             $bot = app(WhatsappBotService::class);
-            $reply = $bot->generateReply($chat->fresh(), (string) $extracted['content']);
+            $reply = $bot->generateReply($chat->fresh(), (string) $extracted['content'], $inboundMessageId);
             if (!$reply) {
                 return;
             }
@@ -127,6 +127,7 @@ class ProcessEvolutionWebhook implements ShouldQueue
             $result = $evo->sendText($instance->instance_name, $chat->contact_phone ?: $chat->wa_id, $reply);
 
             if (isset($result['error'])) {
+                $bot->registerOutbound(null, true);
                 Log::warning('WhatsappBot: envio falhou', [
                     'chat_id' => $chat->id,
                     'details' => $result['details'] ?? null,
@@ -145,6 +146,8 @@ class ProcessEvolutionWebhook implements ShouldQueue
                 'content' => $reply,
                 'status' => 'sent',
             ]);
+
+            $bot->registerOutbound($outboundId);
 
             $chat->update(['last_message_at' => now()]);
         } catch (Throwable $e) {
