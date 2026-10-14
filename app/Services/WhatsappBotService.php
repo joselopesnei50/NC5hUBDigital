@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Agent\Chat\ToolRegistry;
+use App\Agent\Chat\Tools\ConsultarAgendaWhatsappTool;
+use App\Agent\Chat\Tools\CriarAgendamentoWhatsappTool;
 use App\Agent\DTOs\PromptPayload;
 use App\Agent\LlmManager;
 use App\Models\ClienteFinal;
@@ -21,9 +24,15 @@ class WhatsappBotService
     protected const HISTORY_LIMIT = 6;
     protected const ESCALATION_SENTINEL = 'ESCALAR_HUMANO';
     protected const CUSTOMER_CONTEXT_TTL = 300;
+    protected const MAX_TOOL_ITERATIONS = 3;
+
+    protected ToolRegistry $tools;
 
     public function __construct(protected LlmManager $llm)
     {
+        $this->tools = new ToolRegistry();
+        $this->tools->register(new CriarAgendamentoWhatsappTool());
+        $this->tools->register(new ConsultarAgendaWhatsappTool());
     }
 
     public function generateReply(WhatsappChat $chat, string $inboundText, ?string $inboundMessageId = null): ?string
@@ -62,13 +71,7 @@ class WhatsappBotService
         $startedAt = microtime(true);
 
         try {
-            $response = $this->llm->driver('deepseek')->complete(new PromptPayload(
-                systemPrompt: $systemPrompt,
-                userPrompt: $inboundText,
-                snapshot: $customerContext,
-                history: $history,
-                toolChoice: 'none',
-            ));
+            $response = $this->runLlmWithTools($chat, $systemPrompt, $inboundText, $history, $customerContext, $training);
         } catch (Throwable $e) {
             Log::error('WhatsappBot: LLM falhou', [
                 'cliente_id' => $chat->cliente_id,
@@ -155,6 +158,86 @@ class WhatsappBotService
         return (bool) $chat->is_bot_active;
     }
 
+    protected function runLlmWithTools(WhatsappChat $chat, string $systemPrompt, string $inboundText, array $history, array $customerContext, ?WhatsappBotTraining $training): \App\Agent\DTOs\LlmResponse
+    {
+        $toolsSchema = $this->tools->getToolsForLlm();
+        $driver = $this->llm->driver('deepseek');
+
+        $workingHistory = $history;
+        $workingUserPrompt = $inboundText;
+        $workingUserAlreadyInjected = false;
+
+        $totalTokensIn = 0;
+        $totalTokensOut = 0;
+        $totalCost = 0.0;
+        $finalContent = '';
+
+        for ($i = 0; $i < self::MAX_TOOL_ITERATIONS; $i++) {
+            $payload = new PromptPayload(
+                systemPrompt: $systemPrompt,
+                userPrompt: $workingUserAlreadyInjected ? '' : $workingUserPrompt,
+                snapshot: $customerContext,
+                tools: $toolsSchema,
+                history: $workingHistory,
+                toolChoice: 'auto',
+            );
+
+            $response = $driver->complete($payload);
+
+            $totalTokensIn += $response->tokensIn;
+            $totalTokensOut += $response->tokensOut;
+            $totalCost += $response->estimatedCost;
+            $finalContent = $response->content;
+
+            $toolCalls = $response->toolCalls;
+            if (empty($toolCalls)) {
+                break;
+            }
+
+            if (!$workingUserAlreadyInjected) {
+                $workingHistory[] = ['role' => 'user', 'content' => $workingUserPrompt];
+                $workingUserAlreadyInjected = true;
+            }
+
+            $assistantMsg = ['role' => 'assistant', 'content' => $response->content ?: null, 'tool_calls' => $toolCalls];
+            $workingHistory[] = $assistantMsg;
+
+            foreach ($toolCalls as $call) {
+                $toolName = $call['function']['name'] ?? '';
+                $rawArgs = $call['function']['arguments'] ?? '{}';
+                $args = json_decode($rawArgs, true) ?: [];
+                $args['_chat_id'] = $chat->id;
+                $args['_default_duration'] = (int) ($training?->duracao_padrao_atendimento_min ?: 60);
+
+                $tool = $this->tools->getTool($toolName);
+                if (!$tool) {
+                    $result = ['erro' => "tool desconhecida: {$toolName}"];
+                } else {
+                    try {
+                        $result = $tool->execute($chat->cliente_id, $args);
+                    } catch (Throwable $e) {
+                        $result = ['erro' => 'excecao ao executar tool: ' . $e->getMessage()];
+                        Log::warning('WhatsappBot: tool falhou', ['tool' => $toolName, 'msg' => $e->getMessage()]);
+                    }
+                }
+
+                $workingHistory[] = [
+                    'role' => 'tool',
+                    'tool_call_id' => $call['id'] ?? '',
+                    'content' => json_encode($result, JSON_UNESCAPED_UNICODE),
+                ];
+            }
+        }
+
+        return new \App\Agent\DTOs\LlmResponse(
+            content: $finalContent,
+            tokensIn: $totalTokensIn,
+            tokensOut: $totalTokensOut,
+            estimatedCost: $totalCost,
+            toolCalls: null,
+        );
+    }
+
     public function buildCustomerContext(WhatsappChat $chat): array
     {
         return Cache::remember(
@@ -172,6 +255,8 @@ class WhatsappBotService
         $isFirstInteraction = $outboundCount === 0;
 
         $context = [
+            'hoje' => now()->format('Y-m-d'),
+            'dia_da_semana_hoje' => now()->isoFormat('dddd'),
             'is_first_interaction' => $isFirstInteraction,
             'is_returning_customer' => false,
             'customer_name' => $chat->contact_name,
@@ -253,6 +338,16 @@ class WhatsappBotService
         if ($training && $training->cases_exemplo) {
             $parts[] = "EXEMPLOS REAIS DESTE NEGOCIO (seguir fielmente o estilo):\n" . $training->cases_exemplo;
         }
+
+        $parts[] = "AGENDAMENTOS (FERRAMENTAS DISPONIVEIS):\n"
+            . "- Voce tem duas tools: consultar_agenda e criar_agendamento.\n"
+            . "- Quando o cliente pedir pra marcar/agendar, SIGA ESTE FLUXO:\n"
+            . "  1. Entenda o que ele quer agendar e para quando.\n"
+            . "  2. Opcional: use consultar_agenda pra ver se o horario ja esta ocupado.\n"
+            . "  3. REPITA pro cliente a proposta por escrito: \"Deixa confirmar: X dia Y as Z horas, pode ser?\". ESPERE ele responder sim/confirmo.\n"
+            . "  4. SOMENTE depois do SIM EXPLICITO, chame criar_agendamento. Nunca antes.\n"
+            . "- Se o cliente quiser desmarcar ou alterar, oriente a falar com atendente humano (retorne " . self::ESCALATION_SENTINEL . ").\n"
+            . "- Interprete datas relativas (\"amanha\", \"sexta\", \"dia 15\") pra YYYY-MM-DD baseando-se na data de hoje do snapshot.";
 
         $parts[] = "REGRAS GERAIS:\n"
             . "- Responda em portugues brasileiro, humano e natural.\n"

@@ -22,6 +22,13 @@ class Kernel extends ConsoleKernel
                  ->dailyAt('08:30')
                  ->withoutOverlapping()
                  ->onOneServer();
+
+        // Lembretes WhatsApp de agendamentos: roda a cada 15min, envia
+        // N horas antes conforme config de cada cliente (default 2h).
+        $schedule->command('appointments:send-reminders')
+                 ->everyFifteenMinutes()
+                 ->withoutOverlapping()
+                 ->onOneServer();
     }
 
     /**

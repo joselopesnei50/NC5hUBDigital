@@ -42,6 +42,8 @@ class WhatsappBotController extends Controller
             'faq_custom' => ['nullable', 'string', 'max:8000'],
             'regras_proibicoes' => ['nullable', 'string', 'max:4000'],
             'cases_exemplo' => ['nullable', 'string', 'max:8000'],
+            'reminder_hours_before' => ['nullable', 'integer', 'min:1', 'max:48'],
+            'duracao_padrao_atendimento_min' => ['nullable', 'integer', 'min:5', 'max:1440'],
         ]);
 
         WhatsappBotProfile::updateOrCreate(
@@ -68,6 +70,8 @@ class WhatsappBotController extends Controller
                 'faq_custom' => $validated['faq_custom'] ?? null,
                 'regras_proibicoes' => $validated['regras_proibicoes'] ?? null,
                 'cases_exemplo' => $validated['cases_exemplo'] ?? null,
+                'reminder_hours_before' => $validated['reminder_hours_before'] ?? 2,
+                'duracao_padrao_atendimento_min' => $validated['duracao_padrao_atendimento_min'] ?? 60,
             ]
         );
 

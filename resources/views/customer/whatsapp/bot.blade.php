@@ -146,9 +146,34 @@
                 </div>
             </div>
 
+            {{-- Agendamento --}}
+            <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <h3 class="font-display font-bold text-lg text-ink mb-1">6. Agendamentos pelo WhatsApp</h3>
+                <p class="text-slate text-sm mb-5">O bot pode criar agendamentos direto na sua <a href="{{ route('customer.agenda.index') }}" class="text-bruce font-bold hover:underline">agenda</a>. Configure duração e lembrete:</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-bold text-ink mb-1">Duração padrão (minutos)</label>
+                        <input type="number" name="duracao_padrao_atendimento_min"
+                               value="{{ old('duracao_padrao_atendimento_min', $training->duracao_padrao_atendimento_min ?: 60) }}"
+                               min="5" max="1440"
+                               class="w-full px-4 py-2 border border-black/10 rounded-xl text-sm focus:border-bruce focus:outline-none">
+                        <p class="text-slate text-xs mt-1">Quanto tempo dura um atendimento típico (ex: corte 45, consulta 30, visita 60).</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-ink mb-1">Lembrete — quantas horas antes</label>
+                        <input type="number" name="reminder_hours_before"
+                               value="{{ old('reminder_hours_before', $training->reminder_hours_before ?: 2) }}"
+                               min="1" max="48"
+                               class="w-full px-4 py-2 border border-black/10 rounded-xl text-sm focus:border-bruce focus:outline-none">
+                        <p class="text-slate text-xs mt-1">O bot envia uma mensagem automática no WhatsApp N horas antes do horário.</p>
+                    </div>
+                </div>
+            </div>
+
             {{-- Ativar --}}
             <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
-                <h3 class="font-display font-bold text-lg text-ink mb-1">6. Ativar o bot</h3>
+                <h3 class="font-display font-bold text-lg text-ink mb-1">7. Ativar o bot</h3>
                 <p class="text-slate text-sm mb-5">Quando ativado, o bot responde automaticamente toda mensagem recebida. Você pode pausar o bot em uma conversa específica pelo inbox.</p>
 
                 <label class="flex items-center gap-3 cursor-pointer">

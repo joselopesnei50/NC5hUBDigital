@@ -214,6 +214,18 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::post('alertas/{alerta}/dispensar', [\App\Http\Controllers\Customer\AlertsController::class, 'dispensar'])
         ->name('customer.alertas.dispensar');
 
+    // Agenda
+    Route::prefix('agenda')->name('customer.agenda.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Customer\AppointmentController::class, 'index'])->name('index');
+        Route::get('/criar', [\App\Http\Controllers\Customer\AppointmentController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Customer\AppointmentController::class, 'store'])->name('store');
+        Route::get('/{agenda}/editar', [\App\Http\Controllers\Customer\AppointmentController::class, 'edit'])->name('edit');
+        Route::put('/{agenda}', [\App\Http\Controllers\Customer\AppointmentController::class, 'update'])->name('update');
+        Route::delete('/{agenda}', [\App\Http\Controllers\Customer\AppointmentController::class, 'destroy'])->name('destroy');
+        Route::post('/{agenda}/concluir', [\App\Http\Controllers\Customer\AppointmentController::class, 'markCompleted'])->name('complete');
+        Route::post('/{agenda}/cancelar', [\App\Http\Controllers\Customer\AppointmentController::class, 'markCancelled'])->name('cancel');
+    });
+
     // WhatsApp (Evolution API) - Onda 1: inbox mínimo
     Route::prefix('whatsapp')->name('customer.whatsapp.')->group(function () {
         Route::get('conexao', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'index'])->name('conexao');
