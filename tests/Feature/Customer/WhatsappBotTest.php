@@ -8,6 +8,8 @@ use App\Models\Cliente;
 use App\Models\User;
 use App\Models\WhatsappBotProfile;
 use App\Models\WhatsappBotTraining;
+use App\Models\ClienteFinal;
+use App\Models\PedidoCliente;
 use App\Models\WhatsappChat;
 use App\Models\WhatsappMessage;
 use App\Services\WhatsappBotService;
@@ -167,6 +169,120 @@ class WhatsappBotTest extends TestCase
 
         $service = app(WhatsappBotService::class);
         $this->assertNull($service->generateReply($chat, 'alguma coisa'));
+    }
+
+    public function test_bot_update_persiste_campos_fundamentais()
+    {
+        [$user, $cliente] = $this->actingAsCliente();
+
+        $this->post(route('customer.whatsapp.bot.update'), [
+            'segment' => 'lanchonete',
+            'historia_negocio' => 'Comecamos em 2015 na garagem',
+            'diferenciais' => 'Carne artesanal',
+            'processo_producao' => 'Lanches montados na hora',
+            'publico_alvo' => 'Familias do bairro',
+            'tom_de_voz' => 'Descolado e divertido',
+            'politicas' => 'Troca em 7 dias',
+            'cases_exemplo' => 'Cliente: tem X? Bot: temos sim',
+        ]);
+
+        $this->assertDatabaseHas('whatsapp_bot_training', [
+            'cliente_id' => $cliente->id,
+            'historia_negocio' => 'Comecamos em 2015 na garagem',
+            'diferenciais' => 'Carne artesanal',
+            'processo_producao' => 'Lanches montados na hora',
+            'tom_de_voz' => 'Descolado e divertido',
+        ]);
+    }
+
+    public function test_customer_context_primeira_interacao_sem_cliente_final()
+    {
+        [$user, $cliente] = $this->actingAsCliente();
+
+        $chat = WhatsappChat::create([
+            'cliente_id' => $cliente->id,
+            'wa_id' => '5511999990000',
+            'contact_name' => 'Fulano',
+            'contact_phone' => '5511999990000',
+            'is_bot_active' => true,
+            'last_message_at' => now(),
+        ]);
+
+        $ctx = app(WhatsappBotService::class)->buildCustomerContext($chat);
+
+        $this->assertTrue($ctx['is_first_interaction']);
+        $this->assertFalse($ctx['is_identified_customer']);
+        $this->assertFalse($ctx['is_returning_customer']);
+        $this->assertNull($ctx['last_order']);
+        $this->assertEquals('Fulano', $ctx['customer_name']);
+    }
+
+    public function test_customer_context_cliente_identificado_com_pedido_concluido()
+    {
+        [$user, $cliente] = $this->actingAsCliente();
+
+        $cf = ClienteFinal::create([
+            'cliente_id' => $cliente->id,
+            'nome_empresa' => 'Casa da Maria',
+            'nome_responsavel' => 'Maria Silva',
+            'telefone' => '5511999991111',
+        ]);
+
+        PedidoCliente::create([
+            'cliente_id' => $cliente->id,
+            'cliente_final_id' => $cf->id,
+            'titulo' => 'Pedido de aniversario',
+            'valor' => 150.00,
+            'status' => 'Concluído',
+            'data_pedido' => now()->subDays(10),
+        ]);
+
+        $chat = WhatsappChat::create([
+            'cliente_id' => $cliente->id,
+            'cliente_final_id' => $cf->id,
+            'wa_id' => '5511999991111',
+            'contact_phone' => '5511999991111',
+            'is_bot_active' => true,
+            'last_message_at' => now(),
+        ]);
+
+        \Illuminate\Support\Facades\Cache::flush();
+        $ctx = app(WhatsappBotService::class)->buildCustomerContext($chat);
+
+        $this->assertTrue($ctx['is_identified_customer']);
+        $this->assertTrue($ctx['is_returning_customer']);
+        $this->assertEquals(1, $ctx['total_pedidos_fechados']);
+        $this->assertNotNull($ctx['last_order']);
+        $this->assertEquals('Pedido de aniversario', $ctx['last_order']['titulo']);
+        $this->assertEquals('Concluído', $ctx['last_order']['status']);
+        $this->assertEquals('Maria Silva', $ctx['customer_name']);
+    }
+
+    public function test_customer_context_aniversario_hoje_sinalizado()
+    {
+        [$user, $cliente] = $this->actingAsCliente();
+
+        $cf = ClienteFinal::create([
+            'cliente_id' => $cliente->id,
+            'nome_empresa' => 'Pessoa Fisica',
+            'nome_responsavel' => 'Joao',
+            'telefone' => '5511999992222',
+            'data_aniversario_responsavel' => now()->year(1990),
+        ]);
+
+        $chat = WhatsappChat::create([
+            'cliente_id' => $cliente->id,
+            'cliente_final_id' => $cf->id,
+            'wa_id' => '5511999992222',
+            'contact_phone' => '5511999992222',
+            'is_bot_active' => true,
+            'last_message_at' => now(),
+        ]);
+
+        \Illuminate\Support\Facades\Cache::flush();
+        $ctx = app(WhatsappBotService::class)->buildCustomerContext($chat);
+
+        $this->assertTrue($ctx['aniversario_hoje']);
     }
 
     public function test_bot_service_escala_e_pausa_chat_quando_lead_pede_atendente()

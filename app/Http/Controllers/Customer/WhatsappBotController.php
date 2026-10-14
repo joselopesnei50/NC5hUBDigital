@@ -32,9 +32,16 @@ class WhatsappBotController extends Controller
             'business_name' => ['nullable', 'string', 'max:255'],
             'horario_atendimento' => ['nullable', 'string', 'max:255'],
             'endereco' => ['nullable', 'string', 'max:255'],
-            'faq_custom' => ['nullable', 'string', 'max:8000'],
+            'tom_de_voz' => ['nullable', 'string', 'max:500'],
+            'historia_negocio' => ['nullable', 'string', 'max:4000'],
+            'diferenciais' => ['nullable', 'string', 'max:4000'],
+            'processo_producao' => ['nullable', 'string', 'max:8000'],
+            'publico_alvo' => ['nullable', 'string', 'max:2000'],
             'catalogo_texto' => ['nullable', 'string', 'max:12000'],
+            'politicas' => ['nullable', 'string', 'max:4000'],
+            'faq_custom' => ['nullable', 'string', 'max:8000'],
             'regras_proibicoes' => ['nullable', 'string', 'max:4000'],
+            'cases_exemplo' => ['nullable', 'string', 'max:8000'],
         ]);
 
         WhatsappBotProfile::updateOrCreate(
@@ -51,9 +58,16 @@ class WhatsappBotController extends Controller
                 'business_name' => $validated['business_name'] ?? null,
                 'horario_atendimento' => $validated['horario_atendimento'] ?? null,
                 'endereco' => $validated['endereco'] ?? null,
-                'faq_custom' => $validated['faq_custom'] ?? null,
+                'tom_de_voz' => $validated['tom_de_voz'] ?? null,
+                'historia_negocio' => $validated['historia_negocio'] ?? null,
+                'diferenciais' => $validated['diferenciais'] ?? null,
+                'processo_producao' => $validated['processo_producao'] ?? null,
+                'publico_alvo' => $validated['publico_alvo'] ?? null,
                 'catalogo_texto' => $validated['catalogo_texto'] ?? null,
+                'politicas' => $validated['politicas'] ?? null,
+                'faq_custom' => $validated['faq_custom'] ?? null,
                 'regras_proibicoes' => $validated['regras_proibicoes'] ?? null,
+                'cases_exemplo' => $validated['cases_exemplo'] ?? null,
             ]
         );
 

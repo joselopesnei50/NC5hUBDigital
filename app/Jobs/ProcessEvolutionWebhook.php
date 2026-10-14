@@ -8,6 +8,7 @@ use App\Models\WhatsappInstance;
 use App\Models\WhatsappMessage;
 use App\Services\EvolutionApiService;
 use App\Services\WhatsappBotService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -98,6 +99,8 @@ class ProcessEvolutionWebhook implements ShouldQueue
 
         $chat->increment('unread_count');
         $chat->update(['last_message_at' => now()]);
+
+        Cache::forget("wa_bot_ctx:{$chat->id}");
 
         $this->maybeReplyWithBot($instance, $chat, $extracted);
     }
