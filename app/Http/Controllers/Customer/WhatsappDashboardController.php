@@ -35,14 +35,12 @@ class WhatsappDashboardController extends Controller
         $escalations = (clone $interactions)->where('escalated', true)->count();
         $failures = (clone $interactions)->where('failed', true)->count();
 
-        $totalCost = (float) (clone $interactions)->sum('cost');
         $avgResponseMs = (int) (clone $interactions)->where('failed', false)->avg('response_time_ms');
 
         $responseRate = $inboundCount > 0 ? round(($successfulReplies / $inboundCount) * 100, 1) : 0;
 
         $uniqueChatIds = (clone $interactions)->distinct()->pluck('chat_id');
         $uniqueCustomers = $uniqueChatIds->count();
-        $avgCostPerConversation = $uniqueCustomers > 0 ? round($totalCost / $uniqueCustomers, 4) : 0;
 
         $returningCustomers = $uniqueChatIds->isNotEmpty()
             ? WhatsappChat::whereIn('id', $uniqueChatIds)
@@ -73,8 +71,6 @@ class WhatsappDashboardController extends Controller
             'failures' => $failures,
             'totalInteractions' => $totalInteractions,
             'responseRate' => $responseRate,
-            'totalCost' => $totalCost,
-            'avgCostPerConversation' => $avgCostPerConversation,
             'avgResponseMs' => $avgResponseMs,
             'uniqueCustomers' => $uniqueCustomers,
             'returningCustomers' => $returningCustomers,

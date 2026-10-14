@@ -59,50 +59,32 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {{-- Custo --}}
-            <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
-                <h3 class="font-display font-bold text-lg text-ink mb-1">Custo DeepSeek</h3>
-                <p class="text-slate text-sm mb-5">Estimativa baseada em tokens consumidos pelas respostas do bot.</p>
-                <div class="space-y-4">
-                    <div>
-                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Total no período</p>
-                        <p class="font-display font-bold text-2xl text-ink mt-1">US$ {{ number_format($totalCost, 4, ',', '.') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Média por conversa</p>
-                        <p class="font-display font-bold text-xl text-slate mt-1">US$ {{ number_format($avgCostPerConversation, 4, ',', '.') }}</p>
-                    </div>
-                    @if($failures > 0)
-                        <div class="pt-3 border-t border-black/5">
-                            <p class="text-xs text-rose-700 font-bold">⚠ {{ $failures }} falha(s) no período</p>
-                            <p class="text-xs text-slate mt-1">O bot não conseguiu gerar/enviar resposta. Veja logs se persistir.</p>
-                        </div>
-                    @endif
+        {{-- Clientes + pedidos --}}
+        <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <h3 class="font-display font-bold text-lg text-ink mb-1">Clientes atendidos</h3>
+            <p class="text-slate text-sm mb-5">Quem o bot conversou e quantos pedidos foram gerados no período.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div>
+                    <p class="text-xs text-slate uppercase tracking-wider font-bold">Conversas únicas</p>
+                    <p class="font-display font-bold text-3xl text-ink mt-1">{{ number_format($uniqueCustomers, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate uppercase tracking-wider font-bold">Retornantes</p>
+                    <p class="font-display font-bold text-3xl text-slate mt-1">{{ number_format($returningCustomers, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate mt-1">já falaram antes do período</p>
+                </div>
+                <div>
+                    <p class="text-xs text-emerald-700 uppercase tracking-wider font-bold">Pedidos gerados</p>
+                    <p class="font-display font-bold text-3xl text-emerald-700 mt-1">{{ number_format($pedidosGerados, 0, ',', '.') }}</p>
+                    <p class="text-xs text-slate mt-1">clientes que conversaram no período</p>
                 </div>
             </div>
-
-            {{-- Clientes + pedidos --}}
-            <div class="bg-white border border-black/5 rounded-3xl p-6 sm:p-8 shadow-sm">
-                <h3 class="font-display font-bold text-lg text-ink mb-1">Clientes atendidos</h3>
-                <p class="text-slate text-sm mb-5">Quem o bot conversou e quantos pedidos foram gerados.</p>
-                <div class="space-y-4">
-                    <div>
-                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Conversas únicas</p>
-                        <p class="font-display font-bold text-2xl text-ink mt-1">{{ number_format($uniqueCustomers, 0, ',', '.') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate uppercase tracking-wider font-bold">Retornantes</p>
-                        <p class="font-display font-bold text-xl text-slate mt-1">{{ number_format($returningCustomers, 0, ',', '.') }}</p>
-                        <p class="text-xs text-slate mt-1">clientes que já falaram antes do período</p>
-                    </div>
-                    <div class="pt-3 border-t border-black/5">
-                        <p class="text-xs text-emerald-700 uppercase tracking-wider font-bold">Pedidos gerados</p>
-                        <p class="font-display font-bold text-2xl text-emerald-700 mt-1">{{ number_format($pedidosGerados, 0, ',', '.') }}</p>
-                        <p class="text-xs text-slate mt-1">de clientes que conversaram no período</p>
-                    </div>
+            @if($failures > 0)
+                <div class="mt-6 pt-4 border-t border-black/5">
+                    <p class="text-xs text-rose-700 font-bold">⚠ {{ $failures }} falha(s) de resposta no período</p>
+                    <p class="text-xs text-slate mt-1">O bot não conseguiu gerar/enviar resposta. Se persistir, verifique a conexão.</p>
                 </div>
-            </div>
+            @endif
         </div>
 
         @if($totalInteractions === 0)
