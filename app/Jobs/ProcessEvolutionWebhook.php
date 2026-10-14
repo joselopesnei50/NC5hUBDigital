@@ -6,12 +6,16 @@ use App\Models\ClienteFinal;
 use App\Models\WhatsappChat;
 use App\Models\WhatsappInstance;
 use App\Models\WhatsappMessage;
+use App\Services\EvolutionApiService;
+use App\Services\WhatsappBotService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Throwable;
 
 class ProcessEvolutionWebhook implements ShouldQueue
 {
@@ -94,6 +98,58 @@ class ProcessEvolutionWebhook implements ShouldQueue
 
         $chat->increment('unread_count');
         $chat->update(['last_message_at' => now()]);
+
+        $this->maybeReplyWithBot($instance, $chat, $extracted);
+    }
+
+    protected function maybeReplyWithBot(WhatsappInstance $instance, WhatsappChat $chat, array $extracted): void
+    {
+        if ($extracted['type'] !== 'chat' || empty($extracted['content'])) {
+            return;
+        }
+        if ($chat->is_group) {
+            return;
+        }
+
+        try {
+            /** @var WhatsappBotService $bot */
+            $bot = app(WhatsappBotService::class);
+            $reply = $bot->generateReply($chat->fresh(), (string) $extracted['content']);
+            if (!$reply) {
+                return;
+            }
+
+            /** @var EvolutionApiService $evo */
+            $evo = app(EvolutionApiService::class);
+            $result = $evo->sendText($instance->instance_name, $chat->contact_phone ?: $chat->wa_id, $reply);
+
+            if (isset($result['error'])) {
+                Log::warning('WhatsappBot: envio falhou', [
+                    'chat_id' => $chat->id,
+                    'details' => $result['details'] ?? null,
+                ]);
+                return;
+            }
+
+            $outboundId = $result['key']['id'] ?? ('bot_' . Str::random(16));
+
+            WhatsappMessage::create([
+                'cliente_id' => $instance->cliente_id,
+                'chat_id' => $chat->id,
+                'wa_message_id' => $outboundId,
+                'direction' => 'outbound',
+                'type' => 'chat',
+                'content' => $reply,
+                'status' => 'sent',
+            ]);
+
+            $chat->update(['last_message_at' => now()]);
+        } catch (Throwable $e) {
+            Log::error('WhatsappBot: excecao no auto-reply', [
+                'chat_id' => $chat->id,
+                'msg' => $e->getMessage(),
+            ]);
+        }
     }
 
     protected function findOrCreateChat(WhatsappInstance $instance, string $phone, string $jid, ?string $pushName, bool $isGroup): WhatsappChat

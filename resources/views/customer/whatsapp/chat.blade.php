@@ -1,18 +1,29 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('customer.whatsapp.inbox') }}" class="text-slate hover:text-ink">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            </a>
-            <div class="w-11 h-11 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center">
-                {{ strtoupper(substr($chat->contact_name ?: $chat->contact_phone ?: 'C', 0, 1)) }}
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('customer.whatsapp.inbox') }}" class="text-slate hover:text-ink">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </a>
+                <div class="w-11 h-11 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center">
+                    {{ strtoupper(substr($chat->contact_name ?: $chat->contact_phone ?: 'C', 0, 1)) }}
+                </div>
+                <div>
+                    <h2 class="font-display font-bold text-xl text-ink leading-tight">
+                        {{ $chat->clienteFinal?->nome_responsavel ?: ($chat->contact_name ?: $chat->contact_phone) }}
+                    </h2>
+                    <p class="text-xs text-slate">{{ $chat->contact_phone ?: $chat->wa_id }}</p>
+                </div>
             </div>
-            <div>
-                <h2 class="font-display font-bold text-xl text-ink leading-tight">
-                    {{ $chat->clienteFinal?->nome_responsavel ?: ($chat->contact_name ?: $chat->contact_phone) }}
-                </h2>
-                <p class="text-xs text-slate">{{ $chat->contact_phone ?: $chat->wa_id }}</p>
-            </div>
+            @if(!$chat->is_group)
+                <form method="POST" action="{{ route('customer.whatsapp.bot.toggle', $chat) }}">
+                    @csrf
+                    <button type="submit"
+                            class="px-3 py-2 rounded-xl text-xs font-bold transition-colors {{ $chat->is_bot_active ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                        {{ $chat->is_bot_active ? 'Bot ativo — pausar' : 'Bot pausado — ativar' }}
+                    </button>
+                </form>
+            @endif
         </div>
     </x-slot>
 
