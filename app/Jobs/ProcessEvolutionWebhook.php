@@ -74,7 +74,12 @@ class ProcessEvolutionWebhook implements ShouldQueue
             return;
         }
 
-        $remoteJid = $key['remoteJid'] ?? '';
+        // LID fix (Meta 2024+): WhatsApp usa um Local Identifier interno em `remoteJid`
+        // que nao e um numero valido pra enviar de volta. O numero real vem em
+        // `remoteJidAlt`. Preferir Alt quando disponivel; fallback pro remoteJid.
+        $remoteJidPrincipal = $key['remoteJid'] ?? '';
+        $remoteJidAlt = $key['remoteJidAlt'] ?? null;
+        $remoteJid = $remoteJidAlt ?: $remoteJidPrincipal;
         $phone = preg_replace('/@.*/', '', $remoteJid);
         $isGroup = str_contains($remoteJid, '@g.us');
 
