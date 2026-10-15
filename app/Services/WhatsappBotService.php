@@ -7,6 +7,8 @@ use App\Agent\Chat\Tools\CancelarAgendamentoWhatsappTool;
 use App\Agent\Chat\Tools\ConsultarAgendaWhatsappTool;
 use App\Agent\Chat\Tools\CriarAgendamentoWhatsappTool;
 use App\Agent\Chat\Tools\ListarMeusAgendamentosWhatsappTool;
+use App\Agent\Chat\Tools\ListarRecursosWhatsappTool;
+use App\Models\AppointmentResource;
 use App\Agent\DTOs\PromptPayload;
 use App\Agent\LlmManager;
 use App\Models\ClienteFinal;
@@ -37,6 +39,7 @@ class WhatsappBotService
         $this->tools->register(new ConsultarAgendaWhatsappTool());
         $this->tools->register(new ListarMeusAgendamentosWhatsappTool());
         $this->tools->register(new CancelarAgendamentoWhatsappTool());
+        $this->tools->register(new ListarRecursosWhatsappTool());
     }
 
     public function generateReply(WhatsappChat $chat, string $inboundText, ?string $inboundMessageId = null): ?string
@@ -277,6 +280,8 @@ class WhatsappBotService
             'dia_da_semana_hoje' => now()->isoFormat('dddd'),
             'horario_comercial' => $this->summarizeBusinessHours($training),
             'duracao_padrao_minutos' => (int) ($training?->duracao_padrao_atendimento_min ?: 60),
+            'resource_label' => $training?->resource_label ?: 'Profissional',
+            'recursos' => $this->summarizeResources($chat->cliente_id),
             'is_first_interaction' => $isFirstInteraction,
             'is_returning_customer' => false,
             'customer_name' => $chat->contact_name,
@@ -360,13 +365,20 @@ class WhatsappBotService
         }
 
         $parts[] = "AGENDAMENTOS (FERRAMENTAS DISPONIVEIS):\n"
-            . "- Tools: consultar_agenda, criar_agendamento, listar_meus_agendamentos, cancelar_agendamento.\n"
+            . "- Tools: consultar_agenda, criar_agendamento, listar_meus_agendamentos, cancelar_agendamento, listar_recursos.\n"
             . "- NUNCA proponha ou agende horario fora do horario_comercial do snapshot. Se o cliente pedir fora, informe o horario de funcionamento e sugira o proximo horario valido.\n"
+            . "- RECURSOS (profissionais/cadeiras/salas conforme resource_label): veja a lista em recursos do snapshot.\n"
+            . "  * Se recursos tem 0 itens: ignore totalmente, agende sem perguntar.\n"
+            . "  * Se recursos tem 1 item: nao pergunte, o sistema auto-preenche.\n"
+            . "  * Se recursos tem 2+ itens: PERGUNTE ao cliente com qual (use o resource_label pra chamar — ex: \"com qual profissional voce quer?\" ou \"em qual cadeira voce prefere?\"). Passe o resource_id correspondente ao criar.\n"
+            . "  * Se o cliente disser \"qualquer um\", \"tanto faz\", \"pode ser qualquer\", passe resource_id=0 — o sistema aloca o primeiro disponivel no horario.\n"
+            . "  * Se a tool criar_agendamento retornar erro escolha_recurso_necessaria, voce esqueceu de perguntar; use a lista recursos retornada e pergunte agora.\n"
             . "- Fluxo pra MARCAR:\n"
             . "  1. Entenda o que ele quer agendar e para quando.\n"
-            . "  2. Opcional: consultar_agenda pra ver ocupacao do dia.\n"
-            . "  3. REPITA a proposta: \"Deixa confirmar: X dia Y as Z, pode ser?\". ESPERE o SIM explicito.\n"
-            . "  4. Chame criar_agendamento. Se a tool retornar erro conflito_de_horario ou horario_fora_do_expediente, OFERECA pro cliente as sugestoes retornadas pela tool e espere ele escolher uma antes de tentar criar de novo.\n"
+            . "  2. Se recursos.length >= 2 e cliente nao disse: PERGUNTE qual recurso.\n"
+            . "  3. Opcional: consultar_agenda pra ver ocupacao do dia.\n"
+            . "  4. REPITA a proposta: \"Deixa confirmar: X dia Y as Z com {recurso}, pode ser?\". ESPERE o SIM explicito.\n"
+            . "  5. Chame criar_agendamento com resource_id. Se a tool retornar erro conflito_de_horario ou horario_fora_do_expediente, OFERECA as sugestoes.\n"
             . "- Fluxo pra CANCELAR ou REMARCAR:\n"
             . "  1. Chame listar_meus_agendamentos pra pegar o id correto.\n"
             . "  2. Se tiver mais de um, pergunte ao cliente QUAL (data+titulo) ele quer alterar.\n"
@@ -463,6 +475,17 @@ class WhatsappBotService
             ];
         }
         return $history;
+    }
+
+    protected function summarizeResources(int $clienteId): array
+    {
+        return AppointmentResource::where('cliente_id', $clienteId)
+            ->active()
+            ->ordered()
+            ->get(['id', 'nome'])
+            ->map(fn ($r) => ['id' => $r->id, 'nome' => $r->nome])
+            ->values()
+            ->all();
     }
 
     protected function summarizeBusinessHours(?WhatsappBotTraining $training): ?array

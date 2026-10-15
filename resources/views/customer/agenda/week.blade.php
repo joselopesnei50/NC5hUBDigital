@@ -54,6 +54,9 @@
                                     @if($apt->clienteFinal?->nome_responsavel || $apt->contato_nome)
                                         <p class="text-slate/70 mt-0.5">{{ $apt->clienteFinal?->nome_responsavel ?: $apt->contato_nome }}</p>
                                     @endif
+                                    @if($apt->resource)
+                                        <p class="text-slate/60 mt-0.5">{{ $apt->resource->nome }}</p>
+                                    @endif
                                     @if($apt->created_via === 'bot')
                                         <span class="inline-block mt-1 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-bold">via WhatsApp</span>
                                     @endif

@@ -224,6 +224,16 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         Route::delete('/{agenda}', [\App\Http\Controllers\Customer\AppointmentController::class, 'destroy'])->name('destroy');
         Route::post('/{agenda}/concluir', [\App\Http\Controllers\Customer\AppointmentController::class, 'markCompleted'])->name('complete');
         Route::post('/{agenda}/cancelar', [\App\Http\Controllers\Customer\AppointmentController::class, 'markCancelled'])->name('cancel');
+
+        // Recursos (profissionais / cadeiras / salas / etc)
+        Route::prefix('recursos')->name('recursos.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Customer\AppointmentResourceController::class, 'index'])->name('index');
+            Route::get('/criar', [\App\Http\Controllers\Customer\AppointmentResourceController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Customer\AppointmentResourceController::class, 'store'])->name('store');
+            Route::get('/{recurso}/editar', [\App\Http\Controllers\Customer\AppointmentResourceController::class, 'edit'])->name('edit');
+            Route::put('/{recurso}', [\App\Http\Controllers\Customer\AppointmentResourceController::class, 'update'])->name('update');
+            Route::delete('/{recurso}', [\App\Http\Controllers\Customer\AppointmentResourceController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // WhatsApp (Evolution API) - Onda 1: inbox mínimo

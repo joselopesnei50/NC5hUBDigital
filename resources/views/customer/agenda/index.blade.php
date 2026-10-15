@@ -54,6 +54,7 @@
                                     {{ $apt->clienteFinal?->nome_responsavel ?: $apt->contato_nome ?: '—' }}
                                     @if($apt->contato_telefone) · {{ $apt->contato_telefone }}@endif
                                     · {{ $apt->duration_minutes }}min
+                                    @if($apt->resource) · <span class="text-ink font-bold">{{ $apt->resource->nome }}</span>@endif
                                 </p>
                                 @if($apt->descricao)
                                     <p class="text-xs text-slate mt-1 line-clamp-2">{{ $apt->descricao }}</p>

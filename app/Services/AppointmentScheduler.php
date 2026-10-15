@@ -46,13 +46,14 @@ class AppointmentScheduler
      * Verifica se existe appointment ativo que colida com o intervalo proposto.
      * Retorna o Appointment conflitante ou null.
      */
-    public function findConflict(int $clienteId, Carbon $when, int $durationMinutes, ?int $ignoreId = null): ?Appointment
+    public function findConflict(int $clienteId, Carbon $when, int $durationMinutes, ?int $ignoreId = null, ?int $resourceId = null): ?Appointment
     {
         $end = $when->copy()->addMinutes($durationMinutes);
 
         return Appointment::where('cliente_id', $clienteId)
             ->whereIn('status', ['agendado', 'confirmado'])
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->when($resourceId !== null, fn ($q) => $q->where('resource_id', $resourceId))
             ->where(function ($q) use ($when, $end) {
                 $q->where(function ($inner) use ($when, $end) {
                     $inner->where('scheduled_at', '<', $end)
@@ -67,7 +68,7 @@ class AppointmentScheduler
      * Sugere ate N proximos horarios livres a partir de $from, dentro de
      * horario comercial, em multiplos da duracao. Varre ate 14 dias.
      */
-    public function suggestNextSlots(int $clienteId, ?WhatsappBotTraining $training, Carbon $from, int $durationMinutes, int $count = 3): array
+    public function suggestNextSlots(int $clienteId, ?WhatsappBotTraining $training, Carbon $from, int $durationMinutes, int $count = 3, ?int $resourceId = null): array
     {
         $slots = [];
         $cursor = $from->copy()->setSecond(0);
@@ -82,7 +83,7 @@ class AppointmentScheduler
                 continue;
             }
 
-            $conflict = $this->findConflict($clienteId, $cursor, $durationMinutes);
+            $conflict = $this->findConflict($clienteId, $cursor, $durationMinutes, null, $resourceId);
             if ($conflict) {
                 $cursor = $conflict->scheduled_at->copy()->addMinutes($conflict->duration_minutes);
                 continue;
@@ -93,6 +94,21 @@ class AppointmentScheduler
         }
 
         return $slots;
+    }
+
+    /**
+     * Retorna o primeiro resource_id disponivel no horario, OU null se nenhum.
+     * Usado quando o cliente final diz "qualquer um" e tem multiplos recursos.
+     * @param int[] $resourceIds
+     */
+    public function findFirstAvailableResource(int $clienteId, array $resourceIds, Carbon $when, int $durationMinutes): ?int
+    {
+        foreach ($resourceIds as $rid) {
+            if (!$this->findConflict($clienteId, $when, $durationMinutes, null, $rid)) {
+                return $rid;
+            }
+        }
+        return null;
     }
 
     protected function jumpToNextOpenMoment(Carbon $cursor, ?WhatsappBotTraining $training): Carbon

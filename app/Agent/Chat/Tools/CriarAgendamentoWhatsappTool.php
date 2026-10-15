@@ -6,6 +6,7 @@ namespace App\Agent\Chat\Tools;
 
 use App\Agent\Chat\Contracts\ToolInterface;
 use App\Models\Appointment;
+use App\Models\AppointmentResource;
 use App\Models\WhatsappBotTraining;
 use App\Models\WhatsappChat;
 use App\Services\AppointmentScheduler;
@@ -50,6 +51,10 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
                     'type' => 'string',
                     'description' => 'Detalhes adicionais do atendimento.',
                 ],
+                'resource_id' => [
+                    'type' => 'integer',
+                    'description' => 'ID do recurso (profissional/cadeira/etc). Obrigatorio quando o negocio tem 2+ recursos ativos. Use listar_recursos pra obter. Passe 0 (zero) se o cliente disser "qualquer um" ou "tanto faz" — o sistema aloca o primeiro disponivel.',
+                ],
             ],
             'required' => ['data_hora', 'titulo'],
         ];
@@ -92,8 +97,53 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
         $training = WhatsappBotTraining::where('cliente_id', $tenantId)->first();
         $scheduler = app(AppointmentScheduler::class);
 
+        $resourceIdInput = array_key_exists('resource_id', $arguments) ? (int) $arguments['resource_id'] : null;
+        $activeResources = AppointmentResource::where('cliente_id', $tenantId)->active()->ordered()->get();
+
+        $resolvedResourceId = null;
+        if ($activeResources->isNotEmpty()) {
+            if ($resourceIdInput === null) {
+                if ($activeResources->count() === 1) {
+                    $resolvedResourceId = $activeResources->first()->id;
+                } else {
+                    return [
+                        'ok' => false,
+                        'erro' => 'escolha_recurso_necessaria',
+                        'mensagem' => "O negocio tem mais de um recurso ativo. Pergunte ao cliente qual ele quer antes de criar.",
+                        'recursos' => $activeResources->map(fn ($r) => ['id' => $r->id, 'nome' => $r->nome])->values()->all(),
+                    ];
+                }
+            } elseif ($resourceIdInput === 0) {
+                $resolvedResourceId = $scheduler->findFirstAvailableResource(
+                    $tenantId,
+                    $activeResources->pluck('id')->all(),
+                    $when,
+                    $duracao
+                );
+                if ($resolvedResourceId === null) {
+                    $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3);
+                    return [
+                        'ok' => false,
+                        'erro' => 'nenhum_recurso_disponivel',
+                        'mensagem' => "Nenhum recurso tem esse horario livre. Oferecer outro.",
+                        'sugestoes' => $this->formatSlots($sugestoes),
+                    ];
+                }
+            } else {
+                $exists = $activeResources->firstWhere('id', $resourceIdInput);
+                if (!$exists) {
+                    return [
+                        'ok' => false,
+                        'erro' => 'recurso_invalido',
+                        'mensagem' => "resource_id nao corresponde a nenhum recurso ativo. Chame listar_recursos pra obter IDs validos.",
+                    ];
+                }
+                $resolvedResourceId = $resourceIdInput;
+            }
+        }
+
         if (!$scheduler->isWithinBusinessHours($when, $duracao, $training)) {
-            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3);
+            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3, $resolvedResourceId);
             return [
                 'ok' => false,
                 'erro' => 'horario_fora_do_expediente',
@@ -102,9 +152,9 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
             ];
         }
 
-        $conflict = $scheduler->findConflict($tenantId, $when, $duracao);
+        $conflict = $scheduler->findConflict($tenantId, $when, $duracao, null, $resolvedResourceId);
         if ($conflict) {
-            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3);
+            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3, $resolvedResourceId);
             return [
                 'ok' => false,
                 'erro' => 'conflito_de_horario',
@@ -117,6 +167,7 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
             'cliente_id' => $tenantId,
             'cliente_final_id' => $chat->cliente_final_id,
             'chat_id' => $chat->id,
+            'resource_id' => $resolvedResourceId,
             'contato_nome' => $chat->contact_name,
             'contato_telefone' => $chat->contact_phone ?: $chat->wa_id,
             'titulo' => $titulo,

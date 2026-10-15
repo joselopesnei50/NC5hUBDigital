@@ -36,6 +36,11 @@ class Appointment extends Model
         return $this->belongsTo(WhatsappChat::class, 'chat_id');
     }
 
+    public function resource()
+    {
+        return $this->belongsTo(AppointmentResource::class, 'resource_id');
+    }
+
     public function isCancelled(): bool
     {
         return $this->status === 'cancelado';

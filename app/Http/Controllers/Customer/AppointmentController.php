@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\AppointmentResource;
 use App\Models\ClienteFinal;
 use App\Models\WhatsappBotTraining;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class AppointmentController extends Controller
             ->whereIn('status', ['agendado', 'confirmado'])
             ->where('scheduled_at', '>=', now()->startOfDay())
             ->orderBy('scheduled_at')
-            ->with('clienteFinal')
+            ->with(['clienteFinal', 'resource'])
             ->get();
 
         $history = Appointment::where('cliente_id', $cliente->id)
@@ -34,7 +35,7 @@ class AppointmentController extends Controller
                     ->orWhere('scheduled_at', '<', now()->startOfDay());
             })
             ->orderByDesc('scheduled_at')
-            ->with('clienteFinal')
+            ->with(['clienteFinal', 'resource'])
             ->paginate(20);
 
         return view('customer.agenda.index', compact('upcoming', 'history'));
@@ -54,7 +55,7 @@ class AppointmentController extends Controller
         $appointments = Appointment::where('cliente_id', $cliente->id)
             ->whereBetween('scheduled_at', [$weekStart, $weekEnd])
             ->orderBy('scheduled_at')
-            ->with('clienteFinal')
+            ->with(['clienteFinal', 'resource'])
             ->get()
             ->groupBy(fn (Appointment $a) => $a->scheduled_at->format('Y-m-d'));
 
@@ -89,9 +90,11 @@ class AppointmentController extends Controller
         $clientesFinais = ClienteFinal::where('cliente_id', $cliente->id)
             ->orderBy('nome_responsavel')
             ->get();
+        $resources = AppointmentResource::where('cliente_id', $cliente->id)->active()->ordered()->get();
+        $resourceLabel = $this->resourceLabel($cliente->id);
         $appointment = new Appointment();
 
-        return view('customer.agenda.form', compact('appointment', 'clientesFinais'));
+        return view('customer.agenda.form', compact('appointment', 'clientesFinais', 'resources', 'resourceLabel'));
     }
 
     public function store(Request $request)
@@ -116,8 +119,20 @@ class AppointmentController extends Controller
         $clientesFinais = ClienteFinal::where('cliente_id', $cliente->id)
             ->orderBy('nome_responsavel')
             ->get();
+        $resources = AppointmentResource::where('cliente_id', $cliente->id)->active()->ordered()->get();
+        $resourceLabel = $this->resourceLabel($cliente->id);
 
-        return view('customer.agenda.form', ['appointment' => $agenda, 'clientesFinais' => $clientesFinais]);
+        return view('customer.agenda.form', [
+            'appointment' => $agenda,
+            'clientesFinais' => $clientesFinais,
+            'resources' => $resources,
+            'resourceLabel' => $resourceLabel,
+        ]);
+    }
+
+    protected function resourceLabel(int $clienteId): string
+    {
+        return WhatsappBotTraining::where('cliente_id', $clienteId)->value('resource_label') ?: 'Profissional';
     }
 
     public function update(Request $request, Appointment $agenda)
@@ -164,6 +179,7 @@ class AppointmentController extends Controller
             'titulo' => ['required', 'string', 'max:160'],
             'descricao' => ['nullable', 'string', 'max:2000'],
             'cliente_final_id' => ['nullable', 'integer'],
+            'resource_id' => ['nullable', 'integer'],
             'contato_nome' => ['nullable', 'string', 'max:160'],
             'contato_telefone' => ['nullable', 'string', 'max:30'],
             'scheduled_date' => ['required', 'date'],
@@ -180,6 +196,15 @@ class AppointmentController extends Controller
             abort_unless($exists, 422, 'Cliente final inválido.');
         } else {
             $v['cliente_final_id'] = null;
+        }
+
+        if (!empty($v['resource_id'])) {
+            $exists = AppointmentResource::where('id', $v['resource_id'])
+                ->where('cliente_id', $clienteId)
+                ->exists();
+            abort_unless($exists, 422, 'Recurso inválido.');
+        } else {
+            $v['resource_id'] = null;
         }
 
         $v['scheduled_at'] = Carbon::createFromFormat('Y-m-d H:i', $v['scheduled_date'] . ' ' . $v['scheduled_time']);

@@ -188,6 +188,21 @@
                 </div>
 
                 <div class="mt-6 border-t border-black/5 pt-6">
+                    <p class="text-sm font-bold text-ink mb-1">Profissionais, cadeiras, mecânicos... como chamar?</p>
+                    <p class="text-slate text-xs mb-3">Nome genérico pros "recursos" que recebem agendamentos (ex: <em>Profissional</em>, <em>Cadeira</em>, <em>Mecânico</em>, <em>Box</em>, <em>Sala</em>). O bot usa esse termo pra perguntar ao cliente final.</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <input type="text" name="resource_label"
+                               value="{{ old('resource_label', $training->resource_label ?: 'Profissional') }}"
+                               maxlength="40"
+                               class="flex-1 min-w-[200px] px-4 py-2 border border-black/10 rounded-xl text-sm focus:border-bruce focus:outline-none">
+                        <a href="{{ route('customer.agenda.recursos.index') }}" class="text-bruce font-bold text-sm hover:underline">
+                            Gerenciar cadastros →
+                        </a>
+                    </div>
+                    <p class="text-slate text-xs mt-2">Enquanto nenhum recurso estiver cadastrado, a agenda funciona em modo único (sem divisão).</p>
+                </div>
+
+                <div class="mt-6 border-t border-black/5 pt-6">
                     <p class="text-sm font-bold text-ink mb-1">Horário comercial</p>
                     <p class="text-slate text-xs mb-4">O bot nunca vai marcar fora destes horários. Marque "Aberto" nos dias que você atende.</p>
 

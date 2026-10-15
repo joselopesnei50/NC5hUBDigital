@@ -61,6 +61,27 @@
                 </select>
             </div>
 
+            @if($resources->isNotEmpty())
+                <div>
+                    <label class="block text-sm font-bold text-ink mb-1">{{ $resourceLabel }} {{ $resources->count() > 1 ? '*' : '' }}</label>
+                    <select name="resource_id" class="w-full px-4 py-2 border border-black/10 rounded-xl text-sm focus:border-bruce focus:outline-none" @if($resources->count() > 1) required @endif>
+                        @if($resources->count() === 1)
+                            <option value="{{ $resources->first()->id }}" selected>{{ $resources->first()->nome }}</option>
+                        @else
+                            <option value="">— selecione —</option>
+                            @foreach($resources as $r)
+                                <option value="{{ $r->id }}" {{ (int) old('resource_id', $appointment->resource_id) === $r->id ? 'selected' : '' }}>
+                                    {{ $r->nome }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                    @if($resources->count() === 1)
+                        <p class="text-slate text-xs mt-1">Único cadastrado — selecionado automaticamente. Pra ter mais opções, <a href="{{ route('customer.agenda.recursos.index') }}" class="text-bruce font-bold hover:underline">adicione em {{ strtolower($resourceLabel) }}s</a>.</p>
+                    @endif
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-bold text-ink mb-1">Nome do contato (se não cadastrado)</label>

@@ -50,6 +50,7 @@ class WhatsappBotController extends Controller
             'horario_comercial.*.aberto' => ['nullable', 'boolean'],
             'horario_comercial.*.abre' => ['nullable', 'date_format:H:i'],
             'horario_comercial.*.fecha' => ['nullable', 'date_format:H:i'],
+            'resource_label' => ['nullable', 'string', 'max:40'],
         ]);
 
         $horario = [];
@@ -91,6 +92,7 @@ class WhatsappBotController extends Controller
                 'reminder_hours_before_second' => $validated['reminder_hours_before_second'] ?? 24,
                 'duracao_padrao_atendimento_min' => $validated['duracao_padrao_atendimento_min'] ?? 60,
                 'horario_comercial' => $horario,
+                'resource_label' => trim($validated['resource_label'] ?? '') ?: 'Profissional',
             ]
         );
 
