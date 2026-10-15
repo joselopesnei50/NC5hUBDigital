@@ -77,7 +77,7 @@
             </template>
 
             {{-- Lista de chats --}}
-            <ul class="divide-y divide-black/5">
+            <ul class="divide-y divide-black/5" x-show="filteredChats.length > 0">
                 <template x-for="c in filteredChats" :key="c.id">
                     <li>
                         <a :href="c.url"
@@ -136,19 +136,7 @@
     <script>
         function inboxApp() {
             return {
-                chats: @json($chats->map(fn ($c) => [
-                    'id' => $c->id,
-                    'name' => $c->clienteFinal?->nome_responsavel ?: ($c->contact_name ?: $c->contact_phone ?: 'Sem nome'),
-                    'phone' => $c->contact_phone ?: $c->wa_id,
-                    'last_at_iso' => optional($c->last_message_at)->toIso8601String(),
-                    'unread' => (int) $c->unread_count,
-                    'last_text' => $c->latestMessage?->content ? mb_substr((string) $c->latestMessage->content, 0, 120) : null,
-                    'last_direction' => $c->latestMessage?->direction,
-                    'last_type' => $c->latestMessage?->type,
-                    'bot_active' => (bool) $c->is_bot_active,
-                    'is_group' => (bool) $c->is_group,
-                    'url' => route('customer.whatsapp.chat', $c),
-                ])->values()),
+                chats: @json($chatsData),
                 filter: 'all',
                 search: '',
                 lastSync: null,
