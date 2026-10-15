@@ -10,6 +10,7 @@
                 <div class="inline-flex rounded-xl bg-white border border-black/10 p-1 text-sm">
                     <a href="{{ route('customer.agenda.index') }}" class="px-3 py-1.5 rounded-lg font-bold text-slate hover:text-ink">Lista</a>
                     <a href="{{ route('customer.agenda.index', ['view' => 'week']) }}" class="px-3 py-1.5 rounded-lg font-bold bg-bruce text-white">Semana</a>
+                    <a href="{{ route('customer.agenda.index', ['view' => 'month']) }}" class="px-3 py-1.5 rounded-lg font-bold text-slate hover:text-ink">Mês</a>
                 </div>
                 <a href="{{ route('customer.agenda.create') }}"
                    class="px-5 py-2.5 bg-bruce hover:bg-bruce/90 text-white rounded-xl font-bold text-sm transition-colors">

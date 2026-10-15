@@ -63,6 +63,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
     Route::resource('clientes', \App\Http\Controllers\Admin\ClienteController::class);
 
+    // WhatsApp Bot — Financeiro (consumo DeepSeek por cliente)
+    Route::get('/whatsapp-financeiro', [\App\Http\Controllers\Admin\WhatsappFinanceiroController::class, 'index'])
+        ->name('whatsapp-financeiro.index');
+
     // Usuários do painel do cliente (limite 5)
     Route::post('clientes/{cliente}/usuarios', [\App\Http\Controllers\Admin\ClienteController::class, 'usersStore'])->name('clientes.usuarios.store');
     Route::delete('clientes/{cliente}/usuarios/{user}', [\App\Http\Controllers\Admin\ClienteController::class, 'usersDestroy'])->name('clientes.usuarios.destroy');

@@ -105,12 +105,59 @@ class WhatsappDashboardController extends Controller
             ->countBy()
             ->toArray();
 
+        // Conversao: chats unicos no periodo vs chats que viraram appointment
+        $chatsUnicos = WhatsappBotInteraction::where('cliente_id', $clienteId)
+            ->whereBetween('created_at', [$start, $end])
+            ->distinct('chat_id')
+            ->count('chat_id');
+        $chatsComAppointment = Appointment::where('cliente_id', $clienteId)
+            ->where('created_via', 'bot')
+            ->whereNotNull('chat_id')
+            ->whereBetween('created_at', [$start, $end])
+            ->distinct('chat_id')
+            ->count('chat_id');
+        $conversionRate = $chatsUnicos > 0 ? round(($chatsComAppointment / $chatsUnicos) * 100, 1) : 0;
+
+        // No-show: appointments passados que ficaram status=agendado/confirmado
+        $pastQuery = Appointment::where('cliente_id', $clienteId)
+            ->whereBetween('scheduled_at', [$start, $end])
+            ->where('scheduled_at', '<', now());
+        $pastTotal = (clone $pastQuery)->whereIn('status', ['agendado', 'confirmado', 'concluido'])->count();
+        $pastNoShow = (clone $pastQuery)->whereIn('status', ['agendado', 'confirmado'])->count();
+        $noShowRate = $pastTotal > 0 ? round(($pastNoShow / $pastTotal) * 100, 1) : 0;
+
+        // Melhor hora e dia da semana (quando mais sao criados)
+        $createdWithTime = Appointment::where('cliente_id', $clienteId)
+            ->whereBetween('created_at', [$start, $end])
+            ->get(['scheduled_at']);
+        $bestHour = null;
+        $bestDow = null;
+        if ($createdWithTime->isNotEmpty()) {
+            $byHour = $createdWithTime->groupBy(fn ($a) => $a->scheduled_at->format('H'))
+                ->map->count()->sortDesc();
+            $bestHour = (int) $byHour->keys()->first();
+
+            $dowNames = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+            $byDow = $createdWithTime->groupBy(fn ($a) => $a->scheduled_at->dayOfWeek)
+                ->map->count()->sortDesc();
+            $bestDowIdx = (int) $byDow->keys()->first();
+            $bestDow = ['dom', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'][$bestDowIdx] ?? null;
+        }
+
         return [
             'created_total' => $createdTotal,
             'created_by_bot' => $createdByBot,
             'cancelled' => $cancelled,
             'conflito_count' => (int) ($errorsByCode['conflito_de_horario'] ?? 0),
             'fora_expediente_count' => (int) ($errorsByCode['horario_fora_do_expediente'] ?? 0),
+            'conversion_rate' => $conversionRate,
+            'chats_unicos' => $chatsUnicos,
+            'chats_com_appointment' => $chatsComAppointment,
+            'no_show_rate' => $noShowRate,
+            'past_total' => $pastTotal,
+            'past_no_show' => $pastNoShow,
+            'best_hour' => $bestHour,
+            'best_dow' => $bestDow,
         ];
     }
 

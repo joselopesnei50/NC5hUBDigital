@@ -17,10 +17,13 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $cliente = Auth::user()->cliente;
-        $view = $request->query('view') === 'week' ? 'week' : 'list';
+        $viewMode = in_array($request->query('view'), ['week', 'month'], true) ? $request->query('view') : 'list';
 
-        if ($view === 'week') {
+        if ($viewMode === 'week') {
             return $this->weekView($request, $cliente);
+        }
+        if ($viewMode === 'month') {
+            return $this->monthView($request, $cliente);
         }
 
         $upcoming = Appointment::where('cliente_id', $cliente->id)
@@ -142,6 +145,59 @@ class AppointmentController extends Controller
     protected function resourceLabel(int $clienteId): string
     {
         return WhatsappBotTraining::where('cliente_id', $clienteId)->value('resource_label') ?: 'Profissional';
+    }
+
+    protected function monthView(Request $request, $cliente)
+    {
+        $monthRef = $request->query('month');
+        try {
+            $monthStart = $monthRef ? Carbon::createFromFormat('Y-m', $monthRef) : now();
+        } catch (\Throwable $e) {
+            $monthStart = now();
+        }
+        $monthStart = $monthStart->copy()->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $gridStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $gridEnd = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
+
+        $appointments = Appointment::where('cliente_id', $cliente->id)
+            ->whereBetween('scheduled_at', [$gridStart, $gridEnd])
+            ->orderBy('scheduled_at')
+            ->with(['clienteFinal', 'resource'])
+            ->get()
+            ->groupBy(fn (Appointment $a) => $a->scheduled_at->format('Y-m-d'));
+
+        $weeks = [];
+        $cursor = $gridStart->copy();
+        while ($cursor->lessThanOrEqualTo($gridEnd)) {
+            $week = [];
+            for ($i = 0; $i < 7; $i++) {
+                $day = $cursor->copy();
+                $key = $day->format('Y-m-d');
+                $dayAppointments = $appointments->get($key, collect());
+                $week[] = [
+                    'date' => $day,
+                    'key' => $key,
+                    'inMonth' => $day->month === $monthStart->month,
+                    'isToday' => $day->isSameDay(now()),
+                    'appointments' => $dayAppointments->take(3),
+                    'overflow' => max(0, $dayAppointments->count() - 3),
+                    'total' => $dayAppointments->count(),
+                ];
+                $cursor->addDay();
+            }
+            $weeks[] = $week;
+        }
+
+        return view('customer.agenda.month', [
+            'monthStart' => $monthStart,
+            'prevMonth' => $monthStart->copy()->subMonth()->format('Y-m'),
+            'nextMonth' => $monthStart->copy()->addMonth()->format('Y-m'),
+            'thisMonth' => now()->format('Y-m'),
+            'weeks' => $weeks,
+            'icsUrl' => $this->icsUrlForCliente($cliente),
+        ]);
     }
 
     public function update(Request $request, Appointment $agenda)
