@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\AppointmentResource;
 use App\Models\ClienteFinal;
 use App\Models\WhatsappBotTraining;
+use App\Services\CalendarTokenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -38,7 +39,15 @@ class AppointmentController extends Controller
             ->with(['clienteFinal', 'resource'])
             ->paginate(20);
 
-        return view('customer.agenda.index', compact('upcoming', 'history'));
+        $icsUrl = $this->icsUrlForCliente($cliente);
+
+        return view('customer.agenda.index', compact('upcoming', 'history', 'icsUrl'));
+    }
+
+    protected function icsUrlForCliente($cliente): string
+    {
+        $token = app(CalendarTokenService::class)->ensureToken($cliente);
+        return route('public.calendar.cliente', ['token' => $token]);
     }
 
     protected function weekView(Request $request, $cliente)

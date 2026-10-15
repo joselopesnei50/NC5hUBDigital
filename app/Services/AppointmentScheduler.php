@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Models\AppointmentResource;
 use App\Models\WhatsappBotTraining;
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
 
 class AppointmentScheduler
 {
@@ -16,17 +16,26 @@ class AppointmentScheduler
 
     /**
      * Retorna true se o intervalo [when, when + duration) cai inteiro dentro
-     * do horario comercial do dia. Se nao ha training ou horario_comercial
-     * nao definido, aceita (fail-open — nao bloqueia o cliente sem config).
+     * do horario comercial do dia. Se o recurso tem horario proprio
+     * (use_custom_hours=true), ele tem prioridade. Senao, usa o do training.
+     * Se nenhum ha config, aceita (fail-open).
      */
-    public function isWithinBusinessHours(Carbon $when, int $durationMinutes, ?WhatsappBotTraining $training): bool
+    public function isWithinBusinessHours(Carbon $when, int $durationMinutes, ?WhatsappBotTraining $training, ?AppointmentResource $resource = null): bool
     {
-        if (!$training || empty($training->horario_comercial)) {
+        $diaChave = self::DIAS_SEMANA_MAP[$when->dayOfWeek] ?? null;
+        if (!$diaChave) {
             return true;
         }
 
-        $diaChave = self::DIAS_SEMANA_MAP[$when->dayOfWeek] ?? null;
-        if (!$diaChave) {
+        if ($resource && $resource->hasCustomHours()) {
+            $dia = $resource->getHorarioDoDia($diaChave);
+            if (!$dia) {
+                return false;
+            }
+            return $this->intervaloCabe($when, $durationMinutes, $dia);
+        }
+
+        if (!$training || empty($training->horario_comercial)) {
             return true;
         }
 
@@ -35,6 +44,11 @@ class AppointmentScheduler
             return false;
         }
 
+        return $this->intervaloCabe($when, $durationMinutes, $dia);
+    }
+
+    protected function intervaloCabe(Carbon $when, int $durationMinutes, array $dia): bool
+    {
         $abre = Carbon::createFromFormat('H:i', $dia['abre'])->setDateFrom($when);
         $fecha = Carbon::createFromFormat('H:i', $dia['fecha'])->setDateFrom($when);
         $end = $when->copy()->addMinutes($durationMinutes);
@@ -68,7 +82,7 @@ class AppointmentScheduler
      * Sugere ate N proximos horarios livres a partir de $from, dentro de
      * horario comercial, em multiplos da duracao. Varre ate 14 dias.
      */
-    public function suggestNextSlots(int $clienteId, ?WhatsappBotTraining $training, Carbon $from, int $durationMinutes, int $count = 3, ?int $resourceId = null): array
+    public function suggestNextSlots(int $clienteId, ?WhatsappBotTraining $training, Carbon $from, int $durationMinutes, int $count = 3, ?int $resourceId = null, ?AppointmentResource $resource = null): array
     {
         $slots = [];
         $cursor = $from->copy()->setSecond(0);
@@ -78,8 +92,8 @@ class AppointmentScheduler
         $deadline = $from->copy()->addDays(14);
 
         while (count($slots) < $count && $cursor->lessThan($deadline)) {
-            if (!$this->isWithinBusinessHours($cursor, $durationMinutes, $training)) {
-                $cursor = $this->jumpToNextOpenMoment($cursor, $training);
+            if (!$this->isWithinBusinessHours($cursor, $durationMinutes, $training, $resource)) {
+                $cursor = $this->jumpToNextOpenMoment($cursor, $training, $resource);
                 continue;
             }
 
@@ -111,19 +125,26 @@ class AppointmentScheduler
         return null;
     }
 
-    protected function jumpToNextOpenMoment(Carbon $cursor, ?WhatsappBotTraining $training): Carbon
+    protected function jumpToNextOpenMoment(Carbon $cursor, ?WhatsappBotTraining $training, ?AppointmentResource $resource = null): Carbon
     {
-        if (!$training || empty($training->horario_comercial)) {
+        $usingResource = $resource && $resource->hasCustomHours();
+        $hasAnyConfig = $usingResource || ($training && !empty($training->horario_comercial));
+
+        if (!$hasAnyConfig) {
             return $cursor->addDay()->setTime(9, 0);
         }
 
         for ($i = 0; $i < 7; $i++) {
             $diaChave = self::DIAS_SEMANA_MAP[$cursor->dayOfWeek] ?? null;
-            $dia = $diaChave ? $training->getHorarioDoDia($diaChave) : null;
-            if ($dia) {
-                $abre = Carbon::createFromFormat('H:i', $dia['abre'])->setDateFrom($cursor);
-                if ($cursor->lessThan($abre)) {
-                    return $abre;
+            if ($diaChave) {
+                $dia = $usingResource
+                    ? $resource->getHorarioDoDia($diaChave)
+                    : ($training ? $training->getHorarioDoDia($diaChave) : null);
+                if ($dia) {
+                    $abre = Carbon::createFromFormat('H:i', $dia['abre'])->setDateFrom($cursor);
+                    if ($cursor->lessThan($abre)) {
+                        return $abre;
+                    }
                 }
             }
             $cursor = $cursor->copy()->addDay()->setTime(0, 1);

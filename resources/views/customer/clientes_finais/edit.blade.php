@@ -82,6 +82,27 @@
                         </div>
                     </form>
 
+                    @if(isset($icsUrl))
+                        <div class="mt-8 pt-6 border-t border-gray-200" x-data="{ copied: false }">
+                            <h4 class="font-bold text-sm text-gray-900 mb-1">Link da agenda deste cliente</h4>
+                            <p class="text-xs text-gray-500 mb-3">Compartilhe este link com o cliente pra ele sincronizar os compromissos no Google Calendar / Outlook / Apple.</p>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <input type="text" readonly value="{{ $icsUrl }}" x-ref="ics"
+                                       class="flex-1 min-w-[280px] px-3 py-2 bg-gray-50 border border-gray-200 rounded text-xs font-mono text-gray-600">
+                                <button type="button"
+                                        @click="navigator.clipboard.writeText($refs.ics.value); copied = true; setTimeout(() => copied = false, 2000)"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold">
+                                    <span x-show="!copied">Copiar</span>
+                                    <span x-show="copied" x-cloak>Copiado!</span>
+                                </button>
+                                <form method="POST" action="{{ route('customer.calendar.cliente-final.regenerate', $clienteFinal) }}" onsubmit="return confirm('O link antigo deixará de funcionar. Confirma?')">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 bg-white border border-gray-200 hover:border-red-400 text-red-700 rounded text-xs font-bold">Regenerar</button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+
                 </div>
             </div>
         </div>

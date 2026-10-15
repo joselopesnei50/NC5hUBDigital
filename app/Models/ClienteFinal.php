@@ -21,6 +21,7 @@ class ClienteFinal extends Model
         'ultimos_pedidos',
         'data_aniversario_empresa',
         'data_aniversario_responsavel',
+        'calendar_token',
     ];
 
     protected $casts = [

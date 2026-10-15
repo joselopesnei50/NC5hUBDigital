@@ -21,6 +21,14 @@ Route::get('/proposta/{token}', [\App\Http\Controllers\PublicPedidoController::c
 Route::post('/proposta/{token}/approve', [\App\Http\Controllers\PublicPedidoController::class, 'approve'])->name('public.pedido.approve');
 Route::get('/proposta/{token}/pdf', [\App\Http\Controllers\PublicPedidoController::class, 'downloadPdf'])->name('public.pedido.pdf');
 
+// Export de agenda (ICS publico por token)
+Route::get('/agenda/ical/cliente/{token}.ics', [\App\Http\Controllers\Public\CalendarController::class, 'cliente'])
+    ->name('public.calendar.cliente')
+    ->where('token', '[A-Za-z0-9]+');
+Route::get('/agenda/ical/final/{token}.ics', [\App\Http\Controllers\Public\CalendarController::class, 'clienteFinal'])
+    ->name('public.calendar.cliente-final')
+    ->where('token', '[A-Za-z0-9]+');
+
 // Análise com Inteligência Artificial
 Route::get('/analise-gratuita', [\App\Http\Controllers\AnalysisController::class, 'index'])->name('analise.index');
 Route::post('/analise-gratuita/processar', [\App\Http\Controllers\AnalysisController::class, 'process'])->name('analise.process');
@@ -235,6 +243,12 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
             Route::delete('/{recurso}', [\App\Http\Controllers\Customer\AppointmentResourceController::class, 'destroy'])->name('destroy');
         });
     });
+
+    // Calendar links (regenerar tokens ICS)
+    Route::post('/calendario/cliente/regenerate', [\App\Http\Controllers\Customer\CalendarLinkController::class, 'regenerateCliente'])
+        ->name('customer.calendar.cliente.regenerate');
+    Route::post('/clientes-finais/{clientes_finai}/calendario/regenerate', [\App\Http\Controllers\Customer\CalendarLinkController::class, 'regenerateClienteFinal'])
+        ->name('customer.calendar.cliente-final.regenerate');
 
     // WhatsApp (Evolution API) - Onda 1: inbox mínimo
     Route::prefix('whatsapp')->name('customer.whatsapp.')->group(function () {

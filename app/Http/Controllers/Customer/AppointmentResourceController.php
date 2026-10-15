@@ -69,12 +69,38 @@ class AppointmentResourceController extends Controller
 
     protected function validated(Request $request): array
     {
-        return $request->validate([
+        $v = $request->validate([
             'nome' => ['required', 'string', 'max:120'],
             'descricao' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
             'ordem' => ['nullable', 'integer', 'min:0', 'max:999'],
-        ]) + ['is_active' => (bool) $request->input('is_active', false)];
+            'use_custom_hours' => ['nullable', 'boolean'],
+            'horario_comercial' => ['nullable', 'array'],
+            'horario_comercial.*.aberto' => ['nullable', 'boolean'],
+            'horario_comercial.*.abre' => ['nullable', 'date_format:H:i'],
+            'horario_comercial.*.fecha' => ['nullable', 'date_format:H:i'],
+        ]);
+
+        $useCustom = (bool) $request->input('use_custom_hours', false);
+        $v['use_custom_hours'] = $useCustom;
+        $v['is_active'] = (bool) $request->input('is_active', false);
+
+        if ($useCustom) {
+            $horario = [];
+            foreach (\App\Models\WhatsappBotTraining::DIAS_SEMANA as $dia) {
+                $entry = $v['horario_comercial'][$dia] ?? [];
+                $horario[$dia] = [
+                    'aberto' => (bool) ($entry['aberto'] ?? false),
+                    'abre' => $entry['abre'] ?? '09:00',
+                    'fecha' => $entry['fecha'] ?? '18:00',
+                ];
+            }
+            $v['horario_comercial'] = $horario;
+        } else {
+            $v['horario_comercial'] = null;
+        }
+
+        return $v;
     }
 
     protected function label(int $clienteId): string

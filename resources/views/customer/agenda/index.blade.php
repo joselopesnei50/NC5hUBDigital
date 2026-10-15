@@ -24,6 +24,36 @@
             <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3 rounded-xl text-sm">{{ session('success') }}</div>
         @endif
 
+        {{-- Link ICS (sincronizar com Google Calendar / Outlook / Apple) --}}
+        <details class="bg-mist/40 border border-black/5 rounded-2xl group" x-data="{ copied: false }">
+            <summary class="cursor-pointer px-5 py-3 text-sm font-bold text-ink flex items-center gap-2">
+                <svg class="w-5 h-5 text-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Sincronizar com Google Calendar / Outlook / Apple
+                <span class="text-xs text-slate font-normal ml-auto">clique pra expandir</span>
+            </summary>
+            <div class="px-5 pb-4 space-y-3 text-sm">
+                <p class="text-slate">Importe este link no seu app de calendário favorito. Os agendamentos aparecem automaticamente e são atualizados sozinhos.</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <input type="text" readonly value="{{ $icsUrl }}" x-ref="icsInput"
+                           class="flex-1 min-w-[280px] px-3 py-2 bg-white border border-black/10 rounded-lg text-xs font-mono text-slate">
+                    <button type="button"
+                            @click="navigator.clipboard.writeText($refs.icsInput.value); copied = true; setTimeout(() => copied = false, 2000)"
+                            class="px-4 py-2 bg-bruce hover:bg-bruce/90 text-white rounded-lg text-xs font-bold">
+                        <span x-show="!copied">Copiar</span>
+                        <span x-show="copied" x-cloak>Copiado!</span>
+                    </button>
+                    <form method="POST" action="{{ route('customer.calendar.cliente.regenerate') }}" onsubmit="return confirm('O link antigo deixará de funcionar. Confirma?')">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-white border border-black/10 hover:border-rose-400 text-rose-700 rounded-lg text-xs font-bold">Regenerar</button>
+                    </form>
+                </div>
+                <p class="text-slate text-xs">
+                    <strong>Google Calendar:</strong> Configurações → Adicionar calendário → De URL → cole o link.
+                    <strong>Outlook/Apple:</strong> Assine o calendário usando este endereço.
+                </p>
+            </div>
+        </details>
+
         {{-- Proximos --}}
         <div>
             <h3 class="font-display font-bold text-lg text-ink mb-3">Próximos</h3>

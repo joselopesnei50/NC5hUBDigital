@@ -13,7 +13,26 @@ class AppointmentResource extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'use_custom_hours' => 'boolean',
+        'horario_comercial' => 'array',
     ];
+
+    public function getHorarioDoDia(string $dia): ?array
+    {
+        if (!$this->use_custom_hours) {
+            return null;
+        }
+        $h = $this->horario_comercial[$dia] ?? null;
+        if (!is_array($h) || empty($h['aberto'])) {
+            return null;
+        }
+        return $h;
+    }
+
+    public function hasCustomHours(): bool
+    {
+        return (bool) $this->use_custom_hours && !empty($this->horario_comercial);
+    }
 
     public function cliente()
     {

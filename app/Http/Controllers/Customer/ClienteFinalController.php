@@ -57,13 +57,18 @@ class ClienteFinalController extends Controller
     public function edit(ClienteFinal $clientes_finai)
     {
         $cliente = Auth::user()->cliente;
-        
-        // Verifica se o cliente final pertence a este cliente
+
         if ($clientes_finai->cliente_id !== $cliente->id) {
             abort(403);
         }
 
-        return view('customer.clientes_finais.edit', ['clienteFinal' => $clientes_finai]);
+        $icsToken = app(\App\Services\CalendarTokenService::class)->ensureToken($clientes_finai);
+        $icsUrl = route('public.calendar.cliente-final', ['token' => $icsToken]);
+
+        return view('customer.clientes_finais.edit', [
+            'clienteFinal' => $clientes_finai,
+            'icsUrl' => $icsUrl,
+        ]);
     }
 
     public function update(Request $request, ClienteFinal $clientes_finai)

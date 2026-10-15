@@ -142,19 +142,23 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
             }
         }
 
-        if (!$scheduler->isWithinBusinessHours($when, $duracao, $training)) {
-            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3, $resolvedResourceId);
+        $resolvedResource = $resolvedResourceId
+            ? $activeResources->firstWhere('id', $resolvedResourceId)
+            : null;
+
+        if (!$scheduler->isWithinBusinessHours($when, $duracao, $training, $resolvedResource)) {
+            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3, $resolvedResourceId, $resolvedResource);
             return [
                 'ok' => false,
                 'erro' => 'horario_fora_do_expediente',
-                'mensagem' => "O horario {$when->format('d/m H:i')} esta fora do expediente do negocio.",
+                'mensagem' => "O horario {$when->format('d/m H:i')} esta fora do expediente.",
                 'sugestoes' => $this->formatSlots($sugestoes),
             ];
         }
 
         $conflict = $scheduler->findConflict($tenantId, $when, $duracao, null, $resolvedResourceId);
         if ($conflict) {
-            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3, $resolvedResourceId);
+            $sugestoes = $scheduler->suggestNextSlots($tenantId, $training, $when, $duracao, 3, $resolvedResourceId, $resolvedResource);
             return [
                 'ok' => false,
                 'erro' => 'conflito_de_horario',
