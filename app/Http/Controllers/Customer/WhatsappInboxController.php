@@ -97,4 +97,65 @@ class WhatsappInboxController extends Controller
 
         return back();
     }
+
+    public function feedInbox(Request $request)
+    {
+        $cliente = Auth::user()->cliente;
+
+        $chats = WhatsappChat::where('cliente_id', $cliente->id)
+            ->with(['latestMessage', 'clienteFinal'])
+            ->orderByDesc('last_message_at')
+            ->limit(30)
+            ->get();
+
+        $data = $chats->map(fn ($c) => [
+            'id' => $c->id,
+            'name' => $c->clienteFinal?->nome_responsavel ?: ($c->contact_name ?: $c->contact_phone),
+            'phone' => $c->contact_phone ?: $c->wa_id,
+            'last_at_iso' => optional($c->last_message_at)->toIso8601String(),
+            'last_at_human' => optional($c->last_message_at)->diffForHumans(),
+            'unread' => (int) $c->unread_count,
+            'last_text' => $c->latestMessage?->content ? mb_substr((string) $c->latestMessage->content, 0, 80) : null,
+            'last_direction' => $c->latestMessage?->direction,
+            'url' => route('customer.whatsapp.chat', $c),
+        ])->values();
+
+        return response()->json([
+            'chats' => $data,
+            'server_time' => now()->toIso8601String(),
+        ]);
+    }
+
+    public function feedChat(Request $request, WhatsappChat $chat)
+    {
+        $cliente = Auth::user()->cliente;
+        abort_unless((int) $chat->cliente_id === (int) $cliente->id, 404);
+
+        $afterId = (int) $request->query('after_id', 0);
+
+        $messages = $chat->messages()
+            ->when($afterId > 0, fn ($q) => $q->where('id', '>', $afterId))
+            ->orderBy('id')
+            ->limit(100)
+            ->get(['id', 'direction', 'type', 'content', 'media_mimetype', 'media_caption', 'status', 'created_at']);
+
+        if ($messages->isNotEmpty()) {
+            $chat->update(['unread_count' => 0]);
+        }
+
+        return response()->json([
+            'messages' => $messages->map(fn ($m) => [
+                'id' => $m->id,
+                'direction' => $m->direction,
+                'type' => $m->type,
+                'content' => $m->content,
+                'caption' => $m->media_caption,
+                'status' => $m->status,
+                'time' => $m->created_at->format('H:i'),
+                'created_at' => $m->created_at->toIso8601String(),
+            ])->values(),
+            'latest_id' => (int) ($messages->last()?->id ?? $afterId),
+            'bot_active' => (bool) $chat->is_bot_active,
+        ]);
+    }
 }

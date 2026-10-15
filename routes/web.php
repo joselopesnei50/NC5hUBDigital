@@ -272,7 +272,9 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         Route::post('conexao/disconnect', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'disconnect'])->name('disconnect');
 
         Route::get('inbox', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'index'])->name('inbox');
+        Route::get('inbox/feed', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'feedInbox'])->name('inbox.feed');
         Route::get('inbox/{chat}', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'show'])->name('chat');
+        Route::get('inbox/{chat}/feed', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'feedChat'])->name('chat.feed');
         Route::post('inbox/{chat}/send', [\App\Http\Controllers\Customer\WhatsappInboxController::class, 'send'])->name('send');
 
         // Bot IA

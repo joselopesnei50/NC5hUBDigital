@@ -32,9 +32,9 @@
             <div class="bg-rose-50 border-b border-rose-200 text-rose-800 px-5 py-3 text-sm">{{ session('error') }}</div>
         @endif
 
-        <div id="messages-area" class="flex-1 overflow-y-auto p-6 space-y-2 bg-mist/40">
+        <div id="messages-area" class="flex-1 overflow-y-auto p-6 space-y-2 bg-mist/40" data-latest-id="{{ $messages->last()?->id ?? 0 }}">
             @foreach($messages as $msg)
-                <div class="flex {{ $msg->isInbound() ? 'justify-start' : 'justify-end' }}">
+                <div class="flex {{ $msg->isInbound() ? 'justify-start' : 'justify-end' }}" data-msg-id="{{ $msg->id }}">
                     <div class="max-w-md rounded-2xl px-4 py-2.5 shadow-sm
                         {{ $msg->isInbound() ? 'bg-white text-ink' : 'bg-emerald-600 text-white' }}">
                         @if($msg->type !== 'chat')
@@ -69,7 +69,47 @@
     <script>
         (function() {
             const area = document.getElementById('messages-area');
-            if (area) area.scrollTop = area.scrollHeight;
+            if (!area) return;
+            area.scrollTop = area.scrollHeight;
+
+            const feedUrl = '{{ route('customer.whatsapp.chat.feed', $chat) }}';
+
+            function escapeHtml(s) {
+                return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+            }
+
+            function appendMessage(m) {
+                const inbound = m.direction === 'inbound';
+                const div = document.createElement('div');
+                div.className = 'flex ' + (inbound ? 'justify-start' : 'justify-end');
+                div.dataset.msgId = m.id;
+                const bubble = inbound ? 'bg-white text-ink' : 'bg-emerald-600 text-white';
+                const typeLabel = m.type !== 'chat' ? `<p class="text-xs opacity-75 italic mb-1">[${escapeHtml(m.type)}]</p>` : '';
+                const statusIcon = inbound ? '' : ' · ' + (m.status === 'failed' ? '❌' : '✓');
+                div.innerHTML = `
+                    <div class="max-w-md rounded-2xl px-4 py-2.5 shadow-sm ${bubble}">
+                        ${typeLabel}
+                        <p class="text-sm whitespace-pre-wrap break-words">${escapeHtml(m.content || m.caption || '')}</p>
+                        <p class="text-[10px] opacity-70 mt-1 text-right">${m.time}${statusIcon}</p>
+                    </div>`;
+                area.appendChild(div);
+            }
+
+            async function poll() {
+                try {
+                    const after = parseInt(area.dataset.latestId || '0', 10);
+                    const res = await fetch(`${feedUrl}?after_id=${after}`, {headers: {'X-Requested-With': 'XMLHttpRequest'}});
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (!data.messages.length) return;
+                    const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 100;
+                    data.messages.forEach(appendMessage);
+                    area.dataset.latestId = data.latest_id;
+                    if (wasAtBottom) area.scrollTop = area.scrollHeight;
+                } catch (e) {}
+            }
+
+            setInterval(poll, 3000);
         })();
     </script>
 </x-app-layout>
