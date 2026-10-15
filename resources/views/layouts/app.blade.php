@@ -68,6 +68,22 @@
                 </header>
 
                 <main class="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
+                    @if(session('impersonating_admin_user_id'))
+                        <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4 flex-wrap">
+                            <div class="flex items-center gap-3 text-sm">
+                                <svg class="w-5 h-5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <div>
+                                    <strong>Modo "Entrar como"</strong> — você está vendo o painel como <strong>{{ auth()->user()->cliente?->razao_social ?? 'cliente' }}</strong>.
+                                </div>
+                            </div>
+                            <form method="POST" action="{{ route('admin.impersonate.leave') }}">
+                                @csrf
+                                <button type="submit" class="px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-sm font-bold">
+                                    ← Voltar ao painel admin
+                                </button>
+                            </form>
+                        </div>
+                    @endif
                     @if (session('success'))
                         <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-sm">
                             <div class="flex items-center gap-3">

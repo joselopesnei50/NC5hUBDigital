@@ -78,6 +78,16 @@
                                 ]
                             ],
                             [
+                                'label' => 'Hub NC5 (atender e testar)',
+                                'items' => [
+                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.conexao'], 'label'=>'WhatsApp — Conexão', 'match'=>'__never__', 'icon'=>'M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654z'],
+                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.inbox'], 'label'=>'WhatsApp — Inbox', 'match'=>'__never__', 'icon'=>'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'],
+                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.bot'], 'label'=>'WhatsApp — Bot IA', 'match'=>'__never__', 'icon'=>'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.dashboard'], 'label'=>'WhatsApp — Dashboard', 'match'=>'__never__', 'icon'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'google-business'], 'label'=>'Google Meu Negócio', 'match'=>'__never__', 'icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+                                ]
+                            ],
+                            [
                                 'label' => 'Comercial',
                                 'items' => [
                                     ['route'=>'admin.clientes.index', 'label'=>'Clientes', 'match'=>'admin.clientes.*', 'icon'=>'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
@@ -121,7 +131,7 @@
                             <p class="px-3 text-[10px] font-bold text-white/40 uppercase tracking-widest pb-2">{{ $section['label'] }}</p>
                             @foreach($section['items'] as $item)
                                 @php $isActive = request()->routeIs($item['match']); @endphp
-                                <a href="{{ route($item['route']) }}" class="relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors {{ $isActive ? 'bg-[#FF7A1A] text-white font-bold' : 'text-slate-300 hover:text-white hover:bg-white/[0.06]' }}">
+                                <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors {{ $isActive ? 'bg-[#FF7A1A] text-white font-bold' : 'text-slate-300 hover:text-white hover:bg-white/[0.06]' }}">
                                     @if($isActive)
                                         <span class="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#FF7A1A] rounded-r-full"></span>
                                     @endif

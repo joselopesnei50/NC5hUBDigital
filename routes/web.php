@@ -67,6 +67,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/whatsapp-financeiro', [\App\Http\Controllers\Admin\WhatsappFinanceiroController::class, 'index'])
         ->name('whatsapp-financeiro.index');
 
+    // Hub NC5 — entrar como Cliente NC5 Interno pra usar WhatsApp/Bot/Google Business
+    Route::get('/hub-nc5/enter', [\App\Http\Controllers\Admin\ImpersonateController::class, 'enter'])
+        ->name('impersonate.enter');
+
     // Usuários do painel do cliente (limite 5)
     Route::post('clientes/{cliente}/usuarios', [\App\Http\Controllers\Admin\ClienteController::class, 'usersStore'])->name('clientes.usuarios.store');
     Route::delete('clientes/{cliente}/usuarios/{user}', [\App\Http\Controllers\Admin\ClienteController::class, 'usersDestroy'])->name('clientes.usuarios.destroy');
@@ -127,6 +131,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/lembretes', [\App\Http\Controllers\Admin\LembreteController::class, 'create'])->name('lembretes.create');
     Route::post('/lembretes', [\App\Http\Controllers\Admin\LembreteController::class, 'store'])->name('lembretes.store');
 });
+
+// Sair do modo "Entrar como" — sessao atual eh cliente, nao bate em role:admin
+Route::post('/impersonate/leave', [\App\Http\Controllers\Admin\ImpersonateController::class, 'leave'])
+    ->middleware('auth')
+    ->name('admin.impersonate.leave');
 
 // Área do Cliente (Isolamento via Role)
 Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(function () {
