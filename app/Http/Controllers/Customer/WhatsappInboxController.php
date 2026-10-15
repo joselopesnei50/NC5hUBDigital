@@ -105,24 +105,28 @@ class WhatsappInboxController extends Controller
         $chats = WhatsappChat::where('cliente_id', $cliente->id)
             ->with(['latestMessage', 'clienteFinal'])
             ->orderByDesc('last_message_at')
-            ->limit(30)
+            ->limit(100)
             ->get();
 
         $data = $chats->map(fn ($c) => [
             'id' => $c->id,
-            'name' => $c->clienteFinal?->nome_responsavel ?: ($c->contact_name ?: $c->contact_phone),
+            'name' => $c->clienteFinal?->nome_responsavel ?: ($c->contact_name ?: $c->contact_phone ?: 'Sem nome'),
             'phone' => $c->contact_phone ?: $c->wa_id,
             'last_at_iso' => optional($c->last_message_at)->toIso8601String(),
-            'last_at_human' => optional($c->last_message_at)->diffForHumans(),
             'unread' => (int) $c->unread_count,
-            'last_text' => $c->latestMessage?->content ? mb_substr((string) $c->latestMessage->content, 0, 80) : null,
+            'last_text' => $c->latestMessage?->content ? mb_substr((string) $c->latestMessage->content, 0, 120) : null,
             'last_direction' => $c->latestMessage?->direction,
+            'last_type' => $c->latestMessage?->type,
+            'bot_active' => (bool) $c->is_bot_active,
+            'is_group' => (bool) $c->is_group,
             'url' => route('customer.whatsapp.chat', $c),
         ])->values();
 
         return response()->json([
             'chats' => $data,
             'server_time' => now()->toIso8601String(),
+            'total' => $data->count(),
+            'unread_total' => $data->sum('unread'),
         ]);
     }
 
