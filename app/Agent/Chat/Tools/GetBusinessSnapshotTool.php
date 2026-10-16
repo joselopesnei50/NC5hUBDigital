@@ -22,8 +22,8 @@ class GetBusinessSnapshotTool implements ToolInterface
     public function getDescription(): string
     {
         return 'Consolida em uma única chamada o retrato completo do negócio do gestor: '
-             . 'fluxo de caixa (receitas/despesas/saldo), faturas com a NC5 (pendentes/em atraso), '
-             . 'base de clientes (novos e crescimento), top 5 clientes por gasto, '
+             . 'fluxo de caixa (receitas/despesas/saldo), pedidos e vendas recentes (volume, faturamento, ticket médio e pendências), '
+             . 'faturas com a NC5 (pendentes/em atraso), base de clientes (novos e crescimento), top 5 clientes por gasto, '
              . 'clientes sumidos (que já compraram e pararam), performance de produtos '
              . '(top vendidos e estagnados), entregas operacionais (projetos ativos, concluídos, travados), '
              . 'agenda (compromissos de hoje, próximos 7 dias, taxa de cancelamento e agendamentos via bot) '

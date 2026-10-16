@@ -13,6 +13,7 @@ use App\Agent\Metrics\CashFlowMetric;
 use App\Agent\Metrics\CustomerSegmentMetric;
 use App\Agent\Metrics\GoogleBusinessMetric;
 use App\Agent\Metrics\InactiveCustomersMetric;
+use App\Agent\Metrics\OrdersMetric;
 use App\Agent\Metrics\PendingInvoicesMetric;
 use App\Agent\Metrics\ProductsPerformanceMetric;
 use App\Agent\Metrics\ProjectDeliveryMetric;
@@ -24,6 +25,10 @@ use App\Agent\Chat\Tools\GetAgendaOverviewTool;
 use App\Agent\Chat\Tools\GetBusinessSnapshotTool;
 use App\Agent\Chat\Tools\GetCashFlowTool;
 use App\Agent\Chat\Tools\GetCustomerDetailsTool;
+use App\Agent\Chat\Tools\GetDocumentsOverviewTool;
+use App\Agent\Chat\Tools\GetOrdersOverviewTool;
+use App\Agent\Chat\Tools\GetProductsCatalogTool;
+use App\Agent\Chat\Tools\GetSuppliersOverviewTool;
 use App\Agent\Chat\Tools\GetWhatsappOverviewTool;
 use App\Agent\Chat\Tools\ListInactiveCustomersTool;
 use App\Agent\Chat\Tools\ListPendingTasksTool;
@@ -55,6 +60,7 @@ class AgentServiceProvider extends ServiceProvider
                 $app->make(GoogleBusinessMetric::class),
                 $app->make(AppointmentsMetric::class),
                 $app->make(WhatsappAtendimentoMetric::class),
+                $app->make(OrdersMetric::class),
             ]);
         });
 
@@ -66,6 +72,14 @@ class AgentServiceProvider extends ServiceProvider
             $registry->register($app->make(GetBusinessSnapshotTool::class));
             // Recorte financeiro estreito
             $registry->register($app->make(GetCashFlowTool::class));
+            // Vendas & Pedidos (Hamburguerias, lojas, serviços)
+            $registry->register($app->make(GetOrdersOverviewTool::class));
+            // Catálogo / Cardápio de Produtos e Serviços
+            $registry->register($app->make(GetProductsCatalogTool::class));
+            // Fornecedores & Compras
+            $registry->register($app->make(GetSuppliersOverviewTool::class));
+            // Documentos & Cofre de Arquivos
+            $registry->register($app->make(GetDocumentsOverviewTool::class));
             // Zoom em cliente ou lote pra reativação
             $registry->register($app->make(GetCustomerDetailsTool::class));
             $registry->register($app->make(ListInactiveCustomersTool::class));
