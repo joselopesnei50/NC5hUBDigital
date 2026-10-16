@@ -361,5 +361,43 @@ class LandingPageAndGmbUpdateTest extends TestCase
         $adminChatResp->assertSee('Roberto Lead NC5');
         $adminChatResp->assertSee('Proposta comercial enviada!');
     }
+
+    public function test_business_growth_engine_renders_posts_and_tips_for_multiple_niches(): void
+    {
+        [$user, $cliente] = $this->createAuthenticatedCliente();
+
+        // 1. Testa nicho de gastronomia (Hamburgueria)
+        $cliente->update([
+            'nicho_atuacao' => 'gastronomia',
+            'tom_voz' => 'Apetitoso e descontraído',
+            'diferenciais_competitivos' => 'Blend artesanal e maionese da casa',
+        ]);
+
+        $resp = $this->actingAs($user)->get(route('customer.conhecimento.index'));
+        $resp->assertStatus(200);
+        $resp->assertSee('Motor de Crescimento do Bruce');
+        $resp->assertSee('Alimentação & Gastronomia');
+        $resp->assertSee('Posts para o Google Meu Negócio');
+        $resp->assertSee('Radar de Vendas & Dicas');
+
+        // 2. Atualiza perfil do nicho para Corretor de Imóveis
+        $updateResp = $this->actingAs($user)->post(route('customer.conhecimento.profile'), [
+            'nicho_atuacao' => 'imobiliario',
+            'tom_voz' => 'Profissional e consultivo',
+            'diferenciais_competitivos' => 'Atendimento personalizado e lançamentos exclusivos',
+            'publico_alvo' => 'Investidores e famílias buscando primeiro imóvel',
+        ]);
+        $updateResp->assertRedirect(route('customer.conhecimento.index'));
+
+        $cliente->refresh();
+        $this->assertEquals('imobiliario', $cliente->nicho_atuacao);
+
+        // 3. Verifica se o painel agora renderiza adaptado para Imobiliário
+        $respImob = $this->actingAs($user)->get(route('customer.conhecimento.index'));
+        $respImob->assertStatus(200);
+        $respImob->assertSee('Imobiliário & Corretores');
+        $respImob->assertSee('Oportunidade da Semana');
+    }
 }
+
 

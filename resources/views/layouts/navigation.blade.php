@@ -27,6 +27,7 @@
             ];
 
             $groupMarketing = [
+                ['route' => 'customer.conhecimento.index',    'label' => 'Motor de Crescimento 🚀',  'match' => 'customer.conhecimento*',   'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
                 ['route' => 'customer.landing-page.edit',     'label' => 'Meu Site / Landing Page', 'match' => 'customer.landing-page*',  'icon' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'],
                 ['route' => 'customer.google-business.index', 'label' => 'Google Meu Negócio',      'match' => 'customer.google-business*','icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
                 ['route' => 'customer.whatsapp.inbox',        'label' => 'WhatsApp Web (Inbox)',    'match' => 'customer.whatsapp.inbox*', 'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'],
@@ -34,7 +35,7 @@
                 ['route' => 'customer.whatsapp.conexao',      'label' => 'WhatsApp (Conexão QR)',   'match' => 'customer.whatsapp.conexao','icon' => 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0'],
                 ['route' => 'customer.whatsapp.dashboard',    'label' => 'WhatsApp (Métricas)',     'match' => 'customer.whatsapp.dashboard*','icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
                 ['route' => 'customer.dashboard-vendas',      'label' => 'Dashboard de Vendas',     'match' => 'customer.dashboard-vendas*','icon' => 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055zM20.488 9H15V3.512A9.025 9.025 0 0120.488 9z'],
-                ['route' => 'customer.agent-drafts.index',   'label' => 'Mensagens da IA',         'match' => 'customer.agent-drafts*',   'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+                ['route' => 'customer.agent-drafts.index',   'label' => 'Mensagens da IA',         'match' => 'customer.agent-drafts*',   'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
             ];
 
             $groupGestao = [
@@ -49,8 +50,8 @@
             ];
 
             $groupBruce = [
-                ['route' => 'customer.alertas.index',        'label' => 'Alertas do Bruce',        'match' => 'customer.alertas*',         'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
-                ['route' => 'customer.conhecimento.index',   'label' => 'Base do Bruce (RAG)',     'match' => 'customer.conhecimento*',    'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
+                ['route' => 'customer.alertas.index',        'label' => 'Alertas Proativos',       'match' => 'customer.alertas*',         'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
+                ['route' => 'customer.conhecimento.index',   'label' => 'DNA do Negócio (IA)',     'match' => 'customer.conhecimento*',    'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
             ];
 
             $groupIsActive = fn ($items) => collect($items)->contains(fn ($i) => request()->routeIs($i['match']));

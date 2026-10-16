@@ -299,7 +299,9 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::post('mensagens-ia/{draft}/approve', [\App\Http\Controllers\Customer\AgentDraftController::class, 'approve'])->name('customer.agent-drafts.approve');
     Route::post('mensagens-ia/{draft}/discard', [\App\Http\Controllers\Customer\AgentDraftController::class, 'discard'])->name('customer.agent-drafts.discard');
 
-    // Base de Conhecimento do Bruce (RAG do cliente)
+    // Motor de Crescimento do Bruce (Crescimento, Google Meu Negócio e DNA do Negócio)
+    Route::post('conhecimento/perfil', [\App\Http\Controllers\Customer\KnowledgeController::class, 'updateProfile'])->name('customer.conhecimento.profile');
+    Route::post('conhecimento/publicar-google', [\App\Http\Controllers\Customer\KnowledgeController::class, 'publishGooglePost'])->name('customer.conhecimento.publish-google');
     Route::resource('conhecimento', \App\Http\Controllers\Customer\KnowledgeController::class)
         ->names('customer.conhecimento')
         ->except(['show']);

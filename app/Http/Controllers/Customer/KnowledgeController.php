@@ -4,12 +4,21 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\AgentKnowledge;
+use App\Models\Cliente;
+use App\Services\BusinessGrowthEngineService;
+use App\Services\GoogleBusinessProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class KnowledgeController extends Controller
 {
-    protected function requireCliente()
+    public function __construct(
+        protected BusinessGrowthEngineService $growthEngine,
+        protected GoogleBusinessProfileService $googleService
+    ) {}
+
+    protected function requireCliente(): Cliente
     {
         $cliente = Auth::user()->cliente ?? null;
         if (!$cliente) {
@@ -18,7 +27,7 @@ class KnowledgeController extends Controller
         return $cliente;
     }
 
-    protected function authorizeOwnership(AgentKnowledge $item, $cliente): void
+    protected function authorizeOwnership(AgentKnowledge $item, Cliente $cliente): void
     {
         if ((int) $item->cliente_id !== (int) $cliente->id) {
             abort(403);
@@ -29,29 +38,119 @@ class KnowledgeController extends Controller
     {
         $cliente = $this->requireCliente();
 
-        $search = trim((string) $request->input('search', ''));
+        $niches = BusinessGrowthEngineService::getNiches();
+        $currentNiche = $cliente->nicho_atuacao ?: 'outro';
+        $currentNicheInfo = $niches[$currentNiche] ?? $niches['outro'];
 
-        $query = AgentKnowledge::where('cliente_id', $cliente->id);
+        // Gera ou carrega ideias de posts do Google Meu Negócio
+        $tema = $request->query('tema');
+        $suggestedPosts = $this->growthEngine->generateGooglePosts($cliente, $tema);
 
-        if ($search !== '') {
-            $like = '%' . $search . '%';
-            $query->where(function ($q) use ($like) {
-                $q->where('titulo', 'like', $like)
-                  ->orWhere('conteudo', 'like', $like);
-            });
+        // Gera recomendações e radar de oportunidades
+        $growthTips = $this->growthEngine->generateGrowthTips($cliente);
+
+        // Itens de DNA / Informações estratégicas da empresa
+        $dnaItens = AgentKnowledge::where('cliente_id', $cliente->id)->latest()->get();
+
+        $googleConnected = !empty($cliente->google_location_id);
+
+        return view('customer.conhecimento.index', compact(
+            'cliente',
+            'niches',
+            'currentNiche',
+            'currentNicheInfo',
+            'suggestedPosts',
+            'growthTips',
+            'dnaItens',
+            'googleConnected'
+        ));
+    }
+
+    /**
+     * Atualiza o perfil estratégico / nicho da empresa
+     */
+    public function updateProfile(Request $request)
+    {
+        $cliente = $this->requireCliente();
+
+        $validated = $request->validate([
+            'nicho_atuacao' => 'required|string|max:60',
+            'tom_voz' => 'nullable|string|max:100',
+            'diferenciais_competitivos' => 'nullable|string|max:2000',
+            'publico_alvo' => 'nullable|string|max:2000',
+        ]);
+
+        $cliente->update($validated);
+
+        return redirect()->route('customer.conhecimento.index')
+            ->with('success', 'Perfil do negócio atualizado! O Motor de Crescimento recalibrou as sugestões.');
+    }
+
+    /**
+     * Publica um post diretamente no Google Meu Negócio
+     */
+    public function publishGooglePost(Request $request)
+    {
+        $cliente = $this->requireCliente();
+
+        if (empty($cliente->google_location_id)) {
+            return redirect()->route('customer.conhecimento.index')
+                ->with('error', 'Sua ficha do Google Meu Negócio ainda não está conectada. Conecte-a em Marketing & Vendas > Google Meu Negócio.');
         }
 
-        $itens = $query->latest()->paginate(12);
+        $validated = $request->validate([
+            'summary' => 'required|string|max:1500',
+            'cta_type' => 'nullable|in:CALL,BOOK,ORDER,LEARN_MORE,SIGN_UP',
+            'cta_url' => 'nullable|url',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+        ]);
 
-        return view('customer.conhecimento.index', compact('itens', 'search'));
+        // Upload de imagem se fornecida
+        $imageUrl = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $ext  = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $name = 'c' . $cliente->id . '-' . Str::random(20) . '.' . $ext;
+            $file->storeAs('gbp-posts', $name, 'public');
+            $imageUrl = asset('storage/gbp-posts/' . $name);
+        }
+
+        // Se o CTA precisa de URL e nenhuma foi dada, usa o site do cliente ou fallback
+        $ctaType = $validated['cta_type'] ?? 'CALL';
+        $ctaUrl = $validated['cta_url'] ?? null;
+
+        if ($ctaType !== 'CALL' && empty($ctaUrl)) {
+            $landingPage = $cliente->landingPage;
+            if ($landingPage && !empty($landingPage->slug)) {
+                $ctaUrl = url('/lp/' . $landingPage->slug);
+            } else {
+                $ctaType = 'CALL'; // Fallback seguro para botão de chamada
+            }
+        }
+
+        try {
+            $this->googleService->createPost(
+                $cliente,
+                $cliente->google_location_id,
+                $validated['summary'],
+                [
+                    'cta_type' => $ctaType,
+                    'cta_url' => $ctaUrl,
+                    'image_url' => $imageUrl,
+                ]
+            );
+
+            return redirect()->route('customer.conhecimento.index')
+                ->with('success', '🎉 Post publicado com sucesso na sua ficha do Google Meu Negócio!');
+        } catch (\Throwable $e) {
+            return redirect()->route('customer.conhecimento.index')
+                ->with('error', 'Falha ao publicar no Google: ' . $e->getMessage());
+        }
     }
 
-    public function create()
-    {
-        $this->requireCliente();
-        return view('customer.conhecimento.create');
-    }
-
+    /**
+     * Cadastro de DNA / Informação estratégica complementar
+     */
     public function store(Request $request)
     {
         $cliente = $this->requireCliente();
@@ -68,15 +167,7 @@ class KnowledgeController extends Controller
         AgentKnowledge::create($validated);
 
         return redirect()->route('customer.conhecimento.index')
-            ->with('success', 'Documento adicionado à base de conhecimento do Bruce.');
-    }
-
-    public function edit(AgentKnowledge $conhecimento)
-    {
-        $cliente = $this->requireCliente();
-        $this->authorizeOwnership($conhecimento, $cliente);
-
-        return view('customer.conhecimento.edit', ['item' => $conhecimento]);
+            ->with('success', 'Informação estratégica adicionada ao DNA do Bruce IA!');
     }
 
     public function update(Request $request, AgentKnowledge $conhecimento)
@@ -95,7 +186,7 @@ class KnowledgeController extends Controller
         $conhecimento->update($validated);
 
         return redirect()->route('customer.conhecimento.index')
-            ->with('success', 'Documento atualizado.');
+            ->with('success', 'Informação atualizada.');
     }
 
     public function destroy(AgentKnowledge $conhecimento)
@@ -106,6 +197,6 @@ class KnowledgeController extends Controller
         $conhecimento->delete();
 
         return redirect()->route('customer.conhecimento.index')
-            ->with('success', 'Documento removido da base de conhecimento.');
+            ->with('success', 'Informação removida do DNA da empresa.');
     }
 }
