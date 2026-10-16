@@ -71,6 +71,33 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/hub-nc5/enter', [\App\Http\Controllers\Admin\ImpersonateController::class, 'enter'])
         ->name('impersonate.enter');
 
+    // Hub NC5 — Agenda direto no painel admin (standalone, sem impersonate)
+    Route::prefix('hub-nc5')->name('hub.')->group(function () {
+        Route::prefix('agenda')->name('agenda.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'index'])->name('index');
+            Route::get('/criar', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'store'])->name('store');
+            Route::get('/{agenda}/editar', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'edit'])->name('edit');
+            Route::put('/{agenda}', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'update'])->name('update');
+            Route::delete('/{agenda}', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'destroy'])->name('destroy');
+            Route::post('/{agenda}/concluir', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'markCompleted'])->name('complete');
+            Route::post('/{agenda}/cancelar', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'markCancelled'])->name('cancel');
+
+            Route::prefix('recursos')->name('recursos.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'index'])->name('index');
+                Route::get('/criar', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'store'])->name('store');
+                Route::get('/{recurso}/editar', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'edit'])->name('edit');
+                Route::put('/{recurso}', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'update'])->name('update');
+                Route::delete('/{recurso}', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'destroy'])->name('destroy');
+            });
+        });
+
+        // Regenerar token ICS do cliente NC5 Interno
+        Route::post('/calendario/regenerate', [\App\Http\Controllers\Admin\Hub\CalendarLinkController::class, 'regenerateCliente'])
+            ->name('calendar.cliente.regenerate');
+    });
+
     // Usuários do painel do cliente (limite 5)
     Route::post('clientes/{cliente}/usuarios', [\App\Http\Controllers\Admin\ClienteController::class, 'usersStore'])->name('clientes.usuarios.store');
     Route::delete('clientes/{cliente}/usuarios/{user}', [\App\Http\Controllers\Admin\ClienteController::class, 'usersDestroy'])->name('clientes.usuarios.destroy');
