@@ -290,4 +290,76 @@ class LandingPageAndGmbUpdateTest extends TestCase
         $resp->assertSee('Mensalidade Agência NC5');
         $resp->assertSee('Avaliação Presencial');
     }
+
+    public function test_whatsapp_web_inbox_and_chat_render_split_pane_for_customer_and_super_admin(): void
+    {
+        [$user, $cliente] = $this->createAuthenticatedCliente();
+
+        $chat = \App\Models\WhatsappChat::create([
+            'cliente_id' => $cliente->id,
+            'wa_id' => '5511977776666@s.whatsapp.net',
+            'contact_name' => 'Mariana Costa',
+            'contact_phone' => '5511977776666',
+            'is_bot_active' => true,
+            'unread_count' => 2,
+            'last_message_at' => now(),
+        ]);
+
+        \App\Models\WhatsappMessage::create([
+            'cliente_id' => $cliente->id,
+            'chat_id' => $chat->id,
+            'direction' => 'inbound',
+            'type' => 'chat',
+            'content' => 'Olá, gostaria de agendar uma consulta!',
+            'status' => 'delivered',
+        ]);
+
+        // 1. Customer Inbox
+        $inboxResp = $this->actingAs($user)->get(route('customer.whatsapp.inbox'));
+        $inboxResp->assertStatus(200);
+        $inboxResp->assertSee('WhatsApp Web');
+        $inboxResp->assertSee('Mariana Costa');
+
+        // 2. Customer Active Chat (Split-pane keeps conversation list + active chat messages)
+        $chatResp = $this->actingAs($user)->get(route('customer.whatsapp.chat', $chat));
+        $chatResp->assertStatus(200);
+        $chatResp->assertSee('WhatsApp Web');
+        $chatResp->assertSee('Mariana Costa');
+        $chatResp->assertSee('Olá, gostaria de agendar uma consulta!');
+        $chatResp->assertSee('Respostas rápidas:');
+
+        // 3. Super Admin Inbox & Chat
+        $admin = User::factory()->create(['role' => 'admin']);
+        $sysCliente = \App\Services\SystemCliente::get();
+
+        $adminChat = \App\Models\WhatsappChat::create([
+            'cliente_id' => $sysCliente->id,
+            'wa_id' => '5511966665555@s.whatsapp.net',
+            'contact_name' => 'Roberto Lead NC5',
+            'contact_phone' => '5511966665555',
+            'is_bot_active' => false,
+            'unread_count' => 1,
+            'last_message_at' => now(),
+        ]);
+
+        \App\Models\WhatsappMessage::create([
+            'cliente_id' => $sysCliente->id,
+            'chat_id' => $adminChat->id,
+            'direction' => 'outbound',
+            'type' => 'chat',
+            'content' => 'Proposta comercial enviada!',
+            'status' => 'sent',
+        ]);
+
+        $adminInboxResp = $this->actingAs($admin)->get(route('admin.hub.whatsapp.inbox'));
+        $adminInboxResp->assertStatus(200);
+        $adminInboxResp->assertSee('WhatsApp Web');
+        $adminInboxResp->assertSee('Roberto Lead NC5');
+
+        $adminChatResp = $this->actingAs($admin)->get(route('admin.hub.whatsapp.chat', $adminChat));
+        $adminChatResp->assertStatus(200);
+        $adminChatResp->assertSee('Roberto Lead NC5');
+        $adminChatResp->assertSee('Proposta comercial enviada!');
+    }
 }
+
