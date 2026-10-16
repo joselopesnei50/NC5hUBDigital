@@ -16,7 +16,7 @@ class ClienteController extends Controller
 {
     public function index()
     {
-        $clientes = Cliente::with('user')->paginate(10);
+        $clientes = Cliente::where('is_system', false)->with('user')->paginate(10);
         return view('admin.clientes.index', compact('clientes'));
     }
 

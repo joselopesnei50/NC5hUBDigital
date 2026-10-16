@@ -23,8 +23,31 @@ class GoogleBusinessController extends Controller
         $this->googleService = $googleService;
     }
 
+    protected function isAdminContext(): bool
+    {
+        if (request()->routeIs('admin.hub.google-business.*')) {
+            return true;
+        }
+
+        return Auth::check() && Auth::user()->role === 'admin';
+    }
+
+    protected function routePrefix(): string
+    {
+        return $this->isAdminContext() ? 'admin.hub.google-business.' : 'customer.google-business.';
+    }
+
+    protected function indexRoute(): string
+    {
+        return $this->routePrefix() . 'index';
+    }
+
     protected function requireCliente()
     {
+        if ($this->isAdminContext()) {
+            return \App\Services\SystemCliente::get();
+        }
+
         $cliente = Auth::user()->cliente ?? null;
         if (!$cliente) {
             return redirect()->route('customer.index')
@@ -57,12 +80,14 @@ class GoogleBusinessController extends Controller
         $posts       = [];
         $reviews     = ['media' => 0, 'total' => 0, 'reviews' => []];
         $erros       = [];
+        $routePrefix = $this->routePrefix();
+        $viewName    = $this->isAdminContext() ? 'admin.hub.google-business.index' : 'customer.google-business.index';
 
         $landingPage = \App\Models\LandingPage::where('cliente_id', $cliente->id)->first();
 
         if (!$isConnected) {
-            return view('customer.google-business.index', compact(
-                'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente', 'landingPage'
+            return view($viewName, compact(
+                'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente', 'landingPage', 'routePrefix'
             ));
         }
 
@@ -129,8 +154,8 @@ class GoogleBusinessController extends Controller
             }
         }
 
-        return view('customer.google-business.index', compact(
-            'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente', 'landingPage'
+        return view($viewName, compact(
+            'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente', 'landingPage', 'routePrefix'
         ));
     }
 
@@ -144,12 +169,13 @@ class GoogleBusinessController extends Controller
             empty(\App\Models\Configuracao::get('google_client_secret')) ||
             empty(\App\Models\Configuracao::get('google_redirect_uri'))
         ) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'O administrador do sistema ainda não configurou as chaves do Google Meu Negócio.');
         }
 
         $state = Str::random(40);
         $request->session()->put('gbp_oauth_state', $state);
+        $request->session()->put('gbp_oauth_context', $this->isAdminContext() ? 'admin' : 'customer');
 
         $authUrl = $this->googleService->getAuthUrl($state);
         return redirect()->away($authUrl);
@@ -157,16 +183,22 @@ class GoogleBusinessController extends Controller
 
     public function handleGoogleCallback(Request $request)
     {
-        $cliente = $this->requireCliente();
+        $oauthContext = $request->session()->pull('gbp_oauth_context', $this->isAdminContext() ? 'admin' : 'customer');
+        $targetRoute  = $oauthContext === 'admin' ? 'admin.hub.google-business.index' : 'customer.google-business.index';
+
+        $cliente = $oauthContext === 'admin'
+            ? \App\Services\SystemCliente::get()
+            : $this->requireCliente();
+
         if (!$cliente instanceof \App\Models\Cliente) return $cliente;
 
         if ($request->has('error')) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($targetRoute)
                 ->with('error', 'A autorização foi recusada.');
         }
 
         if (!$request->has('code')) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($targetRoute)
                 ->with('error', 'Código de autorização não recebido.');
         }
 
@@ -174,17 +206,17 @@ class GoogleBusinessController extends Controller
         $received = (string) $request->query('state', '');
         if (!$expected || !hash_equals($expected, $received)) {
             Log::warning('[GoogleBusiness] state OAuth inválido no callback do cliente ' . $cliente->id);
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($targetRoute)
                 ->with('error', 'Sessão de autorização inválida ou expirada. Tente reconectar.');
         }
 
         try {
             $this->googleService->authenticateAndSaveTokens($request->code, $cliente);
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($targetRoute)
                 ->with('success', 'Conta do Google Meu Negócio conectada com sucesso!');
         } catch (\Exception $e) {
             Log::warning('[GoogleBusiness] Falha no callback do cliente ' . $cliente->id . ': ' . $e->getMessage());
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($targetRoute)
                 ->with('error', 'Falha ao conectar sua conta Google. Tente novamente ou fale com o suporte.');
         }
     }
@@ -205,7 +237,7 @@ class GoogleBusinessController extends Controller
             Cache::forget($this->cacheKey($cliente, $s));
         }
 
-        return redirect()->route('customer.google-business.index')
+        return redirect()->route($this->indexRoute())
             ->with('success', 'Conta desconectada com sucesso.');
     }
 
@@ -225,13 +257,13 @@ class GoogleBusinessController extends Controller
                 return $this->googleService->getLocations($cliente);
             });
         } catch (\Throwable $e) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Não conseguimos validar sua ficha agora: ' . $e->getMessage());
         }
 
         $v4Names = array_column($locations, '_v4_name');
         if (!in_array($validated['v4_name'], $v4Names, true)) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'A ficha escolhida não está mais disponível na sua conta Google.');
         }
 
@@ -242,7 +274,7 @@ class GoogleBusinessController extends Controller
             Cache::forget($this->cacheKey($cliente, $s));
         }
 
-        return redirect()->route('customer.google-business.index')
+        return redirect()->route($this->indexRoute())
             ->with('success', 'Ficha selecionada.');
     }
 
@@ -256,7 +288,7 @@ class GoogleBusinessController extends Controller
         if (!$cliente instanceof \App\Models\Cliente) return $cliente;
 
         if (empty($cliente->google_location_id)) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Selecione uma ficha antes de editar as informações.');
         }
 
@@ -302,13 +334,13 @@ class GoogleBusinessController extends Controller
         try {
             $this->googleService->updateLocation($cliente, $cliente->google_location_id, $payload);
         } catch (\Throwable $e) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Não foi possível salvar no Google: ' . $e->getMessage());
         }
 
         Cache::forget($this->cacheKey($cliente, 'locations'));
 
-        return redirect()->route('customer.google-business.index')
+        return redirect()->route($this->indexRoute())
             ->with('success', 'Informações da ficha do Google Meu Negócio atualizadas com sucesso!');
     }
 
@@ -360,7 +392,7 @@ TXT;
         if (!$cliente instanceof \App\Models\Cliente) return $cliente;
 
         if (empty($cliente->google_location_id)) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Selecione uma ficha antes de publicar.');
         }
 
@@ -408,13 +440,13 @@ TXT;
             if ($imageUrl && isset($name)) {
                 Storage::disk('public')->delete('gbp-posts/' . $name);
             }
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Não foi possível publicar: ' . $e->getMessage());
         }
 
         Cache::forget($this->cacheKey($cliente, 'posts'));
 
-        return redirect()->route('customer.google-business.index')
+        return redirect()->route($this->indexRoute())
             ->with('success', 'Publicação enviada. Ela pode levar alguns minutos para aparecer.');
     }
 
@@ -430,20 +462,20 @@ TXT;
         // Só aceitar postName que pertence à ficha salva
         $prefix = $cliente->google_location_id . '/localPosts/';
         if (empty($cliente->google_location_id) || !Str::startsWith($validated['post_name'], $prefix)) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Publicação inválida.');
         }
 
         try {
             $this->googleService->deletePost($cliente, $validated['post_name']);
         } catch (\Throwable $e) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Não foi possível remover: ' . $e->getMessage());
         }
 
         Cache::forget($this->cacheKey($cliente, 'posts'));
 
-        return redirect()->route('customer.google-business.index')
+        return redirect()->route($this->indexRoute())
             ->with('success', 'Publicação removida.');
     }
 
@@ -524,20 +556,20 @@ TXT;
 
         $prefix = $cliente->google_location_id . '/reviews/';
         if (empty($cliente->google_location_id) || !Str::startsWith($validated['review_name'], $prefix)) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Avaliação inválida.');
         }
 
         try {
             $this->googleService->replyReview($cliente, $validated['review_name'], $validated['comment']);
         } catch (\Throwable $e) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Não foi possível responder: ' . $e->getMessage());
         }
 
         Cache::forget($this->cacheKey($cliente, 'reviews'));
 
-        return redirect()->route('customer.google-business.index')
+        return redirect()->route($this->indexRoute())
             ->with('success', 'Resposta enviada.');
     }
 
@@ -581,7 +613,7 @@ TXT;
 
         $data = $this->loadDadosExport($cliente);
         if (!$data['ok']) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Não foi possível exportar: ' . $data['msg']);
         }
 
@@ -660,7 +692,7 @@ TXT;
 
         $data = $this->loadDadosExport($cliente);
         if (!$data['ok']) {
-            return redirect()->route('customer.google-business.index')
+            return redirect()->route($this->indexRoute())
                 ->with('error', 'Não foi possível exportar: ' . $data['msg']);
         }
 

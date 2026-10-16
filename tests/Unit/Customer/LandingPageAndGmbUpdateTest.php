@@ -214,4 +214,43 @@ class LandingPageAndGmbUpdateTest extends TestCase
         $this->assertEquals(8, $json['regularHours']['periods'][0]['openTime']['hours']);
         $this->assertEquals(30, $json['regularHours']['periods'][0]['openTime']['minutes']);
     }
+
+    public function test_super_admin_hub_google_business_and_whatsapp_stay_in_admin_panel_and_hide_system_cliente(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        // 1. Acessar Google Meu Negócio pelo painel Admin mantém o usuário como Admin (sem impersonate)
+        $gmbResp = $this->actingAs($admin)->get(route('admin.hub.google-business.index'));
+        $gmbResp->assertStatus(200);
+        $gmbResp->assertSee('Super Admin');
+        $gmbResp->assertSee(route('admin.hub.google-business.connect'), false);
+        $gmbResp->assertDontSee('Modo "Entrar como"');
+        $this->assertEquals($admin->id, auth()->id());
+        $this->assertEquals('admin', auth()->user()->role);
+
+        // 2. Acessar todas as telas do Hub NC5 (Agenda, WhatsApp Conexão, Inbox, Bot IA, Dashboard) mantém o layout Admin unificado
+        foreach ([
+            'admin.hub.agenda.index',
+            'admin.hub.whatsapp.conexao',
+            'admin.hub.whatsapp.inbox',
+            'admin.hub.whatsapp.bot.index',
+            'admin.hub.whatsapp.dashboard',
+        ] as $routeName) {
+            $hubResp = $this->actingAs($admin)->get(route($routeName));
+            $hubResp->assertStatus(200);
+            $hubResp->assertSee('Super Admin');
+            $hubResp->assertSee(route('admin.hub.google-business.index'), false);
+            $hubResp->assertDontSee(route('admin.impersonate.enter'), false);
+            $this->assertEquals($admin->id, auth()->id());
+        }
+
+        // 3. O registro interno "NC5 Interno" (is_system = true) não aparece na listagem comercial de clientes nem no dashboard
+        $clientesResp = $this->actingAs($admin)->get(route('admin.clientes.index'));
+        $clientesResp->assertStatus(200);
+        $clientesResp->assertDontSee('NC5 Interno');
+
+        $dashResp = $this->actingAs($admin)->get(route('admin.dashboard'));
+        $dashResp->assertStatus(200);
+        $dashResp->assertDontSee('NC5 Interno');
+    }
 }

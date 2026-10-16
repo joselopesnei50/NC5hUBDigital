@@ -122,6 +122,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
             Route::get('dashboard', [\App\Http\Controllers\Admin\Hub\WhatsappDashboardController::class, 'index'])->name('dashboard');
         });
+
+        // Google Meu Negócio — Direto no painel Admin (sem impersonate)
+        Route::prefix('google-business')->name('google-business.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\GoogleBusinessController::class, 'index'])->name('index');
+            Route::get('/connect', [\App\Http\Controllers\GoogleBusinessController::class, 'redirectToGoogle'])->name('connect');
+            Route::get('/callback', [\App\Http\Controllers\GoogleBusinessController::class, 'handleGoogleCallback'])->name('callback');
+            Route::post('/disconnect', [\App\Http\Controllers\GoogleBusinessController::class, 'disconnect'])->name('disconnect');
+            Route::post('/ficha', [\App\Http\Controllers\GoogleBusinessController::class, 'selectLocation'])->name('location');
+            Route::patch('/ficha', [\App\Http\Controllers\GoogleBusinessController::class, 'updateLocation'])->middleware('throttle:15,1')->name('location.update');
+            Route::post('/ficha/sugerir-descricao', [\App\Http\Controllers\GoogleBusinessController::class, 'suggestDescription'])->middleware('throttle:15,1')->name('location.suggest-description');
+            Route::post('/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'storePost'])->middleware('throttle:10,1')->name('posts.store');
+            Route::delete('/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'destroyPost'])->name('posts.destroy');
+            Route::post('/avaliacoes/responder', [\App\Http\Controllers\GoogleBusinessController::class, 'replyReview'])->middleware('throttle:20,1')->name('reviews.reply');
+            Route::post('/avaliacoes/sugerir', [\App\Http\Controllers\GoogleBusinessController::class, 'suggestReply'])->middleware('throttle:20,1')->name('reviews.suggest');
+            Route::get('/exportar/csv', [\App\Http\Controllers\GoogleBusinessController::class, 'exportCsv'])->name('export.csv');
+            Route::get('/exportar/pdf', [\App\Http\Controllers\GoogleBusinessController::class, 'exportPdf'])->name('export.pdf');
+        });
     });
 
     // Usuários do painel do cliente (limite 5)
@@ -190,6 +207,11 @@ Route::post('/impersonate/leave', [\App\Http\Controllers\Admin\ImpersonateContro
     ->middleware('auth')
     ->name('admin.impersonate.leave');
 
+// Callback OAuth do Google Meu Negócio (acessível por Admin e Cliente sem exigir role:cliente)
+Route::get('/area-cliente/google-business/callback', [\App\Http\Controllers\GoogleBusinessController::class, 'handleGoogleCallback'])
+    ->middleware('auth')
+    ->name('customer.google-business.callback');
+
 // Área do Cliente (Isolamento via Role)
 Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(function () {
     Route::get('/', [CustomerController::class, 'index'])->name('customer.index');
@@ -213,7 +235,6 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     // Integração Google Meu Negócio
     Route::get('/google-business', [\App\Http\Controllers\GoogleBusinessController::class, 'index'])->name('customer.google-business.index');
     Route::get('/google-business/connect', [\App\Http\Controllers\GoogleBusinessController::class, 'redirectToGoogle'])->name('customer.google-business.connect');
-    Route::get('/google-business/callback', [\App\Http\Controllers\GoogleBusinessController::class, 'handleGoogleCallback'])->name('customer.google-business.callback');
     Route::post('/google-business/disconnect', [\App\Http\Controllers\GoogleBusinessController::class, 'disconnect'])->name('customer.google-business.disconnect');
     Route::post('/google-business/ficha', [\App\Http\Controllers\GoogleBusinessController::class, 'selectLocation'])->name('customer.google-business.location');
     Route::patch('/google-business/ficha', [\App\Http\Controllers\GoogleBusinessController::class, 'updateLocation'])->middleware('throttle:15,1')->name('customer.google-business.location.update');
