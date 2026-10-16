@@ -10,4 +10,6 @@ enum AgentInsightCategory: string
     case CAIXA = 'caixa';
     case CLIENTES = 'clientes';
     case PRODUTOS = 'produtos';
+    case AGENDA = 'agenda';
+    case ATENDIMENTO = 'atendimento';
 }

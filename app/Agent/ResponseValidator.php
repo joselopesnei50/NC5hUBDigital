@@ -34,7 +34,7 @@ class ResponseValidator
             throw new Exception('A propriedade raiz "insights" está ausente ou não é um array.');
         }
 
-        $categorias = ['pedidos', 'caixa', 'clientes', 'produtos'];
+        $categorias = ['pedidos', 'caixa', 'clientes', 'produtos', 'agenda', 'atendimento'];
         $severidades = ['info', 'atencao', 'critico'];
 
         foreach ($data['insights'] as $i => $insight) {

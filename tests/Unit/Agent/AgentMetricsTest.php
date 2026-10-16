@@ -16,8 +16,23 @@ class AgentMetricsTest extends TestCase
 
     public function test_cash_flow_metric_aggregates_correctly_and_isolates_tenant()
     {
+        $userId1 = DB::table('users')->insertGetId([
+            'name' => 'User 1',
+            'email' => 'u1@example.com',
+            'password' => 'secret',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $userId2 = DB::table('users')->insertGetId([
+            'name' => 'User 2',
+            'email' => 'u2@example.com',
+            'password' => 'secret',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         // Fixture: Tenant 1 (O que está sendo analisado)
-        DB::table('clientes')->insert(['id' => 1, 'razao_social' => 'Tenant 1']);
+        DB::table('clientes')->insert(['id' => 1, 'user_id' => $userId1, 'razao_social' => 'Tenant 1']);
         
         DB::table('lancamentos_financeiros')->insert([
             ['cliente_id' => 1, 'tipo' => 'receber', 'valor' => 1500.00, 'status' => 'pago', 'descricao' => 'A', 'data_vencimento' => now()],
@@ -25,7 +40,7 @@ class AgentMetricsTest extends TestCase
         ]);
 
         // Fixture: Tenant 2 (Dados que NÃO devem vazar para o Tenant 1)
-        DB::table('clientes')->insert(['id' => 2, 'razao_social' => 'Tenant 2']);
+        DB::table('clientes')->insert(['id' => 2, 'user_id' => $userId2, 'razao_social' => 'Tenant 2']);
         
         DB::table('lancamentos_financeiros')->insert([
             ['cliente_id' => 2, 'tipo' => 'receber', 'valor' => 10000.00, 'status' => 'pago', 'descricao' => 'Vazamento', 'data_vencimento' => now()],

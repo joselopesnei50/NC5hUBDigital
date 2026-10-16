@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Agent\Contracts\LlmDriver;
 use App\Agent\LlmManager;
 use App\Agent\SnapshotBuilder;
+use App\Agent\Metrics\AppointmentsMetric;
 use App\Agent\Metrics\CashFlowMetric;
 use App\Agent\Metrics\CustomerSegmentMetric;
 use App\Agent\Metrics\GoogleBusinessMetric;
@@ -16,11 +17,14 @@ use App\Agent\Metrics\PendingInvoicesMetric;
 use App\Agent\Metrics\ProductsPerformanceMetric;
 use App\Agent\Metrics\ProjectDeliveryMetric;
 use App\Agent\Metrics\TopCustomersMetric;
+use App\Agent\Metrics\WhatsappAtendimentoMetric;
 use App\Agent\Chat\ToolRegistry;
 use App\Agent\Chat\Tools\DraftCustomerMessageTool;
+use App\Agent\Chat\Tools\GetAgendaOverviewTool;
 use App\Agent\Chat\Tools\GetBusinessSnapshotTool;
 use App\Agent\Chat\Tools\GetCashFlowTool;
 use App\Agent\Chat\Tools\GetCustomerDetailsTool;
+use App\Agent\Chat\Tools\GetWhatsappOverviewTool;
 use App\Agent\Chat\Tools\ListInactiveCustomersTool;
 use App\Agent\Chat\Tools\ListPendingTasksTool;
 use App\Agent\Chat\Tools\SearchCompanyKnowledgeTool;
@@ -49,6 +53,8 @@ class AgentServiceProvider extends ServiceProvider
                 $app->make(ProductsPerformanceMetric::class),
                 $app->make(ProjectDeliveryMetric::class),
                 $app->make(GoogleBusinessMetric::class),
+                $app->make(AppointmentsMetric::class),
+                $app->make(WhatsappAtendimentoMetric::class),
             ]);
         });
 
@@ -63,8 +69,10 @@ class AgentServiceProvider extends ServiceProvider
             // Zoom em cliente ou lote pra reativação
             $registry->register($app->make(GetCustomerDetailsTool::class));
             $registry->register($app->make(ListInactiveCustomersTool::class));
-            // Operação
+            // Operação, Agenda e WhatsApp
             $registry->register($app->make(ListPendingTasksTool::class));
+            $registry->register($app->make(GetAgendaOverviewTool::class));
+            $registry->register($app->make(GetWhatsappOverviewTool::class));
             // Conhecimento da empresa (RAG do cliente)
             $registry->register($app->make(SearchCompanyKnowledgeTool::class));
             // Ação

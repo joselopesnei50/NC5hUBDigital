@@ -21,6 +21,11 @@ Route::get('/proposta/{token}', [\App\Http\Controllers\PublicPedidoController::c
 Route::post('/proposta/{token}/approve', [\App\Http\Controllers\PublicPedidoController::class, 'approve'])->name('public.pedido.approve');
 Route::get('/proposta/{token}/pdf', [\App\Http\Controllers\PublicPedidoController::class, 'downloadPdf'])->name('public.pedido.pdf');
 
+// Landing Pages Públicas dos Clientes
+Route::get('/lp/{slug}', [\App\Http\Controllers\Public\PublicLandingPageController::class, 'show'])->name('public.landing-page.show');
+Route::post('/lp/{slug}/lead', [\App\Http\Controllers\Public\PublicLandingPageController::class, 'storeLead'])->middleware('throttle:15,1')->name('public.landing-page.lead');
+Route::get('/lp/{slug}/whatsapp', [\App\Http\Controllers\Public\PublicLandingPageController::class, 'redirectWhatsapp'])->name('public.landing-page.whatsapp');
+
 // Export de agenda (ICS publico por token)
 Route::get('/agenda/ical/cliente/{token}.ics', [\App\Http\Controllers\Public\CalendarController::class, 'cliente'])
     ->name('public.calendar.cliente')
@@ -211,12 +216,20 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('/google-business/callback', [\App\Http\Controllers\GoogleBusinessController::class, 'handleGoogleCallback'])->name('customer.google-business.callback');
     Route::post('/google-business/disconnect', [\App\Http\Controllers\GoogleBusinessController::class, 'disconnect'])->name('customer.google-business.disconnect');
     Route::post('/google-business/ficha', [\App\Http\Controllers\GoogleBusinessController::class, 'selectLocation'])->name('customer.google-business.location');
+    Route::patch('/google-business/ficha', [\App\Http\Controllers\GoogleBusinessController::class, 'updateLocation'])->middleware('throttle:15,1')->name('customer.google-business.location.update');
+    Route::post('/google-business/ficha/sugerir-descricao', [\App\Http\Controllers\GoogleBusinessController::class, 'suggestDescription'])->middleware('throttle:15,1')->name('customer.google-business.location.suggest-description');
     Route::post('/google-business/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'storePost'])->middleware('throttle:10,1')->name('customer.google-business.posts.store');
     Route::delete('/google-business/posts', [\App\Http\Controllers\GoogleBusinessController::class, 'destroyPost'])->name('customer.google-business.posts.destroy');
     Route::post('/google-business/avaliacoes/responder', [\App\Http\Controllers\GoogleBusinessController::class, 'replyReview'])->middleware('throttle:20,1')->name('customer.google-business.reviews.reply');
     Route::post('/google-business/avaliacoes/sugerir', [\App\Http\Controllers\GoogleBusinessController::class, 'suggestReply'])->middleware('throttle:20,1')->name('customer.google-business.reviews.suggest');
     Route::get('/google-business/exportar/csv', [\App\Http\Controllers\GoogleBusinessController::class, 'exportCsv'])->name('customer.google-business.export.csv');
     Route::get('/google-business/exportar/pdf', [\App\Http\Controllers\GoogleBusinessController::class, 'exportPdf'])->name('customer.google-business.export.pdf');
+
+    // Meu Site / Criador de Landing Pages (4 Modelos)
+    Route::get('/meu-site', [\App\Http\Controllers\Customer\LandingPageController::class, 'edit'])->name('customer.landing-page.edit');
+    Route::put('/meu-site', [\App\Http\Controllers\Customer\LandingPageController::class, 'update'])->name('customer.landing-page.update');
+    Route::post('/meu-site/importar-catalogo', [\App\Http\Controllers\Customer\LandingPageController::class, 'importCatalog'])->name('customer.landing-page.import-catalog');
+    Route::post('/meu-site/gerar-ia', [\App\Http\Controllers\Customer\LandingPageController::class, 'generateWithAi'])->middleware('throttle:10,1')->name('customer.landing-page.ai-generate');
 
     // Gestão de Clientes (CRM do Cliente)
     Route::resource('gestao-clientes', \App\Http\Controllers\Customer\ClienteFinalController::class)

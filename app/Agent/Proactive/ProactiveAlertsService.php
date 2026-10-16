@@ -206,6 +206,82 @@ class ProactiveAlertsService
             }
         }
 
+        // ==== WhatsApp & Bot IA =================================================
+        // Só dispara se o cliente já tiver configurado uma instância de WhatsApp.
+        $wa = $metricas['whatsapp_atendimento'] ?? [];
+        if (!empty($wa['instancia_configurada'])) {
+            // R11 — Instância desconectada (crítico: para o bot e os lembretes da agenda)
+            if (empty($wa['instancia_conectada'])) {
+                $alertas[] = [
+                    'tipo' => 'whatsapp_desconectado',
+                    'severidade' => 'critico',
+                    'titulo' => 'Seu WhatsApp está desconectado',
+                    'mensagem' => 'A conexão do seu WhatsApp caiu ou foi encerrada. Reconecte lendo o QR Code em WhatsApp (Conexão) para que o Inbox, o Bot IA e os lembretes da agenda voltem a funcionar.',
+                    'detalhes' => ['status_instancia' => $wa['status_instancia'] ?? 'close'],
+                ];
+            }
+
+            // R12 — Conversas escaladas para humano e com mensagens não lidas
+            $aguardandoHumano = (int) ($wa['conversas_aguardando_humano'] ?? 0);
+            if ($aguardandoHumano > 0) {
+                $alertas[] = [
+                    'tipo' => 'whatsapp_aguardando_humano',
+                    'severidade' => 'atencao',
+                    'titulo' => "{$aguardandoHumano} conversa(s) no WhatsApp aguardando atendimento humano",
+                    'mensagem' => 'O Bot IA pausou o atendimento automático nessas conversas (por pedido do cliente ou escalação) e há mensagens não lidas esperando resposta da sua equipe em WhatsApp (Inbox).',
+                    'detalhes' => ['quantidade' => $aguardandoHumano],
+                ];
+            }
+
+            // R13 — Falhas recorrentes no Bot IA
+            $interacoesBot = (int) ($wa['interacoes_bot_periodo'] ?? 0);
+            $falhasBot = (int) ($wa['falhas_bot_periodo'] ?? 0);
+            if ($interacoesBot >= 5 && $falhasBot >= 3 && ($falhasBot / $interacoesBot) >= 0.20) {
+                $alertas[] = [
+                    'tipo' => 'whatsapp_falhas_bot',
+                    'severidade' => 'atencao',
+                    'titulo' => "O Bot do WhatsApp registrou {$falhasBot} falha(s) recentes",
+                    'mensagem' => 'Algumas respostas automáticas falharam no período. Confira o painel WhatsApp (Dashboard) e revise o treinamento do seu Bot IA.',
+                    'detalhes' => ['falhas' => $falhasBot, 'interacoes' => $interacoesBot],
+                ];
+            }
+        }
+
+        // ==== Agenda ============================================================
+        $agenda = $metricas['agenda'] ?? [];
+        if (!empty($agenda)) {
+            // R14 — Compromissos passados ainda sem baixa (agendado/confirmado no passado)
+            $vencidosAgenda = (int) ($agenda['vencidos_sem_baixa'] ?? 0);
+            if ($vencidosAgenda >= 3) {
+                $alertas[] = [
+                    'tipo' => 'agenda_vencidos_sem_baixa',
+                    'severidade' => 'info',
+                    'titulo' => "{$vencidosAgenda} agendamentos passados ainda sem baixa na Agenda",
+                    'mensagem' => 'Há compromissos cujo horário já passou, mas que continuam como agendados. Marque-os como concluídos ou cancelados em Agenda para manter suas métricas em dia.',
+                    'detalhes' => ['quantidade' => $vencidosAgenda],
+                ];
+            }
+
+            // R15 — Taxa de cancelamento alta (> 25% com base mínima de 5 agendamentos)
+            $totalAgenda = (int) ($agenda['total_periodo'] ?? 0);
+            $canceladosAgenda = (int) ($agenda['cancelados_periodo'] ?? 0);
+            $taxaCancel = (float) ($agenda['taxa_cancelamento_pct'] ?? 0.0);
+            if ($totalAgenda >= 5 && $taxaCancel > 25.0) {
+                $taxaFmt = number_format($taxaCancel, 1, ',', '.');
+                $alertas[] = [
+                    'tipo' => 'agenda_cancelamento_alto',
+                    'severidade' => 'atencao',
+                    'titulo' => "Taxa de cancelamento na agenda em {$taxaFmt}%",
+                    'mensagem' => "Dos {$totalAgenda} agendamentos do período, {$canceladosAgenda} foram cancelados ({$taxaFmt}%). Considere ativar o 2º lembrete automático de WhatsApp em WhatsApp (Bot IA) para reduzir desistências.",
+                    'detalhes' => [
+                        'total_periodo' => $totalAgenda,
+                        'cancelados_periodo' => $canceladosAgenda,
+                        'taxa_cancelamento_pct' => $taxaCancel,
+                    ],
+                ];
+            }
+        }
+
         return $alertas;
     }
 

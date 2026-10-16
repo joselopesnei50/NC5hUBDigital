@@ -160,6 +160,219 @@
                         Escolha uma ficha acima para ver métricas, posts e avaliações.
                     </div>
                 @else
+                    {{-- Edição de Informações Cadastrais da Ficha do Google Meu Negócio --}}
+                    @php
+                        $addr = $selected['storefrontAddress'] ?? [];
+                        $addrLines = $addr['addressLines'] ?? [];
+                        $primaryPhone = $selected['phoneNumbers']['primaryPhone'] ?? '';
+                        $profileDesc = $selected['profile']['description'] ?? '';
+                        $periods = $selected['regularHours']['periods'] ?? [];
+                        $daysMap = [
+                            'MONDAY'    => 'Segunda-feira',
+                            'TUESDAY'   => 'Terça-feira',
+                            'WEDNESDAY' => 'Quarta-feira',
+                            'THURSDAY'  => 'Quinta-feira',
+                            'FRIDAY'    => 'Sexta-feira',
+                            'SATURDAY'  => 'Sábado',
+                            'SUNDAY'    => 'Domingo',
+                        ];
+                        $hoursByDay = [];
+                        foreach ($daysMap as $dayKey => $dayLabel) {
+                            $hoursByDay[$dayKey] = ['enabled' => false, 'open' => '08:00', 'close' => '18:00'];
+                        }
+                        foreach ($periods as $p) {
+                            $dKey = $p['openDay'] ?? null;
+                            if ($dKey && isset($hoursByDay[$dKey])) {
+                                $oh = sprintf('%02d:%02d', (int) ($p['openTime']['hours'] ?? 8), (int) ($p['openTime']['minutes'] ?? 0));
+                                $ch = sprintf('%02d:%02d', (int) ($p['closeTime']['hours'] ?? 18), (int) ($p['closeTime']['minutes'] ?? 0));
+                                $hoursByDay[$dKey] = ['enabled' => true, 'open' => $oh, 'close' => $ch];
+                            }
+                        }
+                    @endphp
+
+                    <details class="mb-8 group rounded-2xl border border-black/10 bg-white shadow-sm overflow-hidden"
+                             x-data="{
+                                descChars: {{ mb_strlen($profileDesc) }},
+                                loadingDescAi: false,
+                                descAiError: '',
+                                descContext: '',
+                                updateHours: {{ !empty($periods) ? 'true' : 'false' }}
+                             }">
+                        <summary class="cursor-pointer list-none p-5 bg-mist/60 hover:bg-mist flex items-center justify-between gap-4 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-bruce/10 text-bruce flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-display font-bold text-base text-ink">Editar Informações da Ficha no Google</h3>
+                                    <p class="text-xs text-slate">Altere nome, telefone, site, descrição, endereço e horário de funcionamento direto no Google Meu Negócio.</p>
+                                </div>
+                            </div>
+                            <span class="px-4 py-1.5 rounded-full bg-white border border-black/10 text-xs font-bold text-ink group-open:bg-ink group-open:text-white transition-colors">
+                                Editar Ficha
+                            </span>
+                        </summary>
+
+                        <form action="{{ route('customer.google-business.location.update') }}" method="POST" class="p-6 space-y-6 border-t border-black/5">
+                            @csrf
+                            @method('PATCH')
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-1.5">Nome da Empresa na Ficha *</label>
+                                    <input type="text" name="title" x-ref="gmbTitle" required maxlength="140"
+                                           value="{{ old('title', $selected['title'] ?? '') }}"
+                                           class="w-full rounded-xl border-gray-300 focus:border-bruce focus:ring-bruce text-sm">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate mb-1.5">Telefone Principal</label>
+                                    <input type="text" name="primary_phone" maxlength="30"
+                                           value="{{ old('primary_phone', $primaryPhone) }}"
+                                           placeholder="Ex: +55 11 99999-9999"
+                                           class="w-full rounded-xl border-gray-300 focus:border-bruce focus:ring-bruce text-sm">
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate">Website / Landing Page</label>
+                                        @if(!empty($landingPage))
+                                            <button type="button"
+                                                    x-on:click="$refs.gmbWebsite.value = '{{ route('public.landing-page.show', ['slug' => $landingPage->slug]) }}'"
+                                                    class="text-[11px] font-bold text-bruce hover:underline">
+                                                Usar minha Landing Page NC5
+                                            </button>
+                                        @endif
+                                    </div>
+                                    <input type="url" name="website_uri" x-ref="gmbWebsite" maxlength="255"
+                                           value="{{ old('website_uri', $selected['websiteUri'] ?? '') }}"
+                                           placeholder="https://seusite.com.br"
+                                           class="w-full rounded-xl border-gray-300 focus:border-bruce focus:ring-bruce text-sm">
+                                </div>
+                            </div>
+
+                            {{-- Descrição com sugestão do Bruce IA --}}
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate">Descrição da Empresa (SEO Local)</label>
+                                    <span class="text-[11px] text-slate"><span x-text="descChars">0</span> / 750 caracteres</span>
+                                </div>
+                                <textarea name="description" rows="3" maxlength="750" x-ref="gmbDescription"
+                                          x-on:input="descChars = $event.target.value.length"
+                                          placeholder="Apresente seus serviços, diferenciais e região de atendimento..."
+                                          class="w-full rounded-xl border-gray-300 focus:border-bruce focus:ring-bruce text-sm">{{ old('description', $profileDesc) }}</textarea>
+
+                                <div class="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                    <input type="text" x-model="descContext"
+                                           placeholder="Opcional: informe palavras-chave ou diferenciais para o Bruce IA incluir na descrição..."
+                                           class="flex-1 rounded-xl border-gray-300 text-xs py-1.5">
+                                    <button type="button"
+                                            x-bind:disabled="loadingDescAi"
+                                            x-on:click="
+                                                loadingDescAi = true; descAiError = '';
+                                                fetch('{{ route('customer.google-business.location.suggest-description') }}', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'Accept': 'application/json',
+                                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                                                    },
+                                                    body: JSON.stringify({
+                                                        title: $refs.gmbTitle.value,
+                                                        context: descContext
+                                                    })
+                                                })
+                                                .then(r => r.json().then(d => ({ok: r.ok, d})))
+                                                .then(({ok, d}) => {
+                                                    if (!ok || d.error) throw new Error(d.error || 'Falha ao sugerir descrição');
+                                                    $refs.gmbDescription.value = d.descricao;
+                                                    descChars = d.descricao.length;
+                                                })
+                                                .catch(e => { descAiError = e.message; })
+                                                .finally(() => { loadingDescAi = false; });
+                                            "
+                                            class="px-4 py-1.5 rounded-full bg-white hover:bg-mist text-bruce border border-bruce text-xs font-bold transition-colors whitespace-nowrap">
+                                        <span x-text="loadingDescAi ? 'Gerando...' : '✨ Sugerir Descrição com Bruce IA'"></span>
+                                    </button>
+                                </div>
+                                <p x-show="descAiError" x-cloak x-text="descAiError" class="text-xs text-rose-600 mt-1"></p>
+                            </div>
+
+                            {{-- Endereço Comercial --}}
+                            <div class="pt-2 border-t border-black/5">
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate mb-3">Endereço Comercial</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                                    <div class="lg:col-span-2">
+                                        <label class="block text-[10px] font-bold uppercase text-slate mb-1">Rua e Número</label>
+                                        <input type="text" name="address_line" value="{{ old('address_line', $addrLines[0] ?? '') }}"
+                                               placeholder="Av. Paulista, 1000"
+                                               class="w-full rounded-xl border-gray-300 text-xs">
+                                    </div>
+                                    <div class="lg:col-span-1">
+                                        <label class="block text-[10px] font-bold uppercase text-slate mb-1">Bairro / Compl.</label>
+                                        <input type="text" name="sublocality" value="{{ old('sublocality', $addrLines[1] ?? '') }}"
+                                               placeholder="Bela Vista"
+                                               class="w-full rounded-xl border-gray-300 text-xs">
+                                    </div>
+                                    <div class="lg:col-span-1">
+                                        <label class="block text-[10px] font-bold uppercase text-slate mb-1">Cidade</label>
+                                        <input type="text" name="locality" value="{{ old('locality', $addr['locality'] ?? '') }}"
+                                               placeholder="São Paulo"
+                                               class="w-full rounded-xl border-gray-300 text-xs">
+                                    </div>
+                                    <div class="lg:col-span-1">
+                                        <label class="block text-[10px] font-bold uppercase text-slate mb-1">UF (Estado)</label>
+                                        <input type="text" name="administrative_area" maxlength="2" value="{{ old('administrative_area', $addr['administrativeArea'] ?? '') }}"
+                                               placeholder="SP"
+                                               class="w-full rounded-xl border-gray-300 text-xs uppercase">
+                                    </div>
+                                    <div class="lg:col-span-1">
+                                        <label class="block text-[10px] font-bold uppercase text-slate mb-1">CEP</label>
+                                        <input type="text" name="postal_code" value="{{ old('postal_code', $addr['postalCode'] ?? '') }}"
+                                               placeholder="01310-100"
+                                               class="w-full rounded-xl border-gray-300 text-xs">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Horário de Funcionamento --}}
+                            <div class="pt-2 border-t border-black/5">
+                                <label class="inline-flex items-center gap-2 cursor-pointer mb-3">
+                                    <input type="checkbox" name="update_hours" value="1" x-model="updateHours"
+                                           class="rounded border-gray-300 text-bruce focus:ring-bruce">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-ink">Atualizar Horários de Funcionamento na Ficha</span>
+                                </label>
+
+                                <div x-show="updateHours" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                    @foreach($daysMap as $dayKey => $dayLabel)
+                                        @php $cfg = $hoursByDay[$dayKey]; @endphp
+                                        <div class="p-3 rounded-xl bg-mist border border-black/5 space-y-2">
+                                            <label class="flex items-center justify-between gap-2 cursor-pointer">
+                                                <span class="text-xs font-bold text-ink">{{ $dayLabel }}</span>
+                                                <input type="checkbox" name="hours[{{ $dayKey }}][enabled]" value="1"
+                                                       @checked($cfg['enabled'])
+                                                       class="rounded border-gray-300 text-bruce focus:ring-bruce">
+                                            </label>
+                                            <div class="flex items-center gap-1.5">
+                                                <input type="time" name="hours[{{ $dayKey }}][open]" value="{{ $cfg['open'] }}"
+                                                       class="w-full rounded-lg border-gray-300 text-xs py-1 px-2">
+                                                <span class="text-xs text-slate">às</span>
+                                                <input type="time" name="hours[{{ $dayKey }}][close]" value="{{ $cfg['close'] }}"
+                                                       class="w-full rounded-lg border-gray-300 text-xs py-1 px-2">
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="px-6 py-2.5 rounded-full bg-ink hover:bg-bruce text-white text-xs font-bold transition-colors shadow-sm">
+                                    Salvar Informações no Google Meu Negócio
+                                </button>
+                            </div>
+                        </form>
+                    </details>
+
                     {{-- Métricas --}}
                     <div class="mb-8">
                         <h3 class="font-display text-lg font-bold text-ink mb-4">Desempenho nos últimos 30 dias</h3>

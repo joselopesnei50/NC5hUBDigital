@@ -204,7 +204,7 @@ class GoogleBusinessProfileService
             do {
                 $query = [
                     'pageSize' => 100,
-                    'readMask' => 'name,title,storeCode,storefrontAddress,websiteUri',
+                    'readMask' => 'name,title,storeCode,storefrontAddress,websiteUri,phoneNumbers,profile,regularHours',
                 ];
                 if ($locPageToken) $query['pageToken'] = $locPageToken;
 
@@ -474,6 +474,111 @@ class GoogleBusinessProfileService
             "https://mybusiness.googleapis.com/v4/{$reviewName}/reply",
             ['json' => ['comment' => $comment]],
             'responder avaliação'
+        );
+    }
+
+    /**
+     * Atualiza as informações principais da ficha no Google Meu Negócio
+     * (Business Information API v1 — PATCH locations/{id}?updateMask=...).
+     */
+    public function updateLocation($cliente, string $v4Name, array $data): array
+    {
+        $this->setClientForCliente($cliente);
+
+        $locOnly = self::locationOnly($v4Name);
+        $payload = [];
+        $updateMask = [];
+
+        if (array_key_exists('title', $data) && trim((string) $data['title']) !== '') {
+            $payload['title'] = trim((string) $data['title']);
+            $updateMask[] = 'title';
+        }
+
+        if (array_key_exists('description', $data)) {
+            $payload['profile'] = [
+                'description' => trim((string) $data['description']),
+            ];
+            $updateMask[] = 'profile.description';
+        }
+
+        if (array_key_exists('primary_phone', $data) && trim((string) $data['primary_phone']) !== '') {
+            $payload['phoneNumbers'] = [
+                'primaryPhone' => trim((string) $data['primary_phone']),
+            ];
+            $updateMask[] = 'phoneNumbers.primaryPhone';
+        }
+
+        if (array_key_exists('website_uri', $data)) {
+            $payload['websiteUri'] = trim((string) $data['website_uri']);
+            $updateMask[] = 'websiteUri';
+        }
+
+        if (!empty($data['address']) && is_array($data['address'])) {
+            $addr = $data['address'];
+            $line1 = trim((string) ($addr['address_line'] ?? ''));
+            $subloc = trim((string) ($addr['sublocality'] ?? ''));
+            $locality = trim((string) ($addr['locality'] ?? ''));
+            $uf = strtoupper(trim((string) ($addr['administrative_area'] ?? '')));
+            $cep = trim((string) ($addr['postal_code'] ?? ''));
+
+            if ($line1 !== '' && $locality !== '' && $uf !== '' && $cep !== '') {
+                $addressLines = array_values(array_filter([$line1, $subloc], fn ($v) => $v !== ''));
+                $payload['storefrontAddress'] = [
+                    'regionCode' => 'BR',
+                    'languageCode' => 'pt-BR',
+                    'postalCode' => $cep,
+                    'administrativeArea' => $uf,
+                    'locality' => $locality,
+                    'addressLines' => $addressLines,
+                ];
+                $updateMask[] = 'storefrontAddress';
+            }
+        }
+
+        if (isset($data['hours']) && is_array($data['hours'])) {
+            $validDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+            $periods = [];
+            foreach ($validDays as $dayKey) {
+                $dayCfg = $data['hours'][$dayKey] ?? null;
+                if (!is_array($dayCfg) || empty($dayCfg['enabled'])) {
+                    continue;
+                }
+                $openStr = (string) ($dayCfg['open'] ?? '08:00');
+                $closeStr = (string) ($dayCfg['close'] ?? '18:00');
+
+                [$openH, $openM] = array_pad(explode(':', $openStr), 2, '0');
+                [$closeH, $closeM] = array_pad(explode(':', $closeStr), 2, '0');
+
+                $periods[] = [
+                    'openDay' => $dayKey,
+                    'openTime' => [
+                        'hours' => max(0, min(23, (int) $openH)),
+                        'minutes' => max(0, min(59, (int) $openM)),
+                    ],
+                    'closeDay' => $dayKey,
+                    'closeTime' => [
+                        'hours' => max(0, min(24, (int) $closeH)),
+                        'minutes' => max(0, min(59, (int) $closeM)),
+                    ],
+                ];
+            }
+
+            $payload['regularHours'] = ['periods' => $periods];
+            $updateMask[] = 'regularHours';
+        }
+
+        if (empty($updateMask)) {
+            throw new \InvalidArgumentException('Nenhum campo válido foi informado para atualizar na ficha.');
+        }
+
+        $maskStr = implode(',', $updateMask);
+
+        return $this->request(
+            $cliente,
+            'PATCH',
+            "https://mybusinessbusinessinformation.googleapis.com/v1/{$locOnly}?updateMask=" . rawurlencode($maskStr),
+            ['json' => $payload],
+            'atualizar informações da ficha'
         );
     }
 

@@ -24,9 +24,9 @@ class CashFlowMetric implements MetricInterface
             ->where('cliente_id', $tenantId)
             ->where('data_vencimento', '>=', $startDate)
             ->select(
-                DB::raw('SUM(CASE WHEN tipo = "receber" AND status = "pago" THEN valor ELSE 0 END) as receitas_realizadas'),
-                DB::raw('SUM(CASE WHEN tipo = "pagar" AND status = "pago" THEN valor ELSE 0 END) as despesas_realizadas'),
-                DB::raw('SUM(CASE WHEN tipo = "receber" AND status = "pendente" AND data_vencimento < CURRENT_DATE() THEN valor ELSE 0 END) as inadimplencia_estimada')
+                DB::raw("SUM(CASE WHEN tipo = 'receber' AND status = 'pago' THEN valor ELSE 0 END) as receitas_realizadas"),
+                DB::raw("SUM(CASE WHEN tipo = 'pagar' AND status = 'pago' THEN valor ELSE 0 END) as despesas_realizadas"),
+                DB::raw("SUM(CASE WHEN tipo = 'receber' AND status = 'pendente' AND data_vencimento < CURRENT_DATE THEN valor ELSE 0 END) as inadimplencia_estimada")
             )
             ->first();
 

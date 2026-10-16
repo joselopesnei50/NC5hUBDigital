@@ -58,9 +58,11 @@ class GoogleBusinessController extends Controller
         $reviews     = ['media' => 0, 'total' => 0, 'reviews' => []];
         $erros       = [];
 
+        $landingPage = \App\Models\LandingPage::where('cliente_id', $cliente->id)->first();
+
         if (!$isConnected) {
             return view('customer.google-business.index', compact(
-                'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente'
+                'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente', 'landingPage'
             ));
         }
 
@@ -128,7 +130,7 @@ class GoogleBusinessController extends Controller
         }
 
         return view('customer.google-business.index', compact(
-            'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente'
+            'isConnected', 'locations', 'selected', 'metricas', 'posts', 'reviews', 'erros', 'cliente', 'landingPage'
         ));
     }
 
@@ -242,6 +244,114 @@ class GoogleBusinessController extends Controller
 
         return redirect()->route('customer.google-business.index')
             ->with('success', 'Ficha selecionada.');
+    }
+
+    /**
+     * Atualiza informações cadastrais da ficha do Google Meu Negócio
+     * (Nome, Descrição, Telefone, Site, Endereço e Horários de Funcionamento).
+     */
+    public function updateLocation(Request $request)
+    {
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) return $cliente;
+
+        if (empty($cliente->google_location_id)) {
+            return redirect()->route('customer.google-business.index')
+                ->with('error', 'Selecione uma ficha antes de editar as informações.');
+        }
+
+        $validated = $request->validate([
+            'title'               => 'required|string|max:140',
+            'description'         => 'nullable|string|max:750',
+            'primary_phone'       => 'nullable|string|max:30',
+            'website_uri'         => 'nullable|url|max:255',
+            'address_line'        => 'nullable|string|max:180',
+            'sublocality'         => 'nullable|string|max:100',
+            'locality'            => 'nullable|string|max:100',
+            'administrative_area' => 'nullable|string|max:5',
+            'postal_code'         => 'nullable|string|max:20',
+            'update_hours'        => 'nullable|boolean',
+            'hours'               => 'nullable|array',
+        ], [
+            'title.required'   => 'O nome da empresa na ficha é obrigatório.',
+            'description.max'  => 'A descrição no Google Meu Negócio pode ter no máximo 750 caracteres.',
+            'website_uri.url'  => 'Informe uma URL válida para o site (iniciando com http:// ou https://).',
+        ]);
+
+        $payload = [
+            'title'         => $validated['title'],
+            'description'   => $validated['description'] ?? '',
+            'primary_phone' => $validated['primary_phone'] ?? '',
+            'website_uri'   => $validated['website_uri'] ?? '',
+        ];
+
+        if (!empty($validated['address_line']) && !empty($validated['locality']) && !empty($validated['administrative_area']) && !empty($validated['postal_code'])) {
+            $payload['address'] = [
+                'address_line'        => $validated['address_line'],
+                'sublocality'         => $validated['sublocality'] ?? '',
+                'locality'            => $validated['locality'],
+                'administrative_area' => $validated['administrative_area'],
+                'postal_code'         => $validated['postal_code'],
+            ];
+        }
+
+        if ($request->boolean('update_hours') && is_array($request->input('hours'))) {
+            $payload['hours'] = $request->input('hours');
+        }
+
+        try {
+            $this->googleService->updateLocation($cliente, $cliente->google_location_id, $payload);
+        } catch (\Throwable $e) {
+            return redirect()->route('customer.google-business.index')
+                ->with('error', 'Não foi possível salvar no Google: ' . $e->getMessage());
+        }
+
+        Cache::forget($this->cacheKey($cliente, 'locations'));
+
+        return redirect()->route('customer.google-business.index')
+            ->with('success', 'Informações da ficha do Google Meu Negócio atualizadas com sucesso!');
+    }
+
+    /**
+     * Pede para o Bruce IA sugerir uma descrição otimizada para SEO Local (máx. 750 caracteres).
+     */
+    public function suggestDescription(Request $request, LlmDriver $llm)
+    {
+        $cliente = $this->requireCliente();
+        if (!$cliente instanceof \App\Models\Cliente) {
+            return response()->json(['error' => 'Cliente não autenticado.'], 401);
+        }
+
+        $validated = $request->validate([
+            'title'   => 'nullable|string|max:140',
+            'context' => 'nullable|string|max:500',
+        ]);
+
+        $title = trim((string) ($validated['title'] ?? $cliente->razao_social ?? 'Nossa Empresa'));
+        $context = trim((string) ($validated['context'] ?? ''));
+
+        $system = <<<TXT
+Você é especialista em SEO Local e Google Meu Negócio no Brasil.
+Escreva uma descrição comercial atraente, profissional e otimizada para buscas locais para a ficha do Google Meu Negócio da empresa "{$title}".
+Regras estritas:
+- Máximo de 700 caracteres (limite rígido do Google é 750).
+- Não inclua links, URLs, códigos HTML ou emojis em excesso.
+- Destaque autoridade, atendimento ao cliente e principais serviços.
+- Responda APENAS com o texto final da descrição, sem aspas nem introduções.
+TXT;
+
+        $userPrompt = "Empresa: {$title}." . ($context !== '' ? " Ramo/Diferenciais: {$context}." : '');
+
+        try {
+            $resp = $llm->complete(new PromptPayload($system, $userPrompt));
+            $texto = trim($resp->content, " \t\n\r\0\x0B\"'");
+            $texto = mb_substr($texto, 0, 745);
+
+            return response()->json(['descricao' => $texto]);
+        } catch (\Throwable $e) {
+            Log::warning('[GoogleBusiness] Falha ao sugerir descricao para cliente ' . $cliente->id . ': ' . $e->getMessage());
+            return response()->json(['error' => 'Não foi possível gerar a sugestão agora. Tente novamente.'], 502);
+        }
     }
 
     public function storePost(Request $request)

@@ -77,4 +77,14 @@ class Cliente extends Model
     {
         return $this->hasMany(Fornecedor::class);
     }
+
+    public function landingPage()
+    {
+        return $this->hasOne(LandingPage::class);
+    }
+
+    public function landingPages()
+    {
+        return $this->hasMany(LandingPage::class);
+    }
 }

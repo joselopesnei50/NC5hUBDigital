@@ -32,7 +32,7 @@ class BusinessAnalyzer
             'insights' => [
                 [
                     'titulo' => 'O que está acontecendo',
-                    'categoria' => 'enum: pedidos, caixa, clientes, produtos',
+                    'categoria' => 'enum: pedidos, caixa, clientes, produtos, agenda, atendimento',
                     'severidade' => 'enum: info, atencao, critico',
                     'evidencia' => ['chave_da_metrica_do_snapshot' => 'valor_encontrado_no_snapshot'],
                     'acao_sugerida' => 'Recomendacao pratica e acionavel.'

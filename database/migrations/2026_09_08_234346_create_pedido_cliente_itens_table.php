@@ -39,10 +39,12 @@ return new class extends Migration
         }
 
         // Drop legacy column
-        Schema::table('pedidos_clientes', function (Blueprint $table) {
-            $table->dropForeign(['produto_servico_id']);
-            $table->dropColumn('produto_servico_id');
-        });
+        if (DB::getDriverName() !== 'sqlite') {
+            Schema::table('pedidos_clientes', function (Blueprint $table) {
+                $table->dropForeign(['produto_servico_id']);
+                $table->dropColumn('produto_servico_id');
+            });
+        }
     }
 
     /**
