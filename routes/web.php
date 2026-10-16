@@ -67,71 +67,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/whatsapp-financeiro', [\App\Http\Controllers\Admin\WhatsappFinanceiroController::class, 'index'])
         ->name('whatsapp-financeiro.index');
 
-    // Hub NC5 — impersonate (escondido, uso de suporte)
+    // Hub NC5 — entrar como Cliente NC5 Interno pra usar WhatsApp/Bot/Google Business
     Route::get('/hub-nc5/enter', [\App\Http\Controllers\Admin\ImpersonateController::class, 'enter'])
         ->name('impersonate.enter');
-
-    // Hub NC5 — modulos acessiveis diretamente no admin
-    Route::prefix('hub-nc5')->name('hub.')->group(function () {
-        // WhatsApp
-        Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
-            Route::get('conexao', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'index'])->name('conexao');
-            Route::post('conexao/connect', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'connect'])->name('connect');
-            Route::get('conexao/qr', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'qr'])->name('qr');
-            Route::get('conexao/status', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'status'])->name('status');
-            Route::post('conexao/disconnect', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'disconnect'])->name('disconnect');
-
-            Route::get('inbox', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'index'])->name('inbox');
-            Route::get('inbox/feed', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'feedInbox'])->name('inbox.feed');
-            Route::get('inbox/{chat}', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'show'])->name('chat');
-            Route::get('inbox/{chat}/feed', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'feedChat'])->name('chat.feed');
-            Route::post('inbox/{chat}/send', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'send'])->name('send');
-
-            Route::get('bot', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'index'])->name('bot.index');
-            Route::post('bot', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'update'])->name('bot.update');
-            Route::post('inbox/{chat}/bot-toggle', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'toggleChatBot'])->name('bot.toggle');
-
-            Route::get('dashboard', [\App\Http\Controllers\Admin\Hub\WhatsappDashboardController::class, 'index'])->name('dashboard');
-        });
-
-        // Agenda
-        Route::prefix('agenda')->name('agenda.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'index'])->name('index');
-            Route::get('/criar', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'store'])->name('store');
-            Route::get('/{agenda}/editar', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'edit'])->name('edit');
-            Route::put('/{agenda}', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'update'])->name('update');
-            Route::delete('/{agenda}', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'destroy'])->name('destroy');
-            Route::post('/{agenda}/concluir', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'markCompleted'])->name('complete');
-            Route::post('/{agenda}/cancelar', [\App\Http\Controllers\Admin\Hub\AppointmentController::class, 'markCancelled'])->name('cancel');
-
-            Route::prefix('recursos')->name('recursos.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'index'])->name('index');
-                Route::get('/criar', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'store'])->name('store');
-                Route::get('/{recurso}/editar', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'edit'])->name('edit');
-                Route::put('/{recurso}', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'update'])->name('update');
-                Route::delete('/{recurso}', [\App\Http\Controllers\Admin\Hub\AppointmentResourceController::class, 'destroy'])->name('destroy');
-            });
-        });
-
-        // Google Meu Negócio
-        Route::prefix('google-business')->name('google-business.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'index'])->name('index');
-            Route::get('/connect', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'redirectToGoogle'])->name('connect');
-            Route::get('/callback', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'handleGoogleCallback'])->name('callback');
-            Route::post('/disconnect', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'disconnect'])->name('disconnect');
-            Route::post('/ficha', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'selectLocation'])->name('location');
-            Route::post('/posts', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'storePost'])->middleware('throttle:10,1')->name('posts.store');
-            Route::delete('/posts', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'destroyPost'])->name('posts.destroy');
-            Route::post('/avaliacoes/responder', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'replyReview'])->middleware('throttle:20,1')->name('reviews.reply');
-            Route::post('/avaliacoes/sugerir', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'suggestReply'])
-                ->middleware('throttle:20,1')
-                ->name('reviews.suggest');
-            Route::get('/exportar/csv', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'exportCsv'])->name('export.csv');
-            Route::get('/exportar/pdf', [\App\Http\Controllers\Admin\Hub\GoogleBusinessController::class, 'exportPdf'])->name('export.pdf');
-        });
-    });
 
     // Usuários do painel do cliente (limite 5)
     Route::post('clientes/{cliente}/usuarios', [\App\Http\Controllers\Admin\ClienteController::class, 'usersStore'])->name('clientes.usuarios.store');
