@@ -21,6 +21,7 @@
                             inkLight: '#141D38',
                             magenta: '#FF7A1A', 
                             mist: '#F8FAFC', 
+                            slate: { DEFAULT: '#64748B' },
                             slateText: '#64748B', 
                             bruce: '#FF7A1A', 
                             bruceDark: '#E5651A', 

@@ -20,6 +20,7 @@
                         ink: '#0A1128', 
                         inkLight: '#141D38',
                         mist: '#F8FAFC', 
+                        slate: { DEFAULT: '#64748B' },
                         slateText: '#64748B', 
                         bruce: '#FF7A1A', 
                         bruceDark: '#E5651A', 
