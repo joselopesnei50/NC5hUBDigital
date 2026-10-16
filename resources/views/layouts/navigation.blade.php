@@ -12,12 +12,20 @@
         {{--
             Menu estruturado em seções estratégicas:
             - Visão Geral (Home do cliente)
-            - Marketing & Vendas (Atração, Landing Pages, Google, WhatsApp, Métricas)
-            - Gestão do Negócio (CRM, Agenda, Pedidos, Finanças, Estoque, Projetos)
-            - Inteligência Bruce IA (Alertas e Base de Conhecimento)
-            - Central NC5 (Comunicações, Materiais, Briefings, Contratos e Faturas)
+            - 1. Central NC5 (Comunicações, Materiais, Briefings, Contratos e Faturas) -> Primeiro grupo
+            - 2. Marketing & Vendas (Atração, Landing Pages, Google, WhatsApp, Métricas)
+            - 3. Gestão do Negócio (CRM, Agenda, Pedidos, Finanças, Estoque, Projetos)
+            - 4. Inteligência Bruce IA (Alertas e Base de Conhecimento)
         --}}
         @php
+            $groupNC5 = [
+                ['route' => 'customer.materiais',  'label' => 'Aprovar Materiais', 'match' => 'customer.materiais*',  'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                ['route' => 'customer.briefings',  'label' => 'Meus Briefings',    'match' => 'customer.briefings*',  'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                ['route' => 'customer.contracts',  'label' => 'Meus Contratos',    'match' => 'customer.contracts*',  'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 017-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
+                ['route' => 'customer.invoices',   'label' => 'Minhas Faturas',    'match' => 'customer.invoices*',   'icon' => 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z'],
+                ['route' => 'customer.support',    'label' => 'Suporte & Tickets', 'match' => 'customer.support*',    'icon' => 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z'],
+            ];
+
             $groupMarketing = [
                 ['route' => 'customer.landing-page.edit',     'label' => 'Meu Site / Landing Page', 'match' => 'customer.landing-page*',  'icon' => 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'],
                 ['route' => 'customer.google-business.index', 'label' => 'Google Meu Negócio',      'match' => 'customer.google-business*','icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
@@ -45,14 +53,6 @@
                 ['route' => 'customer.conhecimento.index',   'label' => 'Base do Bruce (RAG)',     'match' => 'customer.conhecimento*',    'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
             ];
 
-            $groupNC5 = [
-                ['route' => 'customer.materiais',  'label' => 'Aprovar Materiais', 'match' => 'customer.materiais*',  'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
-                ['route' => 'customer.briefings',  'label' => 'Meus Briefings',    'match' => 'customer.briefings*',  'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                ['route' => 'customer.contracts',  'label' => 'Meus Contratos',    'match' => 'customer.contracts*',  'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 017-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
-                ['route' => 'customer.invoices',   'label' => 'Minhas Faturas',    'match' => 'customer.invoices*',   'icon' => 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z'],
-                ['route' => 'customer.support',    'label' => 'Suporte & Tickets', 'match' => 'customer.support*',    'icon' => 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z'],
-            ];
-
             $groupIsActive = fn ($items) => collect($items)->contains(fn ($i) => request()->routeIs($i['match']));
         @endphp
 
@@ -65,15 +65,31 @@
             </a>
 
             {{-- =========================================================
-                 SEÇÃO 1: MARKETING & VENDAS (Atração, Presença e Conversão)
+                 SEÇÃO 1: CENTRAL NC5 (Primeira Seção: Comunicações e Agência)
+                 ========================================================= --}}
+            <details class="group pt-4" @if($groupIsActive($groupNC5) || $overviewActive) open @endif>
+                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[11px] font-bold text-white uppercase tracking-wider hover:text-white transition-colors">
+                    <span>Central NC5</span>
+                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div class="space-y-1">
+                    @foreach($groupNC5 as $item)
+                        @php $isActive = request()->routeIs($item['match']); @endphp
+                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-white/85 hover:text-white hover:bg-white/10' }}">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/></svg>
+                            {{ $item['label'] }}
+                        </a>
+                    @endforeach
+                </div>
+            </details>
+
+            {{-- =========================================================
+                 SEÇÃO 2: MARKETING & VENDAS (Atração, Presença e Conversão)
                  ========================================================= --}}
             <details class="group pt-4" @if($groupIsActive($groupMarketing) || $overviewActive) open @endif>
-                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-extrabold text-[#38BDF8] uppercase tracking-wider hover:text-white transition-colors">
-                    <span class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#38BDF8]"></span>
-                        Marketing &amp; Vendas
-                    </span>
-                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[11px] font-bold text-white uppercase tracking-wider hover:text-white transition-colors">
+                    <span>Marketing &amp; Vendas</span>
+                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
                 <div class="space-y-1">
                     @foreach($groupMarketing as $item)
@@ -87,15 +103,12 @@
             </details>
 
             {{-- =========================================================
-                 SEÇÃO 2: GESTÃO DO NEGÓCIO (Operação, CRM, Rotina e Finanças)
+                 SEÇÃO 3: GESTÃO DO NEGÓCIO (Operação, CRM, Rotina e Finanças)
                  ========================================================= --}}
             <details class="group pt-4" @if($groupIsActive($groupGestao) || $overviewActive) open @endif>
-                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-extrabold text-[#34D399] uppercase tracking-wider hover:text-white transition-colors">
-                    <span class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
-                        Gestão do Negócio
-                    </span>
-                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[11px] font-bold text-white uppercase tracking-wider hover:text-white transition-colors">
+                    <span>Gestão do Negócio</span>
+                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
                 <div class="space-y-1">
                     @foreach($groupGestao as $item)
@@ -109,40 +122,15 @@
             </details>
 
             {{-- =========================================================
-                 SEÇÃO 3: INTELIGÊNCIA BRUCE IA (Alertas e Base de Conhecimento)
+                 SEÇÃO 4: INTELIGÊNCIA BRUCE IA (Alertas e Base de Conhecimento)
                  ========================================================= --}}
             <details class="group pt-4" @if($groupIsActive($groupBruce)) open @endif>
-                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-extrabold text-[#FBBF24] uppercase tracking-wider hover:text-white transition-colors">
-                    <span class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#FBBF24]"></span>
-                        Inteligência Bruce IA
-                    </span>
-                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[11px] font-bold text-white uppercase tracking-wider hover:text-white transition-colors">
+                    <span>Inteligência Bruce IA</span>
+                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
                 <div class="space-y-1">
                     @foreach($groupBruce as $item)
-                        @php $isActive = request()->routeIs($item['match']); @endphp
-                        <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-white/85 hover:text-white hover:bg-white/10' }}">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/></svg>
-                            {{ $item['label'] }}
-                        </a>
-                    @endforeach
-                </div>
-            </details>
-
-            {{-- =========================================================
-                 SEÇÃO 4: CENTRAL NC5 (Relação, Materiais e Comunicação da Agência)
-                 ========================================================= --}}
-            <details class="group pt-4" @if($groupIsActive($groupNC5)) open @endif>
-                <summary class="cursor-pointer list-none px-3 pb-2 flex items-center justify-between text-[10px] font-extrabold text-[#F43F5E] uppercase tracking-wider hover:text-white transition-colors">
-                    <span class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#F43F5E]"></span>
-                        Central NC5
-                    </span>
-                    <svg class="w-3 h-3 transition-transform group-open:rotate-180 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <div class="space-y-1">
-                    @foreach($groupNC5 as $item)
                         @php $isActive = request()->routeIs($item['match']); @endphp
                         <a href="{{ route($item['route']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $isActive ? 'bg-bruce text-white shadow-md font-bold' : 'text-white/85 hover:text-white hover:bg-white/10' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/></svg>
