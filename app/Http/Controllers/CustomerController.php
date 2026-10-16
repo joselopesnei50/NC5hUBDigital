@@ -18,22 +18,33 @@ class CustomerController extends Controller
             abort(403, 'Acesso negado. Sua conta não está vinculada a um cliente.');
         }
 
-        // === Da NC5 pra você (o que a agência envia) ===
+        // === PILAR 1: Da NC5 pra você (Comunicações e Entregas da Agência) ===
         $faturasPendentes    = $cliente->faturas()->where('status', 'pendente')->count();
         $materiaisAguardando = $cliente->materiais()->where('status_aprovacao', 'pendente')->count();
         $contratosPendentes  = $cliente->contratos()->where('status_assinatura', '!=', 'assinado')->count();
         $briefingsPendentes  = $cliente->briefings()->where('status', 'pendente')->count();
         $ticketsAbertos      = $cliente->tickets()->where('status', '!=', 'fechado')->count();
+        $totalPendenciasNc5  = $faturasPendentes + $materiaisAguardando + $contratosPendentes + $briefingsPendentes;
 
-        // === Alertas proativos do Bruce ainda ativos ===
+        $ultimosMateriais = $cliente->materiais()->latest()->limit(3)->get();
+        $proximaFatura    = $cliente->faturas()->where('status', 'pendente')->orderBy('vencimento', 'asc')->first()
+            ?? $cliente->faturas()->latest()->first();
+        $ultimosBriefings = $cliente->briefings()->latest()->limit(2)->get();
+        $ultimosTickets   = $cliente->tickets()->latest()->limit(2)->get();
+        $contratosTotal   = $cliente->contratos()->count();
+
+        // === Alertas proativos e Rascunhos do Bruce IA ===
         $alertasAtivos = \App\Models\AgentAlert::doCliente($cliente->id)
             ->ativos()
             ->latest()
             ->limit(3)
             ->get();
         $alertasAtivosTotal = \App\Models\AgentAlert::doCliente($cliente->id)->ativos()->count();
+        $rascunhosIaPendentes = \App\Models\AgentNotificationDraft::where('cliente_id', $cliente->id)
+            ->where('status', 'pending')
+            ->count();
 
-        // === Seu negócio na plataforma (uso das ferramentas do cliente) ===
+        // === PILAR 2: Seu negócio na plataforma (Operação & Crescimento) ===
         $inicioMes = \Carbon\Carbon::now()->startOfMonth();
         $em7dias   = \Carbon\Carbon::now()->addDays(7)->endOfDay();
 
@@ -42,7 +53,9 @@ class CustomerController extends Controller
             ->selectRaw("SUM(CASE WHEN tipo = 'receber' AND status = 'pago' THEN valor ELSE 0 END) as receitas")
             ->selectRaw("SUM(CASE WHEN tipo = 'pagar' AND status = 'pago' THEN valor ELSE 0 END) as despesas")
             ->first();
-        $saldoMes = (float) ($financeiroMes->receitas ?? 0) - (float) ($financeiroMes->despesas ?? 0);
+        $receitasMes = (float) ($financeiroMes->receitas ?? 0);
+        $despesasMes = (float) ($financeiroMes->despesas ?? 0);
+        $saldoMes    = $receitasMes - $despesasMes;
 
         $aVencer7d = \App\Models\LancamentoFinanceiro::where('cliente_id', $cliente->id)
             ->where('tipo', 'pagar')
@@ -50,7 +63,34 @@ class CustomerController extends Controller
             ->whereBetween('data_vencimento', [now(), $em7dias])
             ->count();
 
+        // CRM & Carteira
         $clientesFinaisTotal = $cliente->clientesFinais()->count();
+        $clientesNovosMes    = $cliente->clientesFinais()->where('created_at', '>=', $inicioMes)->count();
+        $fornecedoresTotal   = $cliente->fornecedores()->count();
+        $catalogoTotal       = $cliente->produtosServicos()->count();
+
+        // Vendas & Orçamentos (Pipeline)
+        $pedidosAtivosCount = \App\Models\PedidoCliente::where('cliente_id', $cliente->id)
+            ->whereIn('status', ['orcamento', 'enviado', 'aprovado', 'em_producao'])
+            ->count();
+        $pedidosValorPipeline = (float) \App\Models\PedidoCliente::where('cliente_id', $cliente->id)
+            ->whereIn('status', ['orcamento', 'enviado', 'aprovado', 'em_producao'])
+            ->sum('valor');
+
+        // Agenda e Compromissos
+        $compromissosHojeCount = \App\Models\Appointment::where('cliente_id', $cliente->id)
+            ->whereIn('status', ['agendado', 'confirmado'])
+            ->whereBetween('scheduled_at', [now()->startOfDay(), now()->endOfDay()])
+            ->count();
+        $proximosCompromissos = \App\Models\Appointment::where('cliente_id', $cliente->id)
+            ->whereIn('status', ['agendado', 'confirmado'])
+            ->where('scheduled_at', '>=', now()->subMinutes(30))
+            ->orderBy('scheduled_at', 'asc')
+            ->with(['clienteFinal', 'resource'])
+            ->limit(4)
+            ->get();
+
+        // Projetos
         $projetosAtivos = \App\Models\Projeto::where('cliente_id', $cliente->id)
             ->whereIn('status', ['pendente', 'em_andamento', 'aguardando_cliente'])
             ->count();
@@ -59,10 +99,16 @@ class CustomerController extends Controller
             ->whereNotNull('data_previsao')
             ->orderBy('data_previsao', 'asc')
             ->first();
-        $fornecedoresTotal = $cliente->fornecedores()->count();
 
-        // Google Meu Negócio: só usa cache já quente da tela do módulo — NUNCA
-        // dispara chamada à API do Google no dashboard (arriscado + lento).
+        // Canais Digitais: WhatsApp, Landing Page e Google Meu Negócio
+        $whatsappInstance       = \App\Models\WhatsappInstance::where('cliente_id', $cliente->id)->first();
+        $whatsappConectado      = $whatsappInstance ? $whatsappInstance->isConnected() : false;
+        $whatsappNaoLidas       = (int) \App\Models\WhatsappChat::where('cliente_id', $cliente->id)->sum('unread_count');
+        $whatsappConversasTotal = \App\Models\WhatsappChat::where('cliente_id', $cliente->id)->count();
+
+        $landingPage = \App\Models\LandingPage::where('cliente_id', $cliente->id)->first();
+
+        // Google Meu Negócio: só usa cache já quente da tela do módulo
         $gbpConectado = !empty($cliente->google_refresh_token);
         $gbpMetricas  = null;
         if ($gbpConectado && !empty($cliente->google_location_id)) {
@@ -76,14 +122,33 @@ class CustomerController extends Controller
             'contratosPendentes',
             'briefingsPendentes',
             'ticketsAbertos',
+            'totalPendenciasNc5',
+            'ultimosMateriais',
+            'proximaFatura',
+            'ultimosBriefings',
+            'ultimosTickets',
+            'contratosTotal',
             'alertasAtivos',
             'alertasAtivosTotal',
+            'rascunhosIaPendentes',
+            'receitasMes',
+            'despesasMes',
             'saldoMes',
             'aVencer7d',
             'clientesFinaisTotal',
+            'clientesNovosMes',
+            'fornecedoresTotal',
+            'catalogoTotal',
+            'pedidosAtivosCount',
+            'pedidosValorPipeline',
+            'compromissosHojeCount',
+            'proximosCompromissos',
             'projetosAtivos',
             'proximoProjeto',
-            'fornecedoresTotal',
+            'whatsappConectado',
+            'whatsappNaoLidas',
+            'whatsappConversasTotal',
+            'landingPage',
             'gbpConectado',
             'gbpMetricas'
         ));

@@ -253,4 +253,41 @@ class LandingPageAndGmbUpdateTest extends TestCase
         $dashResp->assertStatus(200);
         $dashResp->assertDontSee('NC5 Interno');
     }
+
+    public function test_customer_dashboard_renders_both_nc5_communications_and_business_command_center(): void
+    {
+        [$user, $cliente] = $this->createAuthenticatedCliente();
+
+        \App\Models\Material::create([
+            'cliente_id' => $cliente->id,
+            'titulo' => 'Campanha Outubro Criativos',
+            'status_aprovacao' => 'pendente',
+        ]);
+
+        \App\Models\Fatura::create([
+            'cliente_id' => $cliente->id,
+            'descricao' => 'Mensalidade Agência NC5',
+            'valor' => 1500.00,
+            'vencimento' => now()->addDays(5),
+            'status' => 'pendente',
+        ]);
+
+        \App\Models\Appointment::create([
+            'cliente_id' => $cliente->id,
+            'titulo' => 'Avaliação Presencial',
+            'scheduled_at' => now()->addHours(2),
+            'duration_minutes' => 60,
+            'status' => 'confirmado',
+            'created_via' => 'bot',
+        ]);
+
+        $resp = $this->actingAs($user)->get(route('customer.index'));
+        $resp->assertStatus(200);
+        $resp->assertSee('Comando do Seu Negócio');
+        $resp->assertSee('Canais de Atração & Atendimento', false);
+        $resp->assertSee('Central NC5');
+        $resp->assertSee('Campanha Outubro Criativos');
+        $resp->assertSee('Mensalidade Agência NC5');
+        $resp->assertSee('Avaliação Presencial');
+    }
 }
