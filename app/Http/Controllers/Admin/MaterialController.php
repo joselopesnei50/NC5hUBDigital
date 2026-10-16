@@ -15,10 +15,31 @@ use Illuminate\Support\Facades\Mail;
 
 class MaterialController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $materiais = Material::with('cliente.user')->latest()->paginate(12);
-        return view('admin.materiais.index', compact('materiais'));
+        $status = $request->input('status');
+        $search = trim((string) $request->input('search'));
+
+        $query = Material::with('cliente.user');
+
+        if ($status && in_array($status, ['pendente', 'ajustes_solicitados', 'aprovado', 'reprovado'])) {
+            $query->where('status_aprovacao', $status);
+        }
+
+        if ($search !== '') {
+            $like = '%' . $search . '%';
+            $query->where(function ($q) use ($like) {
+                $q->where('titulo', 'like', $like)
+                  ->orWhere('tipo', 'like', $like)
+                  ->orWhereHas('cliente', function ($cq) use ($like) {
+                      $cq->where('razao_social', 'like', $like);
+                  });
+            });
+        }
+
+        $materiais = $query->latest()->paginate(15)->withQueryString();
+
+        return view('admin.materiais.index', compact('materiais', 'status', 'search'));
     }
 
     public function create()

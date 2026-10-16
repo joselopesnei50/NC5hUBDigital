@@ -398,6 +398,43 @@ class LandingPageAndGmbUpdateTest extends TestCase
         $respImob->assertSee('Imobiliário & Corretores');
         $respImob->assertSee('Oportunidade da Semana');
     }
+
+    public function test_admin_materiais_index_renders_optimized_table_and_filters(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$user, $cliente] = $this->createAuthenticatedCliente();
+
+        $mat1 = \App\Models\Material::create([
+            'cliente_id' => $cliente->id,
+            'titulo' => 'Campanha Black Friday Criativos',
+            'tipo' => 'Social Media',
+            'status_aprovacao' => 'pendente',
+            'descricao' => 'Peças para redes sociais',
+        ]);
+
+        $mat2 = \App\Models\Material::create([
+            'cliente_id' => $cliente->id,
+            'titulo' => 'Banner Site Institucional',
+            'tipo' => 'Banner Web',
+            'status_aprovacao' => 'aprovado',
+            'descricao' => 'Banner topo',
+        ]);
+
+        // Acessa listagem de materiais
+        $resp = $this->actingAs($admin)->get(route('admin.materiais.index'));
+        $resp->assertStatus(200);
+        $resp->assertSee('Hub de Produção & Materiais');
+        $resp->assertSee('Campanha Black Friday Criativos');
+        $resp->assertSee('Banner Site Institucional');
+        $resp->assertSee('sticky right-0', false); // Confirma coluna de ações fixada sem corte
+
+        // Filtro por status
+        $filterResp = $this->actingAs($admin)->get(route('admin.materiais.index', ['status' => 'pendente']));
+        $filterResp->assertStatus(200);
+        $filterResp->assertSee('Campanha Black Friday Criativos');
+        $filterResp->assertDontSee('Banner Site Institucional');
+    }
 }
+
 
 
