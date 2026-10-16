@@ -68,7 +68,8 @@
                     </button>
                 </header>
 
-                <main class="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
+                @php $waFullWidth = request()->routeIs('customer.whatsapp.inbox', 'customer.whatsapp.chat'); @endphp
+                <main class="flex-1 w-full {{ $waFullWidth ? 'p-2 sm:p-3' : 'p-4 sm:p-8 max-w-7xl mx-auto' }}">
                     @if(session('impersonating_admin_user_id'))
                         <div class="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4 flex-wrap">
                             <div class="flex items-center gap-3 text-sm">

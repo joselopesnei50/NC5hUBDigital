@@ -1,11 +1,9 @@
 <x-admin-layout>
-    <div class="max-w-[1600px] mx-auto">
-        @include('customer.whatsapp._web_client', [
-            'routePrefix' => 'admin.hub.whatsapp.',
-            'instance' => $instance ?? null,
-            'chatsData' => $chatsData ?? [],
-            'activeChat' => $chat,
-            'messages' => $messages ?? collect(),
-        ])
-    </div>
+    @include('customer.whatsapp._web_client', [
+        'routePrefix' => 'admin.hub.whatsapp.',
+        'instance' => $instance ?? null,
+        'chatsData' => $chatsData ?? [],
+        'activeChat' => $chat,
+        'messages' => $messages ?? collect(),
+    ])
 </x-admin-layout>

@@ -184,7 +184,8 @@
                 </button>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-4 sm:p-8">
+            @php $waFullWidth = request()->routeIs('admin.hub.whatsapp.inbox', 'admin.hub.whatsapp.chat'); @endphp
+            <div class="flex-1 overflow-y-auto {{ $waFullWidth ? 'p-2 sm:p-3' : 'p-4 sm:p-8' }}">
                 @if (session('success'))
                     <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between shadow-sm">
                         <div class="flex items-center gap-3">

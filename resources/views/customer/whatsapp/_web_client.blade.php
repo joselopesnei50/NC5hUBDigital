@@ -25,7 +25,9 @@
         csrfToken: @js(csrf_token()),
     })"
     x-init="init()"
-    class="flex flex-col bg-white rounded-2xl shadow-lg border border-[#D1D7DB] overflow-hidden h-[calc(100vh-145px)] min-h-[640px]"
+    @keydown.escape.window="fullscreen && toggleFullscreen()"
+    :class="fullscreen ? 'fixed inset-0 z-[100] h-screen rounded-none border-0' : 'h-[calc(100vh-24px)] max-md:h-[calc(100vh-90px)] rounded-2xl border border-[#D1D7DB]'"
+    class="flex flex-col bg-white shadow-lg overflow-hidden min-h-[560px]"
 >
     {{-- Top WhatsApp Web Emerald Bar --}}
     <div class="h-1.5 w-full bg-gradient-to-r from-[#00A884] via-[#25D366] to-[#008069] shrink-0"></div>
@@ -61,6 +63,17 @@
 
                 {{-- Header Action Icons --}}
                 <div class="flex items-center gap-1 shrink-0">
+                    <button type="button"
+                            @click="toggleFullscreen()"
+                            :title="fullscreen ? 'Sair da tela cheia (Esc)' : 'Tela cheia'"
+                            class="p-2 rounded-full text-[#54656F] hover:text-[#111B21] hover:bg-[#E9EDEF] transition cursor-pointer">
+                        <svg x-show="!fullscreen" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>
+                        </svg>
+                        <svg x-show="fullscreen" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4"/>
+                        </svg>
+                    </button>
                     <a href="{{ route($routePrefix . 'bot.index') }}"
                        title="Configurar Agente Bruce IA"
                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#54656F] hover:text-[#111B21] hover:bg-[#E9EDEF] transition">
@@ -560,6 +573,13 @@
                 newMessages: [],
                 inboxTimer: null,
                 chatTimer: null,
+                fullscreen: localStorage.getItem('nc5_wa_fullscreen') === '1',
+
+                toggleFullscreen() {
+                    this.fullscreen = !this.fullscreen;
+                    localStorage.setItem('nc5_wa_fullscreen', this.fullscreen ? '1' : '0');
+                    this.scrollBottom();
+                },
 
                 get unreadTotal() {
                     return this.chats.reduce((acc, c) => acc + (parseInt(c.unread, 10) || 0), 0);
