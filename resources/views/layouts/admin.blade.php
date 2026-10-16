@@ -46,6 +46,11 @@
         .font-display { font-family: 'Outfit', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .thin-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
+        .thin-scrollbar::-webkit-scrollbar { width: 6px; }
+        .thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .thin-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.2); border-radius: 3px; }
+        .thin-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.35); }
         .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
         .glass-dark { background: rgba(10, 17, 40, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
@@ -59,7 +64,7 @@
         <!-- Sidebar Admin -->
         <nav :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 md:relative md:translate-x-0 bg-ink text-white w-64 h-full flex flex-col flex-shrink-0 shadow-2xl md:shadow-none transition-transform duration-300">
 
-            <div class="overflow-y-auto no-scrollbar flex-1 px-4 py-6">
+            <div class="overflow-y-auto thin-scrollbar flex-1 px-4 py-6">
                 <!-- Logo & Brand -->
                 <div class="h-16 flex items-center px-3 mb-6 border-b border-white/10">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
@@ -78,13 +83,14 @@
                                 ]
                             ],
                             [
-                                'label' => 'Hub NC5 (atender e testar)',
+                                'label' => 'Hub NC5',
                                 'items' => [
-                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.conexao'], 'label'=>'WhatsApp — Conexão', 'match'=>'__never__', 'icon'=>'M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654z'],
-                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.inbox'], 'label'=>'WhatsApp — Inbox', 'match'=>'__never__', 'icon'=>'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'],
-                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.bot'], 'label'=>'WhatsApp — Bot IA', 'match'=>'__never__', 'icon'=>'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
-                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'whatsapp.dashboard'], 'label'=>'WhatsApp — Dashboard', 'match'=>'__never__', 'icon'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-                                    ['route'=>'admin.impersonate.enter', 'params'=>['target'=>'google-business'], 'label'=>'Google Meu Negócio', 'match'=>'__never__', 'icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+                                    ['route'=>'admin.hub.whatsapp.conexao', 'label'=>'WhatsApp — Conexão', 'match'=>'admin.hub.whatsapp.conexao*', 'icon'=>'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0'],
+                                    ['route'=>'admin.hub.whatsapp.inbox', 'label'=>'WhatsApp — Inbox', 'match'=>'admin.hub.whatsapp.inbox*', 'icon'=>'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'],
+                                    ['route'=>'admin.hub.whatsapp.bot.index', 'label'=>'WhatsApp — Bot IA', 'match'=>'admin.hub.whatsapp.bot*', 'icon'=>'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+                                    ['route'=>'admin.hub.whatsapp.dashboard', 'label'=>'WhatsApp — Dashboard', 'match'=>'admin.hub.whatsapp.dashboard*', 'icon'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                                    ['route'=>'admin.hub.agenda.index', 'label'=>'Agenda', 'match'=>'admin.hub.agenda*', 'icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                                    ['route'=>'admin.hub.google-business.index', 'label'=>'Google Meu Negócio', 'match'=>'admin.hub.google-business*', 'icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
                                 ]
                             ],
                             [
