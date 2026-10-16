@@ -46,6 +46,11 @@
         .font-display { font-family: 'Outfit', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .thin-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
+        .thin-scrollbar::-webkit-scrollbar { width: 6px; }
+        .thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .thin-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.2); border-radius: 3px; }
+        .thin-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.35); }
         .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
         .glass-dark { background: rgba(10, 17, 40, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
@@ -59,7 +64,7 @@
         <!-- Sidebar Admin -->
         <nav :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 md:relative md:translate-x-0 bg-ink text-white w-64 h-full flex flex-col flex-shrink-0 shadow-2xl md:shadow-none transition-transform duration-300">
 
-            <div class="overflow-y-auto no-scrollbar flex-1 px-4 py-6">
+            <div class="overflow-y-auto thin-scrollbar flex-1 px-4 py-6">
                 <!-- Logo & Brand -->
                 <div class="h-16 flex items-center px-3 mb-6 border-b border-white/10">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
