@@ -96,6 +96,27 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         // Regenerar token ICS do cliente NC5 Interno
         Route::post('/calendario/regenerate', [\App\Http\Controllers\Admin\Hub\CalendarLinkController::class, 'regenerateCliente'])
             ->name('calendar.cliente.regenerate');
+
+        // WhatsApp — Conexão, Inbox, Bot, Dashboard
+        Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+            Route::get('conexao', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'index'])->name('conexao');
+            Route::post('conexao/connect', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'connect'])->name('connect');
+            Route::get('conexao/qr', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'qr'])->name('qr');
+            Route::get('conexao/status', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'status'])->name('status');
+            Route::post('conexao/disconnect', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'disconnect'])->name('disconnect');
+
+            Route::get('inbox', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'index'])->name('inbox');
+            Route::get('inbox/feed', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'feedInbox'])->name('inbox.feed');
+            Route::get('inbox/{chat}', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'show'])->name('chat');
+            Route::get('inbox/{chat}/feed', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'feedChat'])->name('chat.feed');
+            Route::post('inbox/{chat}/send', [\App\Http\Controllers\Admin\Hub\WhatsappInboxController::class, 'send'])->name('send');
+
+            Route::get('bot', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'index'])->name('bot.index');
+            Route::post('bot', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'update'])->name('bot.update');
+            Route::post('inbox/{chat}/bot-toggle', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'toggleChatBot'])->name('bot.toggle');
+
+            Route::get('dashboard', [\App\Http\Controllers\Admin\Hub\WhatsappDashboardController::class, 'index'])->name('dashboard');
+        });
     });
 
     // Usuários do painel do cliente (limite 5)
