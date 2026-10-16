@@ -81,11 +81,24 @@ class WhatsappInboxController extends Controller
 
         $instance = WhatsappInstance::where('cliente_id', $cliente->id)->firstOrFail();
 
+        // Se localmente não consta como 'open', faz uma checagem rápida em tempo real na Evolution
+        if (!$instance->isConnected() && $this->evo->isConfigured()) {
+            $state = $this->evo->getConnectionState($instance->instance_name);
+            $freshState = $state['instance']['state'] ?? ($state['state'] ?? null);
+            if ($freshState) {
+                $instance->update([
+                    'status' => $freshState,
+                    'connected_at' => $freshState === 'open' && !$instance->connected_at ? now() : $instance->connected_at,
+                    'last_status_check_at' => now(),
+                ]);
+            }
+        }
+
         if (!$instance->isConnected()) {
             if ($request->expectsJson()) {
-                return response()->json(['ok' => false, 'error' => 'WhatsApp não está conectado.'], 422);
+                return response()->json(['ok' => false, 'error' => 'WhatsApp não está conectado. Status atual: ' . ($instance->status ?? 'desconhecido')], 422);
             }
-            return back()->with('error', 'WhatsApp não está conectado.');
+            return back()->with('error', 'WhatsApp não está conectado. Status atual: ' . ($instance->status ?? 'desconhecido'));
         }
 
         if (!$this->evo->isConfigured()) {

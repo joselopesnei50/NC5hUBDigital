@@ -110,19 +110,34 @@ class EvolutionApiService
 
     public function sendText(string $instanceName, string $toPhone, string $message): array
     {
+        // Se for grupo (@g.us), preserva o JID. Se for número de usuário, extrai apenas dígitos.
+        $cleanNumber = trim($toPhone);
+        if (str_contains($cleanNumber, '@g.us')) {
+            $cleanNumber = preg_replace('/[^0-9@g\.us]/', '', $cleanNumber);
+        } else {
+            $cleanNumber = preg_replace('/@.*/', '', $cleanNumber);
+            $cleanNumber = preg_replace('/\D/', '', $cleanNumber);
+        }
+
         $payload = [
-            'number' => $toPhone,
+            'number' => $cleanNumber,
             'text' => $message,
             'delay' => 0,
         ];
         try {
             $resp = $this->http()->post("{$this->baseUrl}/message/sendText/{$instanceName}", $payload);
             if ($resp->failed()) {
-                Log::error('EVO sendText failed', ['status' => $resp->status(), 'body' => $resp->body()]);
-                return ['error' => 'Falha ao enviar', 'details' => $resp->body()];
+                Log::error('EVO sendText failed', [
+                    'instance' => $instanceName,
+                    'number' => $cleanNumber,
+                    'status' => $resp->status(),
+                    'body' => $resp->body()
+                ]);
+                return ['error' => 'Falha ao enviar: ' . $resp->body(), 'details' => $resp->body()];
             }
             return $resp->json() ?? [];
         } catch (\Throwable $e) {
+            Log::error('EVO sendText exception', ['error' => $e->getMessage()]);
             return ['error' => $e->getMessage()];
         }
     }
