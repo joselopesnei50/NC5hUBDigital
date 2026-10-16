@@ -19,6 +19,7 @@ class ConfiguracaoController extends Controller
         'abacatepay_webhook_secret',
         'apify_token',
         'google_client_secret',
+        'evolution_global_key',
     ];
 
     public function index()
@@ -43,6 +44,8 @@ class ConfiguracaoController extends Controller
             'google_client_id'          => 'nullable|string',
             'google_client_secret'      => 'nullable|string',
             'google_redirect_uri'       => 'nullable|string',
+            'evolution_api_url'         => 'nullable|string',
+            'evolution_global_key'      => 'nullable|string',
         ]);
 
         foreach ($validated as $chave => $valor) {

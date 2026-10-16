@@ -261,6 +261,30 @@
                 </div>
             </div>
 
+            <!-- WhatsApp (Evolution API) -->
+            <div class="mb-8 border-b border-gray-100 pb-8">
+                <h3 class="text-lg font-bold text-[#0A1128] flex items-center gap-3 mb-4">
+                    <svg class="w-6 h-6 text-[#00A884]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    WhatsApp (Evolution API)
+                </h3>
+                <p class="text-sm text-[#8A8F9C] mb-6">
+                    Conexão para envio e recebimento de mensagens no WhatsApp Web e pelo robô Bruce IA.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">URL Base da Evolution API</label>
+                        <input type="text" name="evolution_api_url" value="{{ $configuracoes['evolution_api_url'] ?? config('whatsapp.evolution.base_url') }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: https://api.seuhost.com ou http://localhost:8080">
+                        <p class="mt-1 text-xs text-gray-500">Endereço da sua API Evolution (sem barra no final).</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Global API Key</label>
+                        <input type="password" name="evolution_global_key" value="" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="{{ !empty($configuracoes['evolution_global_key'] ?? config('whatsapp.evolution.global_key')) ? '•••••••• (já configurado)' : 'Cole a Global Key da Evolution' }}">
+                        <p class="mt-1 text-xs text-gray-500">Deixe em branco para manter a atual.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Botões -->
             <div class="flex items-center justify-end gap-4">
                 <button type="submit" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-8 py-3 rounded-xl text-sm font-bold transition-colors shadow-lg">

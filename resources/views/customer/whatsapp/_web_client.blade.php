@@ -424,6 +424,7 @@
                 {{-- Bottom Message Composer (#F0F2F5) --}}
                 <footer class="bg-[#F0F2F5] px-4 py-2.5 shrink-0 z-10">
                     <form method="POST"
+                          x-ref="composerForm"
                           action="{{ route($routePrefix . 'send', $activeChat) }}"
                           @submit.prevent="sendMessage($event)"
                           class="flex items-end gap-2.5">
@@ -646,8 +647,10 @@
                     const content = this.messageText.trim();
                     if (!content || this.sending) return;
 
+                    const form = this.$refs.composerForm || (event && event.target && event.target.tagName === 'FORM' ? event.target : null);
+
                     if (!this.sendUrl) {
-                        event.target.submit();
+                        if (form) form.submit();
                         return;
                     }
 
@@ -666,11 +669,12 @@
                             body: JSON.stringify({ content }),
                         });
 
-                        const data = await res.json();
+                        const data = await res.json().catch(() => null);
 
-                        if (!res.ok || !data.ok) {
-                            this.sendError = data.error || 'Não foi possível enviar a mensagem.';
-                            if (data.message && !this.newMessages.some(x => x.id === data.message.id)) {
+                        if (!res.ok || !data || !data.ok) {
+                            const err = (data && data.error) ? data.error : ('Erro ao enviar mensagem (HTTP ' + res.status + ')');
+                            this.sendError = err;
+                            if (data && data.message && !this.newMessages.some(x => x.id === data.message.id)) {
                                 this.newMessages.push(data.message);
                                 this.latestId = Math.max(this.latestId, data.message.id);
                                 this.scrollBottom();
@@ -685,8 +689,12 @@
                             this.pollInbox();
                         }
                     } catch (e) {
-                        // Fallback to standard form submit if network/JSON fails
-                        event.target.submit();
+                        console.error('Falha no envio via AJAX:', e);
+                        if (form) {
+                            form.submit();
+                        } else {
+                            this.sendError = 'Erro de conexão ao tentar enviar a mensagem.';
+                        }
                     } finally {
                         this.sending = false;
                     }

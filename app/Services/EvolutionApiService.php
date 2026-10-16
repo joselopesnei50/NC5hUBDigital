@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Configuracao;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -15,8 +16,18 @@ class EvolutionApiService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim((string) config('whatsapp.evolution.base_url'), '/');
-        $this->globalKey = (string) config('whatsapp.evolution.global_key');
+        $url = (string) config('whatsapp.evolution.base_url');
+        if ($url === '') {
+            $url = (string) Configuracao::get('evolution_api_url', '');
+        }
+        $this->baseUrl = rtrim($url, '/');
+
+        $key = (string) config('whatsapp.evolution.global_key');
+        if ($key === '') {
+            $key = (string) Configuracao::get('evolution_global_key', '');
+        }
+        $this->globalKey = $key;
+
         $this->timeout = (int) config('whatsapp.evolution.timeout', 15);
         $this->timeoutMedia = (int) config('whatsapp.evolution.timeout_media', 45);
     }
