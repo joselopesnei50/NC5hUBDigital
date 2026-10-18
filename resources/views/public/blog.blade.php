@@ -16,12 +16,8 @@
 
         {{-- Header da Seção --}}
         <div class="text-center max-w-3xl mx-auto mb-16 lg:mb-20">
-            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[#FF7A1A] text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md">
-                <span class="w-2 h-2 rounded-full bg-[#FF7A1A] animate-pulse"></span>
-                Insights & Estratégia · NC5 Hub
-            </span>
             <h1 class="font-display font-black text-4xl sm:text-5xl lg:text-7xl text-white tracking-tight leading-[1.05]">
-                Nosso radar sobre <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A1A] via-[#FFA866] to-white">marca, mídia & IA</span>
+                Nosso radar sobre marca, mídia & IA
             </h1>
             <p class="mt-6 text-lg sm:text-xl text-white/70 font-normal leading-relaxed max-w-2xl mx-auto">
                 Visão cirúrgica, testes rápidos e estratégias reais para transformar dados e inteligência artificial em lucro.
