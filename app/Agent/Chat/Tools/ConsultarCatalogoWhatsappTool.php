@@ -71,7 +71,7 @@ class ConsultarCatalogoWhatsappTool implements ToolInterface
                     'id' => $p->id,
                     'nome' => $p->nome,
                     'tipo' => $p->tipo, // 'produto' ou 'servico'
-                    'preco' => 'R$ ' . number_format((float) $p->preco, 2, ',', '.'),
+                    'preco' => 'R$ ' . number_format((float) $p->preco_padrao, 2, ',', '.'),
                     'unidade' => $p->unidade_medida ?? 'un',
                     'descricao' => $p->descricao,
                 ];

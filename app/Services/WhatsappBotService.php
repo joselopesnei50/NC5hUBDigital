@@ -7,6 +7,7 @@ use App\Agent\Chat\Tools\CancelarAgendamentoWhatsappTool;
 use App\Agent\Chat\Tools\ConsultarAgendaWhatsappTool;
 use App\Agent\Chat\Tools\ConsultarCatalogoWhatsappTool;
 use App\Agent\Chat\Tools\CriarAgendamentoWhatsappTool;
+use App\Agent\Chat\Tools\CriarOrcamentoWhatsappTool;
 use App\Agent\Chat\Tools\ListarMeusAgendamentosWhatsappTool;
 use App\Agent\Chat\Tools\ListarRecursosWhatsappTool;
 use App\Models\AppointmentResource;
@@ -42,6 +43,7 @@ class WhatsappBotService
         $this->tools->register(new CancelarAgendamentoWhatsappTool());
         $this->tools->register(new ListarRecursosWhatsappTool());
         $this->tools->register(new ConsultarCatalogoWhatsappTool());
+        $this->tools->register(new CriarOrcamentoWhatsappTool());
     }
 
     public function generateReply(WhatsappChat $chat, string $inboundText, ?string $inboundMessageId = null): ?string
@@ -366,7 +368,11 @@ class WhatsappBotService
             $parts[] = "EXEMPLOS REAIS DESTE NEGOCIO (seguir fielmente o estilo):\n" . $training->cases_exemplo;
         }
 
-        $parts[] = "AGENDAMENTOS (FERRAMENTAS DISPONIVEIS):\n"
+        $parts[] = "CATALOGO E ORCAMENTOS (FERRAMENTAS DISPONIVEIS):\n"
+            . "- Tools: consultar_catalogo, criar_orcamento_pedido.\n"
+            . "- Sempre que o cliente perguntar sobre produtos, servicos, cardapio ou valores, chame consultar_catalogo para informar os precos oficiais cadastrados no BruceOS.\n"
+            . "- Se o cliente quiser receber um orcamento formal, proposta ou fechar um pedido com itens especificos, chame criar_orcamento_pedido passando os itens e quantidades, e envie para ele o link_proposta retornado pela ferramenta.\n\n"
+            . "AGENDAMENTOS (FERRAMENTAS DISPONIVEIS):\n"
             . "- Tools: consultar_agenda, criar_agendamento, listar_meus_agendamentos, cancelar_agendamento, listar_recursos.\n"
             . "- NUNCA proponha ou agende horario fora do horario_comercial do snapshot. Se o cliente pedir fora, informe o horario de funcionamento e sugira o proximo horario valido.\n"
             . "- RECURSOS (profissionais/cadeiras/salas conforme resource_label): veja a lista em recursos do snapshot.\n"
