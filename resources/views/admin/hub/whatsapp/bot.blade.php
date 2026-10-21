@@ -29,9 +29,9 @@
                 <form method="POST" action="{{ route('admin.hub.whatsapp.bot.sync') }}">
                     @csrf
                     <button type="submit"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-white text-[#0A1128] border border-gray-200 hover:border-orange-400 hover:text-orange-600 transition shadow-2xs cursor-pointer">
-                        <span>🔄</span>
-                        <span>Sincronizar Catálogo &amp; DNA</span>
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0A1128] text-white hover:bg-orange-600 transition shadow-2xs cursor-pointer">
+                        <span>🚀</span>
+                        <span>Carregar / Restaurar Treinamento Oficial NC5 (BruceIA 100%)</span>
                     </button>
                 </form>
             </div>
@@ -39,7 +39,7 @@
     </x-slot>
 
     <div x-data="botTrainingPage({
-            initialSegment: @js(old('segment', $profile->segment ?: 'vendedor_servicos')),
+            initialSegment: @js(old('segment', $profile->segment ?: 'nc5_hub_closer')),
             templates: @js($quickTemplates ?? []),
             simulateUrl: @js(route('admin.hub.whatsapp.bot.simulate')),
             csrfToken: @js(csrf_token())
@@ -406,13 +406,17 @@
                     </div>
 
                     <div class="px-3 py-2 bg-gray-50 border-t border-gray-200 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-                        <button type="button" @click="sendSimulated('Olá! Quais são os serviços e valores de vocês?')"
+                        <button type="button" @click="sendSimulated('Oi, vi o anúncio de vocês! Tenho uma empresa e quero saber como funciona.')"
                                 class="px-2.5 py-1 rounded-full bg-white border border-gray-200 hover:border-emerald-500 text-[11px] font-medium text-gray-700 shrink-0 cursor-pointer">
-                            💰 Preços e Catálogo
+                            🎯 Novo Lead
                         </button>
-                        <button type="button" @click="sendSimulated('Qual o horário de atendimento?')"
+                        <button type="button" @click="sendSimulated('Quanto custa esse sistema e os serviços da NC5?')"
                                 class="px-2.5 py-1 rounded-full bg-white border border-gray-200 hover:border-emerald-500 text-[11px] font-medium text-gray-700 shrink-0 cursor-pointer">
-                            🕒 Horário
+                            💰 Objeção Preço
+                        </button>
+                        <button type="button" @click="sendSimulated('Sou cliente da NC5: como faço pra IA parar de responder uma conversa específica?')"
+                                class="px-2.5 py-1 rounded-full bg-white border border-gray-200 hover:border-emerald-500 text-[11px] font-medium text-gray-700 shrink-0 cursor-pointer">
+                            🛠️ Dúvida BruceOS
                         </button>
                     </div>
 
@@ -436,7 +440,7 @@
     <script>
         function botTrainingPage({ initialSegment, templates, simulateUrl, csrfToken }) {
             return {
-                selectedSegment: initialSegment || 'vendedor_servicos',
+                selectedSegment: initialSegment || 'nc5_hub_closer',
                 templates: templates || {},
                 simulateUrl,
                 csrfToken,

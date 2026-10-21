@@ -36,6 +36,9 @@ class WhatsappBotController extends Controller
         }
 
         $segments = config('whatsapp-bot-segments');
+        if (empty($cliente->is_system) && $profile->segment !== 'nc5_hub_closer') {
+            unset($segments['nc5_hub_closer']);
+        }
         $catalogCount = ProdutoServico::where('cliente_id', $cliente->id)->count();
         $knowledgeCount = AgentKnowledge::where('cliente_id', $cliente->id)->where('ativo', true)->count();
         $readiness = $training->calculateReadiness($profile, $catalogCount, $knowledgeCount);
