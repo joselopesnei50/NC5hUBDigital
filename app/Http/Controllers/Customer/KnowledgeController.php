@@ -75,12 +75,16 @@ class KnowledgeController extends Controller
 
         $validated = $request->validate([
             'nicho_atuacao' => 'required|string|max:60',
-            'tom_voz' => 'nullable|string|max:100',
+            'tom_voz' => 'nullable|string|max:255',
             'diferenciais_competitivos' => 'nullable|string|max:2000',
             'publico_alvo' => 'nullable|string|max:2000',
         ]);
 
-        $cliente->update($validated);
+        $clienteData = $validated;
+        if (!empty($clienteData['tom_voz'])) {
+            $clienteData['tom_voz'] = mb_substr($clienteData['tom_voz'], 0, 40);
+        }
+        $cliente->update($clienteData);
 
         // Sincroniza também os fundamentos comuns com o Treinamento do Bot IA no WhatsApp
         $training = \App\Models\WhatsappBotTraining::firstOrNew(['cliente_id' => $cliente->id]);

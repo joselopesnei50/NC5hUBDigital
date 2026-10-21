@@ -431,19 +431,18 @@ class WhatsappBotService
         $targetClienteId = $clienteId ?: ($t?->cliente_id ?? null);
         if ($targetClienteId) {
             $itensCatalogo = ProdutoServico::where('cliente_id', $targetClienteId)
-                ->where('ativo', true)
                 ->orderBy('tipo')
                 ->orderBy('nome')
                 ->limit(35)
-                ->get(['nome', 'tipo', 'categoria', 'preco_base', 'unidade', 'descricao']);
+                ->get(['nome', 'tipo', 'preco_padrao', 'unidade_medida', 'descricao']);
 
             if ($itensCatalogo->isNotEmpty()) {
                 $catLines = ["\nCATALOGO OFICIAL SINCRONIZADO DO BRUCEOS:"];
                 foreach ($itensCatalogo as $item) {
-                    $preco = 'R$ ' . number_format((float) $item->preco_base, 2, ',', '.');
-                    $un = $item->unidade ? "/{$item->unidade}" : '';
+                    $preco = 'R$ ' . number_format((float) $item->preco_padrao, 2, ',', '.');
+                    $un = $item->unidade_medida ? "/{$item->unidade_medida}" : '';
                     $desc = $item->descricao ? ' — ' . Str::limit(trim($item->descricao), 90) : '';
-                    $catLines[] = "• {$item->nome} ({$preco}{$un}){$desc}";
+                    $catLines[] = "• [{$item->tipo}] {$item->nome} ({$preco}{$un}){$desc}";
                 }
                 $lines[] = implode("\n", $catLines);
             }
@@ -480,7 +479,7 @@ class WhatsappBotService
     {
         $profile = WhatsappBotProfile::where('cliente_id', $clienteId)->first();
         $segments = config('whatsapp-bot-segments', []);
-        $segmentKey = $overrideSegment ?: ($profile?->segment ?: 'servicos_gerais');
+        $segmentKey = $overrideSegment ?: ($profile?->segment ?: 'vendedor_servicos');
         $preset = $segments[$segmentKey] ?? reset($segments) ?: [];
 
         if ($this->inboundRequestsHuman($inboundText)) {

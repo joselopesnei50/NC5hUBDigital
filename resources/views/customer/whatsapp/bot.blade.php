@@ -46,7 +46,7 @@
     </x-slot>
 
     <div x-data="botTrainingPage({
-            initialSegment: @js(old('segment', $profile->segment ?: 'servicos_gerais')),
+            initialSegment: @js(old('segment', $profile->segment ?: 'vendedor_servicos')),
             templates: @js($quickTemplates ?? []),
             simulateUrl: @js(route('customer.whatsapp.bot.simulate')),
             csrfToken: @js(csrf_token())
@@ -523,7 +523,7 @@
     <script>
         function botTrainingPage({ initialSegment, templates, simulateUrl, csrfToken }) {
             return {
-                selectedSegment: initialSegment || 'servicos_gerais',
+                selectedSegment: initialSegment || 'vendedor_servicos',
                 templates: templates || {},
                 simulateUrl,
                 csrfToken,

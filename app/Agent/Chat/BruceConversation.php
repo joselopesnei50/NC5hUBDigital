@@ -205,7 +205,6 @@ class BruceConversation
                 ->pluck('titulo')
                 ->all();
             $catalogCount = ProdutoServico::where('cliente_id', $tenantId)
-                ->where('ativo', true)
                 ->count();
 
             $lines = ["\n\nCONTEXTO DO NEGÓCIO DESTE GESTOR (MEMÓRIA UNIFICADA BRUCEOS):"];

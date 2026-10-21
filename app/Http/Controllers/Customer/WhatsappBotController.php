@@ -36,7 +36,7 @@ class WhatsappBotController extends Controller
         }
 
         $segments = config('whatsapp-bot-segments');
-        $catalogCount = ProdutoServico::where('cliente_id', $cliente->id)->where('ativo', true)->count();
+        $catalogCount = ProdutoServico::where('cliente_id', $cliente->id)->count();
         $knowledgeCount = AgentKnowledge::where('cliente_id', $cliente->id)->where('ativo', true)->count();
         $readiness = $training->calculateReadiness($profile, $catalogCount, $knowledgeCount);
         $quickTemplates = WhatsappBotTraining::getSegmentQuickTemplates();
@@ -129,7 +129,7 @@ class WhatsappBotController extends Controller
         // Sincroniza também com o DNA do Cliente para que o BruceIA e o Motor de Crescimento compartilhem os mesmos dados
         $clienteUpdates = [];
         if (!empty($validated['tom_de_voz'])) {
-            $clienteUpdates['tom_voz'] = mb_substr($validated['tom_de_voz'], 0, 100);
+            $clienteUpdates['tom_voz'] = mb_substr($validated['tom_de_voz'], 0, 40);
         }
         if (!empty($validated['diferenciais'])) {
             $clienteUpdates['diferenciais_competitivos'] = mb_substr($validated['diferenciais'], 0, 2000);
@@ -138,7 +138,11 @@ class WhatsappBotController extends Controller
             $clienteUpdates['publico_alvo'] = mb_substr($validated['publico_alvo'], 0, 2000);
         }
         if (!empty($clienteUpdates)) {
-            $cliente->update($clienteUpdates);
+            try {
+                $cliente->update($clienteUpdates);
+            } catch (\Throwable) {
+                // Ignora caso alguma coluna opcional não exista no ambiente
+            }
         }
 
         return redirect()->route('customer.whatsapp.bot.index')->with('success', 'Treinamento do Agente salvo e sincronizado com o BruceOS!');
@@ -165,22 +169,20 @@ class WhatsappBotController extends Controller
             $training->publico_alvo = $cliente->publico_alvo;
         }
 
-        // Compila todos os itens ativos do Catálogo de Produtos e Serviços
+        // Compila todos os itens do Catálogo de Produtos e Serviços
         $itens = ProdutoServico::where('cliente_id', $cliente->id)
-            ->where('ativo', true)
             ->orderBy('tipo')
-            ->orderBy('categoria')
             ->orderBy('nome')
             ->get();
 
         if ($itens->isNotEmpty()) {
             $linhas = [];
             foreach ($itens as $item) {
-                $preco = 'R$ ' . number_format((float) $item->preco_base, 2, ',', '.');
-                $un = $item->unidade ? "/{$item->unidade}" : '';
-                $cat = $item->categoria ? "[{$item->categoria}] " : '';
+                $preco = 'R$ ' . number_format((float) $item->preco_padrao, 2, ',', '.');
+                $un = $item->unidade_medida ? "/{$item->unidade_medida}" : '';
+                $tipo = $item->tipo ? "[{$item->tipo}] " : '';
                 $desc = $item->descricao ? " — {$item->descricao}" : '';
-                $linhas[] = "• {$cat}{$item->nome}: {$preco}{$un}{$desc}";
+                $linhas[] = "• {$tipo}{$item->nome}: {$preco}{$un}{$desc}";
             }
             $training->catalogo_texto = implode("\n", $linhas);
         }

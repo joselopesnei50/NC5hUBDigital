@@ -111,10 +111,14 @@ class SaveCompanyKnowledgeTool implements ToolInterface
             // Também sincroniza com o DNA do Cliente se for diferenciais ou tom_de_voz
             $cliente = Cliente::find($tenantId);
             if ($cliente) {
-                if ($categoriaBot === 'tom_de_voz') {
-                    $cliente->update(['tom_voz' => mb_substr($conteudo, 0, 100)]);
-                } elseif ($categoriaBot === 'diferenciais' && empty($cliente->diferenciais_competitivos)) {
-                    $cliente->update(['diferenciais_competitivos' => mb_substr($conteudo, 0, 2000)]);
+                try {
+                    if ($categoriaBot === 'tom_de_voz') {
+                        $cliente->update(['tom_voz' => mb_substr($conteudo, 0, 40)]);
+                    } elseif ($categoriaBot === 'diferenciais' && empty($cliente->diferenciais_competitivos)) {
+                        $cliente->update(['diferenciais_competitivos' => mb_substr($conteudo, 0, 2000)]);
+                    }
+                } catch (\Throwable) {
+                    // Ignora caso alguma coluna opcional não exista no ambiente
                 }
             }
         }
