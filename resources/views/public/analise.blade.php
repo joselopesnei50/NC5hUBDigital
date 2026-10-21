@@ -34,11 +34,6 @@
         {{-- HERO --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-20 lg:mb-28">
             <div class="lg:col-span-7">
-                <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[#FF7A1A] text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md">
-                    <span class="w-2 h-2 rounded-full bg-[#FF7A1A] animate-pulse"></span>
-                    Diagnóstico Estratégico Instantâneo
-                </span>
-                
                 <h1 class="font-display font-black text-4xl sm:text-5xl lg:text-7xl text-white tracking-tight leading-[1.05] mb-6">
                     Descubra o que trava suas conversões.
                 </h1>
