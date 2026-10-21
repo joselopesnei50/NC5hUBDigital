@@ -6,8 +6,8 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #333;
-            font-size: 14px;
+            color: #0A1128;
+            font-size: 13px;
             line-height: 1.5;
             margin: 0;
             padding: 0;
@@ -15,58 +15,73 @@
         .container {
             width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
         }
         .header {
-            border-bottom: 2px solid #2d3748;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
+            background-color: #0A1128;
+            color: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
         }
         .header h1 {
             margin: 0;
-            font-size: 24px;
-            color: #1a202c;
+            font-size: 22px;
+            color: #ffffff;
         }
         .header p {
-            margin: 5px 0 0;
-            color: #718096;
-            font-size: 14px;
+            margin: 4px 0 0;
+            color: #cbd5e1;
+            font-size: 12px;
+        }
+        .header .badge-top {
+            color: #FF7A1A;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
         }
         .info-grid {
             width: 100%;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
+            border-collapse: collapse;
         }
         .info-grid td {
             vertical-align: top;
             width: 50%;
         }
         .info-box {
-            background-color: #f7fafc;
-            padding: 15px;
-            border-radius: 5px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 6px;
         }
         .info-box h3 {
             margin-top: 0;
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
-            color: #a0aec0;
-            margin-bottom: 10px;
+            letter-spacing: 0.8px;
+            color: #FF7A1A;
+            margin-bottom: 8px;
         }
         .info-box p {
-            margin: 0 0 5px;
+            margin: 0 0 4px;
             font-weight: bold;
-            color: #2d3748;
+            color: #0A1128;
+            font-size: 13px;
         }
         .info-box span {
             font-weight: normal;
-            color: #4a5568;
+            color: #475569;
         }
         .section-title {
-            font-size: 18px;
-            color: #2d3748;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0A1128;
+            border-bottom: 2px solid #0A1128;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
         }
         .items-table {
             width: 100%;
@@ -74,17 +89,18 @@
             margin-bottom: 20px;
         }
         .items-table th {
-            background-color: #edf2f7;
-            color: #4a5568;
+            background-color: #0A1128;
+            color: #ffffff;
             font-weight: bold;
             text-align: left;
-            padding: 10px;
-            font-size: 13px;
+            padding: 10px 12px;
+            font-size: 11px;
+            text-transform: uppercase;
         }
         .items-table td {
-            padding: 10px;
+            padding: 10px 12px;
             border-bottom: 1px solid #e2e8f0;
-            color: #2d3748;
+            color: #0A1128;
         }
         .text-right {
             text-align: right !important;
@@ -93,31 +109,36 @@
             text-align: center !important;
         }
         .totals-box {
-            width: 40%;
+            width: 42%;
             float: right;
-            background-color: #f7fafc;
-            padding: 15px;
-            border-radius: 5px;
+            background-color: #0A1128;
+            color: #ffffff;
+            padding: 16px;
+            border-radius: 6px;
             margin-bottom: 30px;
         }
         .totals-box .row {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .totals-box .row:last-child {
             margin-bottom: 0;
             padding-top: 10px;
-            border-top: 1px solid #cbd5e0;
+            border-top: 1px solid #334155;
             font-weight: bold;
-            font-size: 18px;
-            color: #38a169;
+            font-size: 16px;
+            color: #FF7A1A;
         }
         .totals-box .label {
             float: left;
-            color: #718096;
+            color: #cbd5e1;
         }
         .totals-box .value {
             float: right;
-            color: #2d3748;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .totals-box .row:last-child .value {
+            color: #FF7A1A;
         }
         .clearfix::after {
             content: "";
@@ -125,59 +146,66 @@
             display: table;
         }
         .approval-box {
-            margin-top: 50px;
-            background-color: #f0fff4;
-            border: 1px solid #c6f6d5;
-            padding: 15px;
-            border-radius: 5px;
+            margin-top: 30px;
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 14px;
+            border-radius: 6px;
         }
         .approval-box h3 {
             margin-top: 0;
-            color: #2f855a;
-            font-size: 16px;
+            color: #065f46;
+            font-size: 14px;
         }
         .approval-box p {
-            margin: 5px 0;
-            font-size: 13px;
-            color: #276749;
+            margin: 4px 0;
+            font-size: 12px;
+            color: #047857;
         }
         .footer {
-            margin-top: 50px;
+            margin-top: 40px;
             text-align: center;
-            color: #a0aec0;
-            font-size: 12px;
+            color: #94a3b8;
+            font-size: 11px;
             border-top: 1px solid #e2e8f0;
-            padding-top: 20px;
+            padding-top: 16px;
         }
         .status-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 3px 8px;
             background-color: #e2e8f0;
-            border-radius: 12px;
-            font-size: 12px;
+            border-radius: 10px;
+            font-size: 11px;
             font-weight: bold;
         }
-        .status-concluido { background-color: #c6f6d5; color: #22543d; }
-        .status-andamento { background-color: #bee3f8; color: #2a4365; }
-        .status-pagamento { background-color: #fefcbf; color: #744210; }
-        .status-orcamento { background-color: #edf2f7; color: #1a202c; }
-        .status-cancelado { background-color: #fed7d7; color: #742a2a; }
+        .status-concluido { background-color: #d1fae5; color: #065f46; }
+        .status-andamento { background-color: #dbeafe; color: #1e40af; }
+        .status-pagamento { background-color: #fef3c7; color: #92400e; }
+        .status-orcamento { background-color: #f1f5f9; color: #0A1128; }
+        .status-cancelado { background-color: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
+    @php
+        $nomeEmissor = $pedido->cliente?->nome_fantasia ?: ($pedido->cliente?->razao_social ?? 'Empresa');
+        $nomeClienteFinal = $pedido->clienteFinal?->nome_empresa ?: ($pedido->clienteFinal?->nome_responsavel ?? 'Cliente');
+    @endphp
     <div class="container">
         <!-- Header -->
         <div class="header">
             <table style="width: 100%;">
                 <tr>
                     <td>
-                        <h1>{{ $pedido->cliente->razao_social }}</h1>
-                        <p>Documento: {{ $pedido->cliente->cpf_cnpj ?? 'Não informado' }}</p>
+                        <div class="badge-top">Proposta Comercial</div>
+                        <h1>{{ $nomeEmissor }}</h1>
+                        @if($pedido->cliente?->cpf_cnpj)
+                            <p>CNPJ / Documento: {{ $pedido->cliente->cpf_cnpj }}</p>
+                        @endif
                     </td>
                     <td class="text-right">
-                        <h2>Proposta / Pedido</h2>
-                        <p>#{{ str_pad($pedido->id, 5, '0', STR_PAD_LEFT) }}</p>
-                        <p>Data: {{ $pedido->data_pedido ? $pedido->data_pedido->format('d/m/Y') : $pedido->created_at->format('d/m/Y') }}</p>
+                        <div class="badge-top">Referência</div>
+                        <h1 style="font-size: 20px;">#{{ str_pad($pedido->id, 5, '0', STR_PAD_LEFT) }}</h1>
+                        <p>Data: {{ $pedido->data_pedido ? $pedido->data_pedido->format('d/m/Y') : $pedido->created_at?->format('d/m/Y') }}</p>
                     </td>
                 </tr>
             </table>
@@ -186,23 +214,30 @@
         <!-- Info Grid -->
         <table class="info-grid">
             <tr>
-                <td style="padding-right: 10px;">
+                <td style="padding-right: 8px;">
                     <div class="info-box">
                         <h3>Preparado Para</h3>
-                        <p>{{ $pedido->clienteFinal->nome_empresa }}</p>
-                        <p><span>Responsável:</span> {{ $pedido->clienteFinal->nome_responsavel }}</p>
-                        <p><span>E-mail:</span> {{ $pedido->clienteFinal->email }}</p>
+                        <p>{{ $nomeClienteFinal }}</p>
+                        @if($pedido->clienteFinal?->nome_responsavel)
+                            <p><span>Responsável:</span> {{ $pedido->clienteFinal->nome_responsavel }}</p>
+                        @endif
+                        @if($pedido->clienteFinal?->email)
+                            <p><span>E-mail:</span> {{ $pedido->clienteFinal->email }}</p>
+                        @endif
+                        @if($pedido->clienteFinal?->telefone)
+                            <p><span>Telefone:</span> {{ $pedido->clienteFinal->telefone }}</p>
+                        @endif
                     </div>
                 </td>
-                <td style="padding-left: 10px;">
+                <td style="padding-left: 8px;">
                     <div class="info-box">
-                        <h3>Detalhes do Documento</h3>
-                        <p><span>Título:</span> {{ $pedido->titulo }}</p>
+                        <h3>Resumo do Escopo</h3>
+                        <p><span>Projeto:</span> {{ $pedido->titulo }}</p>
                         @if($pedido->data_entrega)
                             <p><span>Previsão de Entrega:</span> {{ $pedido->data_entrega->format('d/m/Y') }}</p>
                         @endif
                         <p>
-                            <span>Status:</span> 
+                            <span>Status:</span>
                             @php
                                 $statusClass = 'status-orcamento';
                                 if($pedido->status == 'Concluído') $statusClass = 'status-concluido';
@@ -218,12 +253,10 @@
         </table>
 
         <!-- Escopo -->
-        <div class="section-title">Itens do Pedido</div>
-        
+        <div class="section-title">Detalhamento dos Itens</div>
+
         @if($pedido->descricao)
-            <div style="margin-bottom: 20px; font-size: 13px; color: #4a5568; white-space: pre-wrap;">
-                {{ $pedido->descricao }}
-            </div>
+            <div style="margin-bottom: 18px; font-size: 12px; color: #334155; white-space: pre-wrap; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">{{ $pedido->descricao }}</div>
         @endif
 
         <table class="items-table">
@@ -232,18 +265,25 @@
                     <th>Descrição do Item</th>
                     <th class="text-center">Qtd</th>
                     <th class="text-right">V. Unitário</th>
-                    <th class="text-right">Total</th>
+                    <th class="text-right">Subtotal</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($pedido->itens as $item)
+                @forelse($pedido->itens as $item)
                     <tr>
-                        <td>{{ $item->nome_item }}</td>
-                        <td class="text-center">{{ number_format($item->quantidade, 2, ',', '') }}</td>
+                        <td><strong>{{ $item->nome_item }}</strong></td>
+                        <td class="text-center">{{ rtrim(rtrim(number_format($item->quantidade, 2, ',', '.'), '0'), ',') }}</td>
                         <td class="text-right">R$ {{ number_format($item->valor_unitario, 2, ',', '.') }}</td>
-                        <td class="text-right font-bold">R$ {{ number_format($item->valor_total, 2, ',', '.') }}</td>
+                        <td class="text-right"><strong>R$ {{ number_format($item->valor_total, 2, ',', '.') }}</strong></td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td><strong>{{ $pedido->titulo }}</strong></td>
+                        <td class="text-center">1</td>
+                        <td class="text-right">R$ {{ number_format($pedido->valor, 2, ',', '.') }}</td>
+                        <td class="text-right"><strong>R$ {{ number_format($pedido->valor, 2, ',', '.') }}</strong></td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
 
@@ -253,8 +293,8 @@
                     <span class="label">Subtotal</span>
                     <span class="value">R$ {{ number_format($pedido->valor, 2, ',', '.') }}</span>
                 </div>
-                <div class="row clearfix" style="border-top: 1px solid #cbd5e0; padding-top: 10px; margin-top: 10px;">
-                    <span class="label">Total Final</span>
+                <div class="row clearfix">
+                    <span class="label">Total do Investimento</span>
                     <span class="value">R$ {{ number_format($pedido->valor, 2, ',', '.') }}</span>
                 </div>
             </div>
@@ -264,15 +304,15 @@
         <!-- Aprovação -->
         @if($pedido->nome_aprovacao)
             <div class="approval-box">
-                <h3>✓ Aprovado Eletronicamente</h3>
-                <p><strong>Por:</strong> {{ $pedido->nome_aprovacao }}</p>
-                <p><strong>Data:</strong> {{ $pedido->data_aprovacao ? $pedido->data_aprovacao->format('d/m/Y \à\s H:i') : '' }}</p>
-                <p><strong>IP Registrado:</strong> {{ $pedido->ip_aprovacao }}</p>
+                <h3>✓ Proposta Aprovada Eletronicamente</h3>
+                <p><strong>Assinado por:</strong> {{ $pedido->nome_aprovacao }}</p>
+                <p><strong>Data e Hora:</strong> {{ $pedido->data_aprovacao ? $pedido->data_aprovacao->format('d/m/Y \à\s H:i') : 'Registrado' }}</p>
+                <p><strong>IP de Validação:</strong> {{ $pedido->ip_aprovacao ?? '-' }}</p>
             </div>
         @endif
 
         <div class="footer">
-            Documento gerado eletronicamente por {{ $pedido->cliente->razao_social }}
+            Documento emitido eletronicamente por <strong>{{ $nomeEmissor }}</strong> · Tecnologia BruceOS
         </div>
     </div>
 </body>

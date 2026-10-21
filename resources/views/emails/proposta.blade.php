@@ -1,20 +1,29 @@
+@php
+    $nomeResponsavel = $pedido->clienteFinal?->nome_responsavel ?: ($pedido->clienteFinal?->nome_empresa ?? 'Cliente');
+    $nomeEmissor = $pedido->cliente?->nome_fantasia ?: ($pedido->cliente?->razao_social ?? config('app.name'));
+    $emailContato = $pedido->cliente?->email
+        ?: ($pedido->cliente?->user?->email
+        ?: ($pedido->cliente?->users()->first()?->email ?? null));
+@endphp
 <x-mail::message>
-# Olá, {{ $pedido->clienteFinal->nome_responsavel }}
+# Olá, {{ $nomeResponsavel }}
 
-A empresa **{{ $pedido->cliente->razao_social }}** enviou uma proposta / pedido para você.
+A empresa **{{ $nomeEmissor }}** preparou uma proposta comercial para você.
 
-**Referência:** {{ str_pad($pedido->id, 5, '0', STR_PAD_LEFT) }}  
-**Serviço / Produto:** {{ $pedido->titulo }}  
-**Valor Total:** R$ {{ number_format($pedido->valor, 2, ',', '.') }}
+**Proposta Nº:** #{{ str_pad($pedido->id, 5, '0', STR_PAD_LEFT) }}  
+**Escopo / Projeto:** {{ $pedido->titulo }}  
+**Investimento Total:** R$ {{ number_format($pedido->valor, 2, ',', '.') }}
 
-Para visualizar os detalhes completos e dar o seu Aceite Eletrônico, clique no botão abaixo:
+Para visualizar o detalhamento completo e realizar o seu **Aceite Eletrônico**, clique no botão abaixo:
 
 <x-mail::button :url="route('public.pedido.show', $pedido->token_publico)">
-Visualizar Proposta
+Visualizar e Aprovar Proposta
 </x-mail::button>
 
-Se você tiver alguma dúvida, entre em contato diretamente com a empresa através do e-mail: {{ $pedido->cliente->user->email }}.
+@if($emailContato)
+Em caso de dúvidas, entre em contato diretamente com **{{ $nomeEmissor }}** pelo e-mail: {{ $emailContato }}.
+@endif
 
 Atenciosamente,<br>
-{{ config('app.name') }}
+**{{ $nomeEmissor }}**
 </x-mail::message>

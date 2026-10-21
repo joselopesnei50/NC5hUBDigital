@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\LancamentoFinanceiro;
 use App\Models\PedidoCliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,10 +18,10 @@ class PedidoClienteController extends Controller
         $query = $cliente->pedidosClientesFinais()->with('clienteFinal');
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('titulo', 'like', "%{$search}%")
                   ->orWhere('descricao', 'like', "%{$search}%")
-                  ->orWhereHas('clienteFinal', function($q2) use ($search) {
+                  ->orWhereHas('clienteFinal', function ($q2) use ($search) {
                       $q2->where('nome_empresa', 'like', "%{$search}%")
                          ->orWhere('nome_responsavel', 'like', "%{$search}%");
                   });
@@ -57,13 +58,12 @@ class PedidoClienteController extends Controller
         ]);
 
         $cliente = Auth::user()->cliente;
-        
+
         $clienteFinalExists = $cliente->clientesFinais()->where('id', $validated['cliente_final_id'])->exists();
         if (!$clienteFinalExists) {
             abort(403, 'Acesso não autorizado a este cliente.');
         }
 
-        // Calcular valor total
         $valorTotalGeral = 0;
         foreach ($validated['itens'] as $item) {
             $valorTotalGeral += ($item['quantidade'] * $item['valor_unitario']);
@@ -89,13 +89,15 @@ class PedidoClienteController extends Controller
             ]);
         }
 
+        $this->sincronizarLancamentoFinanceiro($pedido);
+
         return redirect()->route('customer.pedidos.index')->with('success', 'Pedido cadastrado com sucesso!');
     }
 
     public function edit(PedidoCliente $pedido)
     {
         $cliente = Auth::user()->cliente;
-        
+
         if ($pedido->cliente_id !== $cliente->id) {
             abort(403);
         }
@@ -109,7 +111,7 @@ class PedidoClienteController extends Controller
     public function update(Request $request, PedidoCliente $pedido)
     {
         $cliente = Auth::user()->cliente;
-        
+
         if ($pedido->cliente_id !== $cliente->id) {
             abort(403);
         }
@@ -133,7 +135,6 @@ class PedidoClienteController extends Controller
             abort(403, 'Acesso não autorizado a este cliente.');
         }
 
-        // Calcular valor total
         $valorTotalGeral = 0;
         foreach ($validated['itens'] as $item) {
             $valorTotalGeral += ($item['quantidade'] * $item['valor_unitario']);
@@ -149,7 +150,6 @@ class PedidoClienteController extends Controller
             'valor' => $valorTotalGeral,
         ]);
 
-        // Apagar itens antigos e recriar
         $pedido->itens()->delete();
         foreach ($validated['itens'] as $item) {
             $pedido->itens()->create([
@@ -161,13 +161,15 @@ class PedidoClienteController extends Controller
             ]);
         }
 
+        $this->sincronizarLancamentoFinanceiro($pedido);
+
         return redirect()->route('customer.pedidos.index')->with('success', 'Pedido atualizado com sucesso!');
     }
 
     public function destroy(PedidoCliente $pedido)
     {
         $cliente = Auth::user()->cliente;
-        
+
         if ($pedido->cliente_id !== $cliente->id) {
             abort(403);
         }
@@ -180,12 +182,12 @@ class PedidoClienteController extends Controller
     public function enviarEmail(PedidoCliente $pedido)
     {
         $cliente = Auth::user()->cliente;
-        
+
         if ($pedido->cliente_id !== $cliente->id) {
             abort(403);
         }
 
-        if (!$pedido->clienteFinal->email) {
+        if (!$pedido->clienteFinal?->email) {
             return back()->with('error', 'O cliente final não possui um e-mail cadastrado.');
         }
 
@@ -197,11 +199,9 @@ class PedidoClienteController extends Controller
     public function kanban()
     {
         $cliente = Auth::user()->cliente;
-        
-        // Pega todos os pedidos ativos (exceto cancelados, a menos que você queira mostrar cancelados)
+
         $pedidos = $cliente->pedidosClientesFinais()->with('clienteFinal')->orderBy('updated_at', 'desc')->get();
 
-        // Agrupa pelos status principais
         $kanban = [
             'Orçamento' => $pedidos->where('status', 'Orçamento'),
             'Aguardando Pagamento' => $pedidos->where('status', 'Aguardando Pagamento'),
@@ -215,7 +215,7 @@ class PedidoClienteController extends Controller
     public function updateStatus(Request $request, PedidoCliente $pedido)
     {
         $cliente = Auth::user()->cliente;
-        
+
         if ($pedido->cliente_id !== $cliente->id) {
             return response()->json(['error' => 'Não autorizado'], 403);
         }
@@ -226,13 +226,15 @@ class PedidoClienteController extends Controller
 
         $pedido->update(['status' => $validated['status']]);
 
+        $this->sincronizarLancamentoFinanceiro($pedido);
+
         return response()->json(['success' => true, 'message' => 'Status atualizado']);
     }
 
     public function downloadPdf(PedidoCliente $pedido)
     {
         $cliente = Auth::user()->cliente;
-        
+
         if ($pedido->cliente_id !== $cliente->id) {
             abort(403);
         }
@@ -241,5 +243,56 @@ class PedidoClienteController extends Controller
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdfs.pedido_cliente', compact('pedido'));
         return $pdf->download("Pedido_{$pedido->id}.pdf");
+    }
+
+    /**
+     * Sincroniza automaticamente o pedido com Contas a Receber no módulo Financeiro.
+     */
+    protected function sincronizarLancamentoFinanceiro(PedidoCliente $pedido): void
+    {
+        if ((float) $pedido->valor <= 0) {
+            return;
+        }
+
+        $prefixo = "Pedido #{$pedido->id} —";
+        $descricaoCompleta = "Pedido #{$pedido->id} — {$pedido->titulo}";
+
+        $lancamento = LancamentoFinanceiro::where('cliente_id', $pedido->cliente_id)
+            ->where('tipo', 'receber')
+            ->where('descricao', 'like', "{$prefixo}%")
+            ->first();
+
+        if (in_array($pedido->status, ['Aguardando Pagamento', 'Em Andamento', 'Concluído'], true)) {
+            $novoStatusFinanceiro = $pedido->status === 'Concluído' ? 'pago' : 'pendente';
+
+            if (!$lancamento) {
+                LancamentoFinanceiro::create([
+                    'cliente_id' => $pedido->cliente_id,
+                    'cliente_final_id' => $pedido->cliente_final_id,
+                    'tipo' => 'receber',
+                    'status' => $novoStatusFinanceiro,
+                    'descricao' => $descricaoCompleta,
+                    'valor' => $pedido->valor,
+                    'data_vencimento' => $pedido->data_entrega ?? now()->addDays(5)->toDateString(),
+                    'data_pagamento' => $novoStatusFinanceiro === 'pago' ? now()->toDateString() : null,
+                    'categoria' => 'Proposta Comercial',
+                ]);
+            } else {
+                $dadosUpdate = [
+                    'cliente_final_id' => $pedido->cliente_final_id,
+                    'descricao' => $descricaoCompleta,
+                    'valor' => $pedido->valor,
+                ];
+
+                if ($pedido->status === 'Concluído' && $lancamento->status !== 'pago') {
+                    $dadosUpdate['status'] = 'pago';
+                    $dadosUpdate['data_pagamento'] = now()->toDateString();
+                }
+
+                $lancamento->update($dadosUpdate);
+            }
+        } elseif ($pedido->status === 'Cancelado' && $lancamento && $lancamento->status === 'pendente') {
+            $lancamento->update(['status' => 'cancelado']);
+        }
     }
 }
