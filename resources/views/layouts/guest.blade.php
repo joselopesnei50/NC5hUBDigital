@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>NC5</title>
+        <title>NC5 Hub — BruceOS</title>
         <link rel="icon" type="image/svg+xml" href="{{ asset('images/simbolo.svg') }}">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800|fraunces:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -32,8 +32,11 @@
             <!-- Formulário -->
             <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-16 md:px-24 xl:px-32 relative bg-white">
                 <div class="absolute top-8 left-8 sm:left-16 md:left-24 xl:left-32">
-                    <a href="/" class="flex items-center gap-4">
+                    <a href="/" class="flex items-center gap-3">
                         <img src="{{ asset('images/logo.svg') }}" alt="NC5 Logo" class="h-10 w-auto">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-[#0A1128] text-[#FF7A1A]">
+                            BruceOS
+                        </span>
                     </a>
                 </div>
 
@@ -42,7 +45,7 @@
                 </div>
 
                 <div class="absolute bottom-8 left-8 sm:left-16 md:left-24 xl:left-32 text-xs text-slate">
-                    &copy; {{ date('Y') }} NC5 Hub Digital.
+                    &copy; {{ date('Y') }} NC5 Hub Digital · BruceOS.
                 </div>
             </div>
 
@@ -52,16 +55,16 @@
                 <div class="absolute -bottom-40 -left-20 w-[500px] h-[500px] bg-bruce/10 rounded-full blur-[130px] pointer-events-none"></div>
 
                 <div class="relative z-10 p-16 max-w-lg flex flex-col justify-center h-full">
-                    <div class="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-white/70 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-10 w-max">
+                    <div class="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-white/80 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-10 w-max">
                         <span class="w-2 h-2 bg-bruce rounded-full animate-pulse"></span>
-                        Acesso Restrito
+                        NC5 Hub · BruceOS
                     </div>
 
                     <h2 class="font-display font-bold text-5xl text-white leading-[1.05] tracking-tight mb-4">
-                        Painel de Controle <br><em class="not-italic text-bruce">Estratégico</em>.
+                        Sistema Operacional de <br><em class="not-italic text-bruce">Crescimento</em>.
                     </h2>
                     <p class="text-lg text-white/60 leading-relaxed mb-12">
-                        O ecossistema onde marca, mídia e inteligência artificial se encontram para tracionar conversões.
+                        O ecossistema exclusivo para clientes NC5 onde atendimento via WhatsApp, propostas comerciais, agenda, Google Meu Negócio e financeiro operam integrados com IA.
                     </p>
 
                     <!-- Integração BruceIA -->
@@ -69,12 +72,12 @@
                         <div class="flex items-center gap-4 mb-4">
                             <img src="{{ asset('images/bruce/bruceia-icone-fundo-escuro.svg') }}" alt="BruceIA" class="h-12 w-12 drop-shadow-[0_0_15px_rgba(255,122,26,0.4)]">
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-bruce">Motor Ativo</p>
-                                <p class="text-white font-display font-bold text-xl">Bruce<span class="text-white/60">IA</span> Integrado</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-bruce">Inteligência Operacional</p>
+                                <p class="text-white font-display font-bold text-xl">Bruce<span class="text-white/60">OS</span> Ativo</p>
                             </div>
                         </div>
                         <p class="text-sm text-white/50">
-                            A inteligência artificial da NC5 operando na leitura de dados, otimização de campanhas e suporte avançado.
+                            Acesso exclusivo para empresas parceiras NC5 com contrato ativo.
                         </p>
                     </div>
                 </div>
