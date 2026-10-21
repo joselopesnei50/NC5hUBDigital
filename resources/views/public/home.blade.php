@@ -23,7 +23,7 @@
                 <div class="lg:col-span-7">
                     <h1 class="font-sans font-black text-[15vw] sm:text-[10vw] lg:text-[7rem] leading-[0.9] tracking-tighter text-white mb-8 lg:mb-12">
                         <span class="block reveal" :class="shown ? 'active' : ''">Estratégia.</span>
-                        <span class="block reveal reveal-delay-1 text-transparent bg-clip-text bg-gradient-to-r from-[#FF7A1A] to-[#FFA866]" :class="shown ? 'active' : ''">Design.</span>
+                        <span class="block reveal reveal-delay-1 text-white" :class="shown ? 'active' : ''">Design.</span>
                         <span class="block reveal reveal-delay-2" :class="shown ? 'active' : ''">Escala.</span>
                     </h1>
 

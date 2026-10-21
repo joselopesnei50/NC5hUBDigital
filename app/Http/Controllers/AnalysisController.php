@@ -196,7 +196,7 @@ PROMPT;
             $response = Http::withToken($apiKey)
                 ->timeout(60) // Aumentando o timeout em caso de instabilidade
                 ->post('https://api.deepseek.com/chat/completions', [
-                    'model' => 'deepseek-v4-flash',
+                    'model' => 'deepseek-chat',
                     'messages' => [
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user',   'content' => $userPrompt],

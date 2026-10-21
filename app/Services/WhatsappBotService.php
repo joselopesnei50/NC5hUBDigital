@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Agent\Chat\ToolRegistry;
 use App\Agent\Chat\Tools\CancelarAgendamentoWhatsappTool;
 use App\Agent\Chat\Tools\ConsultarAgendaWhatsappTool;
+use App\Agent\Chat\Tools\ConsultarCatalogoWhatsappTool;
 use App\Agent\Chat\Tools\CriarAgendamentoWhatsappTool;
 use App\Agent\Chat\Tools\ListarMeusAgendamentosWhatsappTool;
 use App\Agent\Chat\Tools\ListarRecursosWhatsappTool;
@@ -40,6 +41,7 @@ class WhatsappBotService
         $this->tools->register(new ListarMeusAgendamentosWhatsappTool());
         $this->tools->register(new CancelarAgendamentoWhatsappTool());
         $this->tools->register(new ListarRecursosWhatsappTool());
+        $this->tools->register(new ConsultarCatalogoWhatsappTool());
     }
 
     public function generateReply(WhatsappChat $chat, string $inboundText, ?string $inboundMessageId = null): ?string

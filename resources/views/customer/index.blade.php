@@ -6,7 +6,7 @@
                     Boa {{ now()->hour < 12 ? 'manhã' : (now()->hour < 18 ? 'tarde' : 'noite') }}, {{ Str::before(Auth::user()->name, ' ') }}.
                 </h2>
                 <p class="text-[#64748B] text-sm mt-2 font-medium">
-                    {{ $cliente->razao_social }} · {{ now()->translatedFormat('l, d \d\e F \d\e Y') }}
+                    {{ $cliente->razao_social }} · BruceOS · {{ now()->translatedFormat('l, d \d\e F \d\e Y') }}
                 </p>
             </div>
             <div class="flex flex-wrap gap-3">
