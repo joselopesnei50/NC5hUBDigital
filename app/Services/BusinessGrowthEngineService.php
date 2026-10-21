@@ -206,11 +206,11 @@ TXT;
             ];
         } elseif ($nichoKey === 'imobiliario') {
             $tips[] = [
-                'categoria' => 'Relacionamento & CRM',
+                'categoria' => 'Relacionamento & Clientes',
                 'badge' => 'Follow-up de Alto Valor',
                 'titulo' => 'Acompanhamento de Leads com mais de 7 dias',
-                'descricao' => 'No mercado imobiliário, clientes que não recebem novas opções em até 10 dias esfriam. Consulte seus contatos no CRM e envie um comparativo.',
-                'acao_label' => 'Ver Clientes no CRM',
+                'descricao' => 'No mercado imobiliário, clientes que não recebem novas opções em até 10 dias esfriam. Consulte seus contatos na Base de Clientes e envie um comparativo.',
+                'acao_label' => 'Ver Base de Clientes',
                 'acao_url' => route('customer.clientes-finais.index'),
                 'tipo' => 'dica',
             ];

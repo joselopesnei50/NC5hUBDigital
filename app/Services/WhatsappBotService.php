@@ -13,7 +13,10 @@ use App\Agent\Chat\Tools\ListarRecursosWhatsappTool;
 use App\Models\AppointmentResource;
 use App\Agent\DTOs\PromptPayload;
 use App\Agent\LlmManager;
+use App\Models\AgentKnowledge;
+use App\Models\Cliente;
 use App\Models\ClienteFinal;
+use App\Models\ProdutoServico;
 use App\Models\WhatsappBotInteraction;
 use App\Models\WhatsappBotProfile;
 use App\Models\WhatsappBotTraining;
@@ -76,7 +79,7 @@ class WhatsappBotService
         $training = WhatsappBotTraining::where('cliente_id', $chat->cliente_id)->first();
         $customerContext = $this->buildCustomerContext($chat);
 
-        $systemPrompt = $this->composeSystemPrompt($preset, $training, $customerContext);
+        $systemPrompt = $this->composeSystemPrompt($preset, $training, $customerContext, (int) $chat->cliente_id);
         $history = $this->buildHistory($chat);
 
         $startedAt = microtime(true);
@@ -339,20 +342,21 @@ class WhatsappBotService
         return $context;
     }
 
-    protected function composeSystemPrompt(array $preset, ?WhatsappBotTraining $training, array $ctx): string
+    protected function composeSystemPrompt(array $preset, ?WhatsappBotTraining $training, array $ctx, ?int $clienteId = null): string
     {
         $parts = [];
 
+        $cliente = $clienteId ? Cliente::find($clienteId) : null;
+        $tomVoz = $training?->tom_de_voz ?: ($cliente?->tom_voz ?? null);
+
         $parts[] = "PERSONA:\n" . ($preset['persona'] ?? '');
-        if ($training && $training->tom_de_voz) {
-            $parts[] = "AJUSTE DE TOM (prioridade sobre a persona):\n" . $training->tom_de_voz;
+        if ($tomVoz) {
+            $parts[] = "AJUSTE DE TOM (prioridade sobre a persona):\n" . $tomVoz;
         }
 
         $parts[] = "INSTRUCOES DO NICHO:\n" . ($preset['prompt_base'] ?? '');
 
-        if ($training) {
-            $parts[] = $this->renderTrainingBlock($training);
-        }
+        $parts[] = $this->renderTrainingBlock($training, $clienteId, $cliente);
 
         $parts[] = $this->renderApproachBlock($ctx);
 
@@ -405,24 +409,194 @@ class WhatsappBotService
         return implode("\n\n", $parts);
     }
 
-    protected function renderTrainingBlock(WhatsappBotTraining $t): string
+    protected function renderTrainingBlock(?WhatsappBotTraining $t, ?int $clienteId = null, ?Cliente $cliente = null): string
     {
-        $lines = ['DADOS E FUNDAMENTOS DO NEGOCIO DESTE CLIENTE:'];
+        $lines = ['DADOS E FUNDAMENTOS DO NEGOCIO DESTE CLIENTE (MEMORIA UNIFICADA BRUCEOS):'];
 
-        if ($t->business_name) $lines[] = "- Nome: {$t->business_name}";
-        if ($t->horario_atendimento) $lines[] = "- Horario de atendimento: {$t->horario_atendimento}";
-        if ($t->endereco) $lines[] = "- Endereco: {$t->endereco}";
-        if ($t->publico_alvo) $lines[] = "- Publico alvo: {$t->publico_alvo}";
+        $nome = $t?->business_name ?: ($cliente?->nome_fantasia ?: $cliente?->razao_social);
+        $publico = $t?->publico_alvo ?: ($cliente?->publico_alvo ?? null);
+        $diferenciais = $t?->diferenciais ?: ($cliente?->diferenciais_competitivos ?? null);
 
-        if ($t->historia_negocio) $lines[] = "\nHISTORIA E PROPOSITO:\n{$t->historia_negocio}";
-        if ($t->diferenciais) $lines[] = "\nDIFERENCIAIS (use pra reforcar valor na venda):\n{$t->diferenciais}";
-        if ($t->processo_producao) $lines[] = "\nCOMO O PRODUTO/SERVICO E FEITO/ENTREGUE:\n{$t->processo_producao}";
-        if ($t->catalogo_texto) $lines[] = "\nCATALOGO / MENU / SERVICOS:\n{$t->catalogo_texto}";
-        if ($t->politicas) $lines[] = "\nPOLITICAS (troca, cancelamento, garantia):\n{$t->politicas}";
-        if ($t->faq_custom) $lines[] = "\nFAQ ESPECIFICA:\n{$t->faq_custom}";
-        if ($t->regras_proibicoes) $lines[] = "\nREGRAS E PROIBICOES (prioridade sobre tudo):\n{$t->regras_proibicoes}";
+        if ($nome) $lines[] = "- Nome: {$nome}";
+        if ($t?->horario_atendimento) $lines[] = "- Horario de atendimento: {$t->horario_atendimento}";
+        if ($t?->endereco) $lines[] = "- Endereco: {$t->endereco}";
+        if ($publico) $lines[] = "- Publico alvo: {$publico}";
+
+        if ($t?->historia_negocio) $lines[] = "\nHISTORIA E PROPOSITO:\n{$t->historia_negocio}";
+        if ($diferenciais) $lines[] = "\nDIFERENCIAIS (use pra reforcar valor na venda):\n{$diferenciais}";
+        if ($t?->processo_producao) $lines[] = "\nCOMO O PRODUTO/SERVICO E FEITO/ENTREGUE:\n{$t->processo_producao}";
+        if ($t?->catalogo_texto) $lines[] = "\nCATALOGO / MENU / SERVICOS (TEXTO):\n{$t->catalogo_texto}";
+
+        // Injeta resumo automático do Catálogo Estruturado do BruceOS (produtos_servicos)
+        $targetClienteId = $clienteId ?: ($t?->cliente_id ?? null);
+        if ($targetClienteId) {
+            $itensCatalogo = ProdutoServico::where('cliente_id', $targetClienteId)
+                ->where('ativo', true)
+                ->orderBy('tipo')
+                ->orderBy('nome')
+                ->limit(35)
+                ->get(['nome', 'tipo', 'categoria', 'preco_base', 'unidade', 'descricao']);
+
+            if ($itensCatalogo->isNotEmpty()) {
+                $catLines = ["\nCATALOGO OFICIAL SINCRONIZADO DO BRUCEOS:"];
+                foreach ($itensCatalogo as $item) {
+                    $preco = 'R$ ' . number_format((float) $item->preco_base, 2, ',', '.');
+                    $un = $item->unidade ? "/{$item->unidade}" : '';
+                    $desc = $item->descricao ? ' — ' . Str::limit(trim($item->descricao), 90) : '';
+                    $catLines[] = "• {$item->nome} ({$preco}{$un}){$desc}";
+                }
+                $lines[] = implode("\n", $catLines);
+            }
+        }
+
+        if ($t?->politicas) $lines[] = "\nPOLITICAS (troca, cancelamento, garantia):\n{$t->politicas}";
+        if ($t?->faq_custom) $lines[] = "\nFAQ ESPECIFICA:\n{$t->faq_custom}";
+        if ($t?->regras_proibicoes) $lines[] = "\nREGRAS E PROIBICOES (prioridade sobre tudo):\n{$t->regras_proibicoes}";
+
+        // Injeta documentos ativos da Base de Conhecimento Unificada (agent_knowledge)
+        if ($targetClienteId) {
+            $knowledgeDocs = AgentKnowledge::where('cliente_id', $targetClienteId)
+                ->where('ativo', true)
+                ->latest('updated_at')
+                ->limit(15)
+                ->get(['titulo', 'conteudo']);
+
+            if ($knowledgeDocs->isNotEmpty()) {
+                $kLines = ["\nCONHECIMENTO E DIRETRIZES COMPLEMENTARES DO BRUCEOS:"];
+                foreach ($knowledgeDocs as $doc) {
+                    $kLines[] = "• {$doc->titulo}: " . Str::limit(trim($doc->conteudo), 350);
+                }
+                $lines[] = implode("\n", $kLines);
+            }
+        }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Simula uma resposta do Bot IA no Playground de Treinamento sem precisar de um WhatsappChat real.
+     */
+    public function simulateReply(int $clienteId, string $inboundText, array $history = [], ?string $overrideSegment = null): array
+    {
+        $profile = WhatsappBotProfile::where('cliente_id', $clienteId)->first();
+        $segments = config('whatsapp-bot-segments', []);
+        $segmentKey = $overrideSegment ?: ($profile?->segment ?: 'servicos_gerais');
+        $preset = $segments[$segmentKey] ?? reset($segments) ?: [];
+
+        if ($this->inboundRequestsHuman($inboundText)) {
+            return [
+                'ok' => true,
+                'reply' => '[Escalação Automática] O cliente pediu atendimento humano. Em produção, o bot pausa automaticamente nesta conversa e alerta sua equipe no Inbox.',
+                'escalated' => true,
+                'elapsed_ms' => 5,
+            ];
+        }
+
+        $training = WhatsappBotTraining::where('cliente_id', $clienteId)->first();
+        $ctx = [
+            'hoje' => now()->format('Y-m-d'),
+            'dia_da_semana_hoje' => now()->isoFormat('dddd'),
+            'horario_comercial' => $this->summarizeBusinessHours($training),
+            'duracao_padrao_minutos' => (int) ($training?->duracao_padrao_atendimento_min ?: 60),
+            'resource_label' => $training?->resource_label ?: 'Profissional',
+            'recursos' => $this->summarizeResources($clienteId),
+            'is_first_interaction' => empty($history),
+            'is_returning_customer' => false,
+            'customer_name' => 'Cliente Teste (Simulador)',
+            'is_identified_customer' => false,
+            'total_pedidos_fechados' => 0,
+            'last_order' => null,
+            'days_since_last_order' => null,
+            'aniversario_hoje' => false,
+        ];
+
+        $systemPrompt = $this->composeSystemPrompt($preset, $training, $ctx, $clienteId);
+
+        // No simulador, expomos as tools de consulta reais (catálogo, agenda, recursos)
+        $safeTools = new ToolRegistry();
+        $safeTools->register(new ConsultarCatalogoWhatsappTool());
+        $safeTools->register(new ConsultarAgendaWhatsappTool());
+        $safeTools->register(new ListarRecursosWhatsappTool());
+
+        $driver = $this->llm->driver('deepseek');
+        $workingHistory = array_slice($history, -6);
+        $workingUserPrompt = $inboundText;
+        $workingUserAlreadyInjected = false;
+        $finalContent = '';
+        $startedAt = microtime(true);
+
+        for ($i = 0; $i < 2; $i++) {
+            $payload = new PromptPayload(
+                systemPrompt: $systemPrompt,
+                userPrompt: $workingUserAlreadyInjected ? '' : $workingUserPrompt,
+                snapshot: $ctx,
+                tools: $safeTools->getToolsForLlm(),
+                history: $workingHistory,
+                toolChoice: 'auto',
+            );
+
+            $response = $driver->complete($payload);
+            $finalContent = trim($response->content);
+
+            if (empty($response->toolCalls)) {
+                break;
+            }
+
+            if (!$workingUserAlreadyInjected) {
+                $workingHistory[] = ['role' => 'user', 'content' => $workingUserPrompt];
+                $workingUserAlreadyInjected = true;
+            }
+
+            $workingHistory[] = [
+                'role' => 'assistant',
+                'content' => $response->content ?: null,
+                'tool_calls' => $response->toolCalls,
+            ];
+
+            foreach ($response->toolCalls as $call) {
+                $toolName = $call['function']['name'] ?? '';
+                $args = json_decode($call['function']['arguments'] ?? '{}', true) ?: [];
+                $args['_default_duration'] = (int) ($training?->duracao_padrao_atendimento_min ?: 60);
+
+                $tool = $safeTools->getTool($toolName);
+                if ($tool) {
+                    try {
+                        $result = $tool->execute($clienteId, $args);
+                    } catch (Throwable $e) {
+                        $result = ['erro' => $e->getMessage()];
+                    }
+                } else {
+                    $result = [
+                        'simulador' => true,
+                        'mensagem' => "No WhatsApp real, a ferramenta '{$toolName}' seria executada agora. Confirme ao cliente que o pedido/agendamento foi registrado.",
+                    ];
+                }
+
+                $workingHistory[] = [
+                    'role' => 'tool',
+                    'tool_call_id' => $call['id'] ?? '',
+                    'content' => json_encode($result, JSON_UNESCAPED_UNICODE),
+                ];
+            }
+        }
+
+        $elapsedMs = (int) ((microtime(true) - $startedAt) * 1000);
+
+        if (Str::contains($finalContent, self::ESCALATION_SENTINEL)) {
+            return [
+                'ok' => true,
+                'reply' => '[Escalação Automática] O agente identificou necessidade de passar para um humano e pausaria o bot na conversa.',
+                'escalated' => true,
+                'elapsed_ms' => $elapsedMs,
+            ];
+        }
+
+        return [
+            'ok' => true,
+            'reply' => $finalContent ?: 'Não consegui gerar uma resposta no momento.',
+            'escalated' => false,
+            'elapsed_ms' => $elapsedMs,
+        ];
     }
 
     protected function renderApproachBlock(array $ctx): string

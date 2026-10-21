@@ -82,8 +82,24 @@ class KnowledgeController extends Controller
 
         $cliente->update($validated);
 
+        // Sincroniza também os fundamentos comuns com o Treinamento do Bot IA no WhatsApp
+        $training = \App\Models\WhatsappBotTraining::firstOrNew(['cliente_id' => $cliente->id]);
+        if (empty($training->business_name)) {
+            $training->business_name = $cliente->nome_fantasia ?: $cliente->razao_social;
+        }
+        if (!empty($validated['tom_voz'])) {
+            $training->tom_de_voz = $validated['tom_voz'];
+        }
+        if (!empty($validated['diferenciais_competitivos'])) {
+            $training->diferenciais = $validated['diferenciais_competitivos'];
+        }
+        if (!empty($validated['publico_alvo'])) {
+            $training->publico_alvo = $validated['publico_alvo'];
+        }
+        $training->save();
+
         return redirect()->route('customer.conhecimento.index')
-            ->with('success', 'Perfil do negócio atualizado! O Motor de Crescimento recalibrou as sugestões.');
+            ->with('success', 'Perfil do negócio atualizado e sincronizado com o BruceIA e o Agente de WhatsApp!');
     }
 
     /**

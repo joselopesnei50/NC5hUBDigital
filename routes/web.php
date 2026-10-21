@@ -118,6 +118,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
             Route::get('bot', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'index'])->name('bot.index');
             Route::post('bot', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'update'])->name('bot.update');
+            Route::post('bot/sincronizar', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'syncFromBruceOs'])->name('bot.sync');
+            Route::post('bot/simular', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'simulate'])->middleware('throttle:20,1')->name('bot.simulate');
             Route::post('inbox/{chat}/bot-toggle', [\App\Http\Controllers\Admin\Hub\WhatsappBotController::class, 'toggleChatBot'])->name('bot.toggle');
 
             Route::get('dashboard', [\App\Http\Controllers\Admin\Hub\WhatsappDashboardController::class, 'index'])->name('dashboard');
@@ -364,6 +366,8 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
         // Bot IA
         Route::get('bot', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'index'])->name('bot.index');
         Route::post('bot', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'update'])->name('bot.update');
+        Route::post('bot/sincronizar', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'syncFromBruceOs'])->name('bot.sync');
+        Route::post('bot/simular', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'simulate'])->middleware('throttle:20,1')->name('bot.simulate');
         Route::post('inbox/{chat}/bot-toggle', [\App\Http\Controllers\Customer\WhatsappBotController::class, 'toggleChatBot'])->name('bot.toggle');
 
         // Dashboard do bot

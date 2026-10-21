@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin\Hub;
 
 use App\Http\Controllers\Controller;
+use App\Models\AgentKnowledge;
+use App\Models\ProdutoServico;
 use App\Models\WhatsappBotProfile;
 use App\Models\WhatsappBotTraining;
 use App\Models\WhatsappChat;
 use App\Services\SystemCliente;
+use App\Services\WhatsappBotService;
 use Illuminate\Http\Request;
 
 class WhatsappBotController extends Controller
@@ -16,9 +19,35 @@ class WhatsappBotController extends Controller
         $cliente = SystemCliente::get();
         $profile = WhatsappBotProfile::firstOrNew(['cliente_id' => $cliente->id]);
         $training = WhatsappBotTraining::firstOrNew(['cliente_id' => $cliente->id]);
-        $segments = config('whatsapp-bot-segments');
 
-        return view('admin.hub.whatsapp.bot', compact('profile', 'training', 'segments'));
+        if (empty($training->business_name)) {
+            $training->business_name = $cliente->nome_fantasia ?: $cliente->razao_social;
+        }
+        if (empty($training->tom_de_voz) && !empty($cliente->tom_voz)) {
+            $training->tom_de_voz = $cliente->tom_voz;
+        }
+        if (empty($training->diferenciais) && !empty($cliente->diferenciais_competitivos)) {
+            $training->diferenciais = $cliente->diferenciais_competitivos;
+        }
+        if (empty($training->publico_alvo) && !empty($cliente->publico_alvo)) {
+            $training->publico_alvo = $cliente->publico_alvo;
+        }
+
+        $segments = config('whatsapp-bot-segments');
+        $catalogCount = ProdutoServico::where('cliente_id', $cliente->id)->where('ativo', true)->count();
+        $knowledgeCount = AgentKnowledge::where('cliente_id', $cliente->id)->where('ativo', true)->count();
+        $readiness = $training->calculateReadiness($profile, $catalogCount, $knowledgeCount);
+        $quickTemplates = WhatsappBotTraining::getSegmentQuickTemplates();
+
+        return view('admin.hub.whatsapp.bot', compact(
+            'profile',
+            'training',
+            'segments',
+            'catalogCount',
+            'knowledgeCount',
+            'readiness',
+            'quickTemplates'
+        ));
     }
 
     public function update(Request $request)
@@ -95,7 +124,91 @@ class WhatsappBotController extends Controller
             ]
         );
 
-        return redirect()->route('admin.hub.whatsapp.bot.index')->with('success', 'Bot atualizado com sucesso.');
+        $clienteUpdates = [];
+        if (!empty($validated['tom_de_voz'])) {
+            $clienteUpdates['tom_voz'] = mb_substr($validated['tom_de_voz'], 0, 100);
+        }
+        if (!empty($validated['diferenciais'])) {
+            $clienteUpdates['diferenciais_competitivos'] = mb_substr($validated['diferenciais'], 0, 2000);
+        }
+        if (!empty($validated['publico_alvo'])) {
+            $clienteUpdates['publico_alvo'] = mb_substr($validated['publico_alvo'], 0, 2000);
+        }
+        if (!empty($clienteUpdates)) {
+            $cliente->update($clienteUpdates);
+        }
+
+        return redirect()->route('admin.hub.whatsapp.bot.index')->with('success', 'Treinamento do Agente salvo e sincronizado!');
+    }
+
+    public function syncFromBruceOs()
+    {
+        $cliente = SystemCliente::get();
+        $training = WhatsappBotTraining::firstOrNew(['cliente_id' => $cliente->id]);
+
+        if (empty($training->business_name)) {
+            $training->business_name = $cliente->nome_fantasia ?: $cliente->razao_social;
+        }
+        if (empty($training->tom_de_voz) && !empty($cliente->tom_voz)) {
+            $training->tom_de_voz = $cliente->tom_voz;
+        }
+        if (empty($training->diferenciais) && !empty($cliente->diferenciais_competitivos)) {
+            $training->diferenciais = $cliente->diferenciais_competitivos;
+        }
+        if (empty($training->publico_alvo) && !empty($cliente->publico_alvo)) {
+            $training->publico_alvo = $cliente->publico_alvo;
+        }
+
+        $itens = ProdutoServico::where('cliente_id', $cliente->id)
+            ->where('ativo', true)
+            ->orderBy('tipo')
+            ->orderBy('categoria')
+            ->orderBy('nome')
+            ->get();
+
+        if ($itens->isNotEmpty()) {
+            $linhas = [];
+            foreach ($itens as $item) {
+                $preco = 'R$ ' . number_format((float) $item->preco_base, 2, ',', '.');
+                $un = $item->unidade ? "/{$item->unidade}" : '';
+                $cat = $item->categoria ? "[{$item->categoria}] " : '';
+                $desc = $item->descricao ? " — {$item->descricao}" : '';
+                $linhas[] = "• {$cat}{$item->nome}: {$preco}{$un}{$desc}";
+            }
+            $training->catalogo_texto = implode("\n", $linhas);
+        }
+
+        $training->save();
+
+        return redirect()->route('admin.hub.whatsapp.bot.index')
+            ->with('success', 'Catálogo e DNA do BruceOS importados com sucesso para o treinamento do Agente!');
+    }
+
+    public function simulate(Request $request, WhatsappBotService $botService)
+    {
+        $cliente = SystemCliente::get();
+
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'max:1000'],
+            'history' => ['nullable', 'array', 'max:10'],
+            'segment' => ['nullable', 'string'],
+        ]);
+
+        try {
+            $result = $botService->simulateReply(
+                (int) $cliente->id,
+                $validated['message'],
+                $validated['history'] ?? [],
+                $validated['segment'] ?? null
+            );
+
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok' => false,
+                'reply' => 'Erro ao simular resposta: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function toggleChatBot(WhatsappChat $chat)

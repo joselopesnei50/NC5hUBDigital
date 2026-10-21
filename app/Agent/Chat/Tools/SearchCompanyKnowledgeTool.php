@@ -86,13 +86,37 @@ class SearchCompanyKnowledgeTool implements ToolInterface
 
         // Precisa buscar tudo pra rankear em PHP (SQL rank multi-term ficaria complexo).
         // Teto: 50 documentos considerados por chamada.
-        $docs = $q->limit(50)->get(['id', 'titulo', 'conteudo']);
+        $docs = $q->limit(50)->get(['id', 'titulo', 'conteudo'])->toBase();
+
+        // Também inclui blocos preenchidos em whatsapp_bot_training para unificar a memória
+        $botTraining = DB::table('whatsapp_bot_training')->where('cliente_id', $tenantId)->first();
+        if ($botTraining) {
+            $botFields = [
+                'politicas' => 'Políticas de Troca, Cancelamento e Garantia',
+                'faq_custom' => 'Perguntas Frequentes (FAQ)',
+                'regras_proibicoes' => 'Regras e Proibições Operacionais',
+                'processo_producao' => 'Como o Produto/Serviço é Feito ou Entregue',
+                'diferenciais' => 'Diferenciais Competitivos do Negócio',
+                'historia_negocio' => 'História e Propósito do Negócio',
+                'catalogo_texto' => 'Catálogo / Menu em Texto',
+            ];
+            foreach ($botFields as $field => $label) {
+                $val = trim((string) ($botTraining->{$field} ?? ''));
+                if ($val !== '') {
+                    $docs->push((object) [
+                        'id' => 0,
+                        'titulo' => $label,
+                        'conteudo' => $val,
+                    ]);
+                }
+            }
+        }
 
         if ($docs->isEmpty()) {
             return [
                 'quantidade' => 0,
                 'trechos' => [],
-                'sugestao_ao_gestor' => 'Nada encontrado. Sugira ao gestor cadastrar o assunto em "Base de Conhecimento" no painel para você conseguir responder no futuro.',
+                'sugestao_ao_gestor' => 'Nada encontrado. Você pode pedir para o gestor te ensinar agora mesmo pelo chat (e usar a tool save_company_knowledge para memorizar) ou cadastrar em Motor de Crescimento / Bot IA.',
             ];
         }
 

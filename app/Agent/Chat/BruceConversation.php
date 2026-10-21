@@ -7,6 +7,11 @@ namespace App\Agent\Chat;
 use App\Agent\Contracts\LlmDriver;
 use App\Agent\DTOs\PromptPayload;
 use App\Models\AgentConversation;
+use App\Models\AgentKnowledge;
+use App\Models\Cliente;
+use App\Models\ProdutoServico;
+use App\Models\WhatsappBotProfile;
+use App\Models\WhatsappBotTraining;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -57,7 +62,7 @@ class BruceConversation
         // 1. O usuário falou: Gravemos na memória.
         $this->memory->addMessage($conversation, 'user', $userMessage);
 
-        $systemPrompt = config('agent.prompts.system_bruce');
+        $systemPrompt = config('agent.prompts.system_bruce') . $this->buildTenantDnaBlock((int) $tenantId);
         $availableTools = $this->tools->getToolsForLlm();
 
         $turnCount = 0;
@@ -178,5 +183,67 @@ class BruceConversation
         $this->memory->addMessage($conversation, 'assistant', $fallback);
 
         return $fallback;
+    }
+
+    /**
+     * Injeta o DNA e contexto de treinamento da empresa no System Prompt do BruceIA
+     * para que a Gestão do Sistema e o Atendimento WhatsApp compartilhem a mesma memória.
+     */
+    private function buildTenantDnaBlock(int $tenantId): string
+    {
+        try {
+            $cliente = Cliente::find($tenantId);
+            if (!$cliente) {
+                return '';
+            }
+
+            $training = WhatsappBotTraining::where('cliente_id', $tenantId)->first();
+            $botProfile = WhatsappBotProfile::where('cliente_id', $tenantId)->first();
+            $knowledgeTitles = AgentKnowledge::where('cliente_id', $tenantId)
+                ->where('ativo', true)
+                ->limit(15)
+                ->pluck('titulo')
+                ->all();
+            $catalogCount = ProdutoServico::where('cliente_id', $tenantId)
+                ->where('ativo', true)
+                ->count();
+
+            $lines = ["\n\nCONTEXTO DO NEGÓCIO DESTE GESTOR (MEMÓRIA UNIFICADA BRUCEOS):"];
+            $nome = $training?->business_name ?: ($cliente->nome_fantasia ?: $cliente->razao_social);
+            if ($nome) {
+                $lines[] = "- Empresa: {$nome}";
+            }
+            $nicho = $cliente->nicho_atuacao ?: ($botProfile?->segment ?? null);
+            if ($nicho) {
+                $lines[] = "- Segmento/Nicho: {$nicho}";
+            }
+            $tom = $training?->tom_de_voz ?: $cliente->tom_voz;
+            if ($tom) {
+                $lines[] = "- Tom de voz da marca: {$tom}";
+            }
+            $dif = $training?->diferenciais ?: $cliente->diferenciais_competitivos;
+            if ($dif) {
+                $lines[] = "- Diferenciais: " . mb_substr($dif, 0, 350);
+            }
+            $pub = $training?->publico_alvo ?: $cliente->publico_alvo;
+            if ($pub) {
+                $lines[] = "- Público-alvo: " . mb_substr($pub, 0, 250);
+            }
+            if ($training?->horario_atendimento) {
+                $lines[] = "- Horário de atendimento: {$training->horario_atendimento}";
+            }
+            $lines[] = "- Catálogo estruturado no BruceOS: {$catalogCount} item(ns) ativo(s).";
+            $lines[] = "- Status do Bot IA no WhatsApp: " . (($botProfile && $botProfile->is_active) ? 'ATIVO' : 'PAUSADO/EM CONFIGURAÇÃO');
+
+            if (!empty($knowledgeTitles)) {
+                $lines[] = "- Tópicos já treinados na Base de Conhecimento: " . implode(', ', $knowledgeTitles) . " (use `search_company_knowledge` para ler detalhes ou `save_company_knowledge` quando o gestor ensinar uma nova regra/política).";
+            } else {
+                $lines[] = "- Dica: Se o gestor ensinar alguma regra, preço, política ou procedimento durante a conversa, use `save_company_knowledge` para gravar na memória unificada.";
+            }
+
+            return implode("\n", $lines);
+        } catch (Exception $e) {
+            return '';
+        }
     }
 }

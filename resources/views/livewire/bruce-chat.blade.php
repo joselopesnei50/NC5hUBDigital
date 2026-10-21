@@ -54,12 +54,31 @@
                 </div>
             @endif
         @empty
-            <div class="flex flex-col items-center justify-center text-center h-full text-[#3A3A3C] py-8 px-4">
-                <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="BruceIA" class="w-20 h-20 mb-5 opacity-90">
+            <div class="flex flex-col items-center justify-center text-center h-full text-[#3A3A3C] py-6 px-4">
+                <img src="{{ asset('images/bruce/bruceia-icone-fundo-claro.svg') }}" alt="BruceIA" class="w-16 h-16 mb-4 opacity-90">
                 <p class="font-display font-bold text-[#0A0A0B] text-xl">Oi! Sou o Bruce.</p>
-                <p class="text-sm mt-3 leading-relaxed max-w-[280px]">
-                    Pergunte sobre <b class="text-[#0A0A0B]">caixa do mês</b>, <b class="text-[#0A0A0B]">clientes sumidos</b> ou peça pra eu redigir mensagens.
+                <p class="text-xs sm:text-sm mt-2 leading-relaxed max-w-[300px]">
+                    Analiso o <b class="text-[#0A0A0B]">caixa</b>, acompanho a <b class="text-[#0A0A0B]">agenda e pedidos</b> e você também pode <b class="text-[#FF7A1A]">me treinar por aqui</b> (eu sincronizo tudo com o Bot do WhatsApp!).
                 </p>
+
+                <div class="mt-5 w-full max-w-[310px] space-y-2 text-left">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-[#3A3A3C]/60 text-center mb-1.5">Experimente pedir ou ensinar:</p>
+                    <button type="button"
+                            onclick="const i = document.getElementById('bruce-chat-input'); i.value = 'Como está o resumo geral do nosso negócio este mês?'; i.dispatchEvent(new Event('input')); i.focus();"
+                            class="w-full text-left px-3.5 py-2.5 rounded-xl bg-white border border-black/8 hover:border-[#FF7A1A] text-xs text-[#0A0A0B] font-medium transition shadow-2xs flex items-center gap-2">
+                        <span>📊</span> <span>Como está o resumo do negócio este mês?</span>
+                    </button>
+                    <button type="button"
+                            onclick="const i = document.getElementById('bruce-chat-input'); i.value = 'Anote nas políticas da empresa e no Bot do WhatsApp que: '; i.dispatchEvent(new Event('input')); i.focus();"
+                            class="w-full text-left px-3.5 py-2.5 rounded-xl bg-white border border-black/8 hover:border-[#FF7A1A] text-xs text-[#0A0A0B] font-medium transition shadow-2xs flex items-center gap-2">
+                        <span>🧠</span> <span>Ensinar nova regra ou política para o Bot</span>
+                    </button>
+                    <button type="button"
+                            onclick="const i = document.getElementById('bruce-chat-input'); i.value = 'Quais clientes estão sumidos há mais de 30 dias?'; i.dispatchEvent(new Event('input')); i.focus();"
+                            class="w-full text-left px-3.5 py-2.5 rounded-xl bg-white border border-black/8 hover:border-[#FF7A1A] text-xs text-[#0A0A0B] font-medium transition shadow-2xs flex items-center gap-2">
+                        <span>🎯</span> <span>Listar clientes sumidos para reativação</span>
+                    </button>
+                </div>
             </div>
         @endforelse
 
@@ -86,9 +105,10 @@
     <div class="px-4 py-4 bg-white border-t border-black/5 shrink-0">
         <form wire:submit.prevent="sendMessage" class="flex items-center gap-2">
             <input
+                id="bruce-chat-input"
                 type="text"
                 wire:model.defer="message"
-                placeholder="Pergunte ao Bruce..."
+                placeholder="Pergunte ou ensine algo ao Bruce..."
                 class="flex-1 rounded-full border border-[#3A3A3C]/15 bg-[#F4F4F5] px-5 py-3 text-[15px] text-[#0A0A0B] placeholder:text-[#3A3A3C]/60 focus:border-[#FF7A1A] focus:ring-2 focus:ring-[#FF7A1A]/20 focus:outline-none transition"
                 required
                 autocomplete="off"

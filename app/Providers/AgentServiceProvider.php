@@ -20,6 +20,7 @@ use App\Agent\Metrics\ProjectDeliveryMetric;
 use App\Agent\Metrics\TopCustomersMetric;
 use App\Agent\Metrics\WhatsappAtendimentoMetric;
 use App\Agent\Chat\ToolRegistry;
+use App\Agent\Chat\Tools\CreateFinancialEntryTool;
 use App\Agent\Chat\Tools\DraftCustomerMessageTool;
 use App\Agent\Chat\Tools\GetAgendaOverviewTool;
 use App\Agent\Chat\Tools\GetBusinessSnapshotTool;
@@ -32,6 +33,7 @@ use App\Agent\Chat\Tools\GetSuppliersOverviewTool;
 use App\Agent\Chat\Tools\GetWhatsappOverviewTool;
 use App\Agent\Chat\Tools\ListInactiveCustomersTool;
 use App\Agent\Chat\Tools\ListPendingTasksTool;
+use App\Agent\Chat\Tools\SaveCompanyKnowledgeTool;
 use App\Agent\Chat\Tools\SearchCompanyKnowledgeTool;
 
 class AgentServiceProvider extends ServiceProvider
@@ -70,8 +72,9 @@ class AgentServiceProvider extends ServiceProvider
             $registry = new ToolRegistry();
             // Snapshot 360 (perguntas amplas)
             $registry->register($app->make(GetBusinessSnapshotTool::class));
-            // Recorte financeiro estreito
+            // Recorte financeiro estreito e lançamentos
             $registry->register($app->make(GetCashFlowTool::class));
+            $registry->register($app->make(CreateFinancialEntryTool::class));
             // Vendas & Pedidos (Hamburguerias, lojas, serviços)
             $registry->register($app->make(GetOrdersOverviewTool::class));
             // Catálogo / Cardápio de Produtos e Serviços
@@ -87,8 +90,9 @@ class AgentServiceProvider extends ServiceProvider
             $registry->register($app->make(ListPendingTasksTool::class));
             $registry->register($app->make(GetAgendaOverviewTool::class));
             $registry->register($app->make(GetWhatsappOverviewTool::class));
-            // Conhecimento da empresa (RAG do cliente)
+            // Conhecimento da empresa (RAG + Treinamento via Chat do cliente)
             $registry->register($app->make(SearchCompanyKnowledgeTool::class));
+            $registry->register($app->make(SaveCompanyKnowledgeTool::class));
             // Ação
             $registry->register($app->make(DraftCustomerMessageTool::class));
             return $registry;
