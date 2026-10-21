@@ -34,7 +34,7 @@
                             
                             <p class="text-xs font-bold text-slate uppercase tracking-wider mb-1">Destinatário</p>
                             <p class="text-sm font-bold text-ink mb-4">
-                                {{ $draft->clienteFinal ? $draft->clienteFinal->nome : 'Toda a base (Disparo em massa)' }}
+                                {{ $draft->clienteFinal ? ($draft->clienteFinal->nome_empresa ?: $draft->clienteFinal->nome_responsavel) : 'Toda a base (Disparo em massa)' }}
                             </p>
 
                             <p class="text-xs font-bold text-slate uppercase tracking-wider mb-1">Gatilho da IA</p>
