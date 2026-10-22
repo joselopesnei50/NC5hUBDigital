@@ -80,6 +80,12 @@
                         <span>🤖</span>
                         <span class="hidden xl:inline">Bot IA</span>
                     </a>
+                    <a href="{{ route($routePrefix . 'conexao', ['tab' => 'meta']) }}"
+                       title="Conectar via API Oficial da Meta (Cloud API)"
+                       class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-[#1877F2] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        <span class="hidden xl:inline">API Meta</span>
+                    </a>
                     <a href="{{ route($routePrefix . 'conexao') }}"
                        title="Status da Conexão & QR Code"
                        class="p-2 rounded-full text-[#54656F] hover:text-[#111B21] hover:bg-[#E9EDEF] transition">
@@ -97,9 +103,15 @@
                         <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
                         Instância desconectada
                     </span>
-                    <a href="{{ route($routePrefix . 'conexao') }}" class="font-bold text-amber-800 underline shrink-0 hover:text-amber-950">
-                        Conectar QR
-                    </a>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{{ route($routePrefix . 'conexao', ['tab' => 'meta']) }}" class="font-bold text-[#1877F2] underline hover:text-blue-900">
+                            API Meta
+                        </a>
+                        <span class="text-amber-300">|</span>
+                        <a href="{{ route($routePrefix . 'conexao') }}" class="font-bold text-amber-800 underline hover:text-amber-950">
+                            QR Code
+                        </a>
+                    </div>
                 </div>
             @endif
 
@@ -532,13 +544,18 @@
                     </div>
 
                     <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-                        <a href="{{ route($routePrefix . 'bot.index') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00A884] text-white text-xs font-bold hover:bg-[#008F6F] transition shadow-xs">
-                            🤖 Configurar Agente Bruce IA
+                        <a href="{{ route($routePrefix . 'conexao', ['tab' => 'meta']) }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1877F2] text-white text-xs font-bold hover:bg-blue-700 transition shadow-xs">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            Conectar API Oficial Meta
                         </a>
                         <a href="{{ route($routePrefix . 'conexao') }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#111B21] border border-[#D1D7DB] text-xs font-semibold hover:bg-gray-50 transition">
                             📱 Status & QR Code
+                        </a>
+                        <a href="{{ route($routePrefix . 'bot.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00A884] text-white text-xs font-bold hover:bg-[#008F6F] transition shadow-xs">
+                            🤖 Configurar Agente Bruce IA
                         </a>
                     </div>
 
