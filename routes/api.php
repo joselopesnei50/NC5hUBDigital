@@ -7,11 +7,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -20,3 +15,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/webhooks/abacatepay', [\App\Http\Controllers\Api\WebhookController::class, 'handleAbacatePay']);
 Route::post('/webhooks/evolution/{token}', [\App\Http\Controllers\Api\WhatsappWebhookController::class, 'handle']);
+
+// Meta WhatsApp Business Cloud API (API Oficial — App NC5HUBDIGITAL-EMP)
+Route::get('/whatsapp/cloud-webhook', [\App\Http\Controllers\Api\CloudApiWebhookController::class, 'verify']);
+Route::post('/whatsapp/cloud-webhook', [\App\Http\Controllers\Api\CloudApiWebhookController::class, 'handle']);
+Route::get('/webhooks/meta-whatsapp', [\App\Http\Controllers\Api\CloudApiWebhookController::class, 'verify']);
+Route::post('/webhooks/meta-whatsapp', [\App\Http\Controllers\Api\CloudApiWebhookController::class, 'handle']);

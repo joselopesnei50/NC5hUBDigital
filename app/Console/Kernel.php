@@ -29,6 +29,12 @@ class Kernel extends ConsoleKernel
                  ->everyFifteenMinutes()
                  ->withoutOverlapping()
                  ->onOneServer();
+
+        // Publicação automática de posts agendados nas Redes Sociais (Facebook & Instagram)
+        $schedule->command('posts:publish')
+                 ->everyMinute()
+                 ->withoutOverlapping()
+                 ->onOneServer();
     }
 
     /**

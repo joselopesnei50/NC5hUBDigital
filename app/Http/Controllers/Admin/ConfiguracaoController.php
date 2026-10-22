@@ -20,6 +20,7 @@ class ConfiguracaoController extends Controller
         'apify_token',
         'google_client_secret',
         'evolution_global_key',
+        'meta_app_secret',
     ];
 
     public function index()
@@ -46,6 +47,11 @@ class ConfiguracaoController extends Controller
             'google_redirect_uri'       => 'nullable|string',
             'evolution_api_url'         => 'nullable|string',
             'evolution_global_key'      => 'nullable|string',
+            'meta_app_id'               => 'nullable|string|max:120',
+            'meta_app_secret'           => 'nullable|string|max:255',
+            'meta_cloud_config_id'      => 'nullable|string|max:120',
+            'meta_webhook_verify_token' => 'nullable|string|max:255',
+            'meta_webhook_forward_url'  => 'nullable|url|max:500',
         ]);
 
         foreach ($validated as $chave => $valor) {

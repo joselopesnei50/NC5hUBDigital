@@ -285,6 +285,66 @@
                 </div>
             </div>
 
+            <!-- Meta Cloud API & Redes Sociais (Facebook / Instagram) -->
+            <div class="mb-8 border-b border-gray-100 pb-8">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                    <h3 class="text-lg font-bold text-[#0A1128] flex items-center gap-3">
+                        <svg class="w-6 h-6 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        Meta App Oficial (WhatsApp Cloud API + Facebook &amp; Instagram)
+                    </h3>
+                    @if(!empty($configuracoes['meta_app_id'] ?? '') && !empty($configuracoes['meta_app_secret'] ?? ''))
+                        <span class="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            App Configurado
+                        </span>
+                    @endif
+                </div>
+                <p class="text-sm text-[#8A8F9C] mb-6">
+                    Use o mesmo App da Meta (<strong>NC5HUBDIGITAL-EMP</strong>) para oferecer conexão via <strong>API Oficial do WhatsApp</strong> e <strong>Agendamento de Posts no Instagram e Facebook</strong> no BruceOS e no Hub NC5.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Meta App ID</label>
+                        <input type="text" name="meta_app_id" value="{{ $configuracoes['meta_app_id'] ?? config('whatsapp.meta_cloud.app_id') }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: 123456789012345">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Meta App Secret</label>
+                        <input type="password" name="meta_app_secret" value="" autocomplete="new-password" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="{{ !empty($configuracoes['meta_app_secret'] ?? config('whatsapp.meta_cloud.app_secret')) ? '•••••••• (já configurado)' : 'Cole o App Secret da Meta' }}">
+                        <p class="mt-1 text-xs text-gray-500">Deixe em branco para manter o segredo atual.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Config ID (Embedded Signup WhatsApp)</label>
+                        <input type="text" name="meta_cloud_config_id" value="{{ $configuracoes['meta_cloud_config_id'] ?? config('whatsapp.meta_cloud.config_id') }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: 987654321098765 (Opcional p/ botão FB.login)">
+                        <p class="mt-1 text-xs text-gray-500">ID da configuração do Login do Facebook para Empresas (Embedded Signup).</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-[#0A1128] mb-2">Webhook Verify Token</label>
+                        <input type="text" name="meta_webhook_verify_token" value="{{ $configuracoes['meta_webhook_verify_token'] ?? config('whatsapp.meta_cloud.verify_token') }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: nc5_meta_verify_2026">
+                        <p class="mt-1 text-xs text-gray-500">Token secreto usado na verificação GET do Webhook da Meta.</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-[#0A1128] mb-2">URL de Bridge de Webhook (Opcional — Compartilhamento com Vivensi)</label>
+                    <input type="url" name="meta_webhook_forward_url" value="{{ $configuracoes['meta_webhook_forward_url'] ?? config('whatsapp.meta_cloud.forward_url') }}" class="w-full rounded-xl border-gray-300 shadow-sm focus:border-[#0A1128] focus:ring-[#0A1128] font-mono text-sm" placeholder="Ex: https://vivensi.app.br/api/whatsapp/cloud-webhook">
+                    <p class="mt-1 text-xs text-gray-500">Se o Webhook principal do App na Meta apontar para cá e chegar mensagem de um número da Vivensi, o BruceOS repassa automaticamente para esta URL mantendo a assinatura HMAC.</p>
+                </div>
+
+                <div class="p-4 bg-[#F4F5F7] rounded-2xl border border-gray-200 text-xs space-y-2">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-[#0A1128]">URLs para cadastrar no painel Meta Developers (NC5HUBDIGITAL-EMP)</p>
+                    <div class="font-mono text-[11px] space-y-1.5 text-slate-700">
+                        <div><span class="font-bold text-[#0A1128]">OAuth Redirect URI (Facebook/Instagram):</span> {{ url('/social/facebook/callback') }}</div>
+                        <div><span class="font-bold text-[#0A1128]">Webhook WhatsApp Cloud API:</span> {{ url('/api/whatsapp/cloud-webhook') }}</div>
+                        <div><span class="font-bold text-[#0A1128]">Deauthorize Callback URL:</span> {{ url('/social/facebook/deauthorize') }}</div>
+                        <div><span class="font-bold text-[#0A1128]">Data Deletion Request URL:</span> {{ url('/social/facebook/data-deletion') }}</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Botões -->
             <div class="flex items-center justify-end gap-4">
                 <button type="submit" class="bg-[#0A1128] hover:bg-[#FF7A1A] text-white px-8 py-3 rounded-xl text-sm font-bold transition-colors shadow-lg">

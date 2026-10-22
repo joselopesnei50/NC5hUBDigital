@@ -106,6 +106,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
             Route::get('conexao', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'index'])->name('conexao');
             Route::post('conexao/connect', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'connect'])->name('connect');
+            Route::post('conexao/cloud-embedded', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'connectCloudEmbedded'])->middleware('throttle:10,1')->name('cloud.embedded');
+            Route::post('conexao/cloud-manual', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'connectCloudManual'])->middleware('throttle:10,1')->name('cloud.manual');
             Route::get('conexao/qr', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'qr'])->name('qr');
             Route::get('conexao/status', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'status'])->name('status');
             Route::post('conexao/disconnect', [\App\Http\Controllers\Admin\Hub\WhatsappConnectionController::class, 'disconnect'])->name('disconnect');
@@ -140,6 +142,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             Route::post('/avaliacoes/sugerir', [\App\Http\Controllers\GoogleBusinessController::class, 'suggestReply'])->middleware('throttle:20,1')->name('reviews.suggest');
             Route::get('/exportar/csv', [\App\Http\Controllers\GoogleBusinessController::class, 'exportCsv'])->name('export.csv');
             Route::get('/exportar/pdf', [\App\Http\Controllers\GoogleBusinessController::class, 'exportPdf'])->name('export.pdf');
+        });
+
+        // Redes Sociais (Instagram & Facebook + BruceIA) — Direto no painel Admin
+        Route::prefix('redes-sociais')->name('social.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\SocialMediaController::class, 'index'])->name('index');
+            Route::get('/connect', [\App\Http\Controllers\SocialMediaController::class, 'connect'])->name('connect');
+            Route::patch('/accounts/{account}/disconnect', [\App\Http\Controllers\SocialMediaController::class, 'disconnectAccount'])->name('accounts.disconnect');
+            Route::delete('/accounts/{account}', [\App\Http\Controllers\SocialMediaController::class, 'destroyAccount'])->name('accounts.destroy');
+            Route::post('/posts', [\App\Http\Controllers\SocialMediaController::class, 'storePost'])->name('posts.store');
+            Route::post('/posts/{post}/retry', [\App\Http\Controllers\SocialMediaController::class, 'retryPost'])->name('posts.retry');
+            Route::delete('/posts/{post}', [\App\Http\Controllers\SocialMediaController::class, 'destroyPost'])->name('posts.destroy');
+            Route::post('/posts/generate-caption', [\App\Http\Controllers\SocialMediaController::class, 'generateCaption'])->middleware('throttle:20,1')->name('posts.generate-caption');
         });
     });
 
@@ -214,6 +228,19 @@ Route::get('/area-cliente/google-business/callback', [\App\Http\Controllers\Goog
     ->middleware('auth')
     ->name('customer.google-business.callback');
 
+// Callback OAuth e Webhooks Públicos da Meta (Facebook & Instagram)
+Route::get('/social/facebook/callback', [\App\Http\Controllers\SocialMediaController::class, 'callback'])
+    ->middleware('auth')
+    ->name('social.facebook.callback');
+Route::post('/social/facebook/deauthorize', [\App\Http\Controllers\SocialMediaController::class, 'handleDeauthorize'])
+    ->middleware('throttle:60,1')
+    ->name('social.facebook.deauthorize');
+Route::post('/social/facebook/data-deletion', [\App\Http\Controllers\SocialMediaController::class, 'handleDataDeletion'])
+    ->middleware('throttle:60,1')
+    ->name('social.facebook.data-deletion');
+Route::get('/social/facebook/deletion-status/{code}', [\App\Http\Controllers\SocialMediaController::class, 'dataDeletionStatus'])
+    ->name('social.facebook.deletion-status');
+
 // Área do Cliente (Isolamento via Role)
 Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(function () {
     Route::get('/', [CustomerController::class, 'index'])->name('customer.index');
@@ -247,6 +274,18 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::post('/google-business/avaliacoes/sugerir', [\App\Http\Controllers\GoogleBusinessController::class, 'suggestReply'])->middleware('throttle:20,1')->name('customer.google-business.reviews.suggest');
     Route::get('/google-business/exportar/csv', [\App\Http\Controllers\GoogleBusinessController::class, 'exportCsv'])->name('customer.google-business.export.csv');
     Route::get('/google-business/exportar/pdf', [\App\Http\Controllers\GoogleBusinessController::class, 'exportPdf'])->name('customer.google-business.export.pdf');
+
+    // Redes Sociais (Instagram & Facebook + BruceIA)
+    Route::prefix('redes-sociais')->name('customer.social.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SocialMediaController::class, 'index'])->name('index');
+        Route::get('/connect', [\App\Http\Controllers\SocialMediaController::class, 'connect'])->name('connect');
+        Route::patch('/accounts/{account}/disconnect', [\App\Http\Controllers\SocialMediaController::class, 'disconnectAccount'])->name('accounts.disconnect');
+        Route::delete('/accounts/{account}', [\App\Http\Controllers\SocialMediaController::class, 'destroyAccount'])->name('accounts.destroy');
+        Route::post('/posts', [\App\Http\Controllers\SocialMediaController::class, 'storePost'])->name('posts.store');
+        Route::post('/posts/{post}/retry', [\App\Http\Controllers\SocialMediaController::class, 'retryPost'])->name('posts.retry');
+        Route::delete('/posts/{post}', [\App\Http\Controllers\SocialMediaController::class, 'destroyPost'])->name('posts.destroy');
+        Route::post('/posts/generate-caption', [\App\Http\Controllers\SocialMediaController::class, 'generateCaption'])->middleware('throttle:20,1')->name('posts.generate-caption');
+    });
 
     // Meu Site / Criador de Landing Pages (4 Modelos)
     Route::get('/meu-site', [\App\Http\Controllers\Customer\LandingPageController::class, 'edit'])->name('customer.landing-page.edit');
@@ -353,6 +392,8 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::prefix('whatsapp')->name('customer.whatsapp.')->group(function () {
         Route::get('conexao', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'index'])->name('conexao');
         Route::post('conexao/connect', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'connect'])->name('connect');
+        Route::post('conexao/cloud-embedded', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'connectCloudEmbedded'])->middleware('throttle:10,1')->name('cloud.embedded');
+        Route::post('conexao/cloud-manual', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'connectCloudManual'])->middleware('throttle:10,1')->name('cloud.manual');
         Route::get('conexao/qr', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'qr'])->name('qr');
         Route::get('conexao/status', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'status'])->name('status');
         Route::post('conexao/disconnect', [\App\Http\Controllers\Customer\WhatsappConnectionController::class, 'disconnect'])->name('disconnect');

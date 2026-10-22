@@ -8,12 +8,16 @@ use App\Models\WhatsappInstance;
 use App\Models\WhatsappMessage;
 use App\Services\EvolutionApiService;
 use App\Services\SystemCliente;
+use App\Services\WhatsappSenderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WhatsappInboxController extends Controller
 {
-    public function __construct(protected EvolutionApiService $evo) {}
+    public function __construct(
+        protected EvolutionApiService $evo,
+        protected WhatsappSenderService $sender,
+    ) {}
 
     protected function buildChatsData(int $clienteId): array
     {
@@ -77,8 +81,8 @@ class WhatsappInboxController extends Controller
 
         $instance = WhatsappInstance::where('cliente_id', $cliente->id)->firstOrFail();
 
-        // Se localmente não consta como 'open', faz uma checagem rápida em tempo real na Evolution
-        if (!$instance->isConnected() && $this->evo->isConfigured()) {
+        // Se for Evolution e localmente não consta como 'open', faz uma checagem rápida em tempo real na Evolution
+        if ($instance->isEvolution() && !$instance->isConnected() && $this->evo->isConfigured()) {
             $state = $this->evo->getConnectionState($instance->instance_name);
             $freshState = $state['instance']['state'] ?? ($state['state'] ?? null);
             if ($freshState) {
@@ -96,16 +100,17 @@ class WhatsappInboxController extends Controller
             }
             return back()->with('error', 'WhatsApp não está conectado. Status atual: ' . ($instance->status ?? 'desconhecido'));
         }
-        if (!$this->evo->isConfigured()) {
+        if (!$this->sender->isInstanceReady($instance)) {
+            $errMsg = $instance->isCloudApi() ? 'Credenciais da Meta Cloud API incompletas.' : 'Evolution API não configurada.';
             if ($request->expectsJson()) {
-                return response()->json(['ok' => false, 'error' => 'Evolution API não configurada.'], 422);
+                return response()->json(['ok' => false, 'error' => $errMsg], 422);
             }
-            return back()->with('error', 'Evolution API não configurada.');
+            return back()->with('error', $errMsg);
         }
 
-        $result = $this->evo->sendText($instance->instance_name, $chat->contact_phone ?: $chat->wa_id, $validated['content']);
+        $result = $this->sender->sendText($instance, $chat->contact_phone ?: $chat->wa_id, $validated['content']);
 
-        if (isset($result['error'])) {
+        if (!$result['ok']) {
             $failedMsg = WhatsappMessage::create([
                 'cliente_id' => $cliente->id,
                 'chat_id' => $chat->id,
@@ -132,7 +137,7 @@ class WhatsappInboxController extends Controller
             return back()->with('error', 'Falha ao enviar: ' . ($result['error'] ?? 'erro desconhecido'));
         }
 
-        $waId = $result['key']['id'] ?? ($result['messageId'] ?? null);
+        $waId = $result['message_id'];
 
         $msg = WhatsappMessage::create([
             'cliente_id' => $cliente->id,

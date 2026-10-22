@@ -6,7 +6,7 @@ use App\Models\Appointment;
 use App\Models\WhatsappBotTraining;
 use App\Models\WhatsappInstance;
 use App\Models\WhatsappMessage;
-use App\Services\EvolutionApiService;
+use App\Services\WhatsappSenderService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -18,13 +18,8 @@ class SendAppointmentReminders extends Command
     protected $signature = 'appointments:send-reminders';
     protected $description = 'Envia lembretes WhatsApp (ate 2 janelas por agendamento) conforme config do cliente';
 
-    public function handle(EvolutionApiService $evo): int
+    public function handle(WhatsappSenderService $sender): int
     {
-        if (!$evo->isConfigured()) {
-            $this->warn('Evolution nao configurada — pulando.');
-            return self::SUCCESS;
-        }
-
         $windowStart = now()->subMinutes(5);
         $windowEnd = now()->addMinutes(20);
 
@@ -49,10 +44,10 @@ class SendAppointmentReminders extends Command
         foreach ($candidates as $apt) {
             try {
                 $training = $trainings->get($apt->cliente_id);
-                $sent += $this->maybeSend($evo, $apt, $training, $windowStart, $windowEnd, 'primary');
+                $sent += $this->maybeSend($sender, $apt, $training, $windowStart, $windowEnd, 'primary');
 
                 if ($training && $training->enable_second_reminder) {
-                    $sent += $this->maybeSend($evo, $apt, $training, $windowStart, $windowEnd, 'second');
+                    $sent += $this->maybeSend($sender, $apt, $training, $windowStart, $windowEnd, 'second');
                 }
             } catch (Throwable $e) {
                 Log::warning('appointments:send-reminders excecao', [
@@ -66,7 +61,7 @@ class SendAppointmentReminders extends Command
         return self::SUCCESS;
     }
 
-    protected function maybeSend(EvolutionApiService $evo, Appointment $apt, ?WhatsappBotTraining $training, Carbon $windowStart, Carbon $windowEnd, string $slot): int
+    protected function maybeSend(WhatsappSenderService $sender, Appointment $apt, ?WhatsappBotTraining $training, Carbon $windowStart, Carbon $windowEnd, string $slot): int
     {
         if ($slot === 'primary') {
             if ($apt->reminder_sent_at) {
@@ -95,18 +90,18 @@ class SendAppointmentReminders extends Command
         $instance = WhatsappInstance::where('cliente_id', $apt->cliente_id)
             ->where('status', 'open')
             ->first();
-        if (!$instance) {
+        if (!$instance || !$sender->isInstanceReady($instance)) {
             return 0;
         }
 
         $msg = $this->buildReminderMessage($apt, $training?->business_name, $slot);
-        $result = $evo->sendText($instance->instance_name, $phone, $msg);
+        $result = $sender->sendText($instance, $phone, $msg);
 
-        if (isset($result['error'])) {
+        if (!$result['ok']) {
             Log::warning('appointments:send-reminders falha envio', [
                 'appointment_id' => $apt->id,
                 'slot' => $slot,
-                'details' => $result['details'] ?? null,
+                'error' => $result['error'] ?? null,
             ]);
             return 0;
         }
@@ -114,7 +109,7 @@ class SendAppointmentReminders extends Command
         $apt->update([$field => now()]);
 
         if ($apt->chat_id) {
-            $outboundId = $result['key']['id'] ?? ('reminder_' . Str::random(16));
+            $outboundId = $result['message_id'] ?: ('reminder_' . Str::random(16));
             WhatsappMessage::create([
                 'cliente_id' => $apt->cliente_id,
                 'chat_id' => $apt->chat_id,
