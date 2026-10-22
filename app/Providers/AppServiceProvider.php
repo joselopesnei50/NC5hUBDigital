@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Mail\Transport\BrevoApiTransport;
 use App\Models\Configuracao;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Mail\MailManager;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
@@ -56,8 +58,88 @@ class AppServiceProvider extends ServiceProvider
 
             // ---- Detecta e configura o motor Brevo ----
             $this->configurarBrevo($configs);
+
+            // ---- Auto-provisiona tabelas/colunas Meta Cloud API & Redes Sociais em produção ----
+            $this->ensureMetaAndSocialSchema();
         } catch (\Exception $e) {
             // não trava boot durante migrations
+        }
+    }
+
+    /**
+     * Garante que as colunas da Meta Cloud API e as tabelas de Redes Sociais
+     * existam automaticamente no banco de produção sem exigir comando SSH manual.
+     */
+    private function ensureMetaAndSocialSchema(): void
+    {
+        if (Cache::get('nc5_meta_social_schema_v1') === true) {
+            return;
+        }
+
+        try {
+            if (Schema::hasTable('whatsapp_instances') && !Schema::hasColumn('whatsapp_instances', 'provider')) {
+                Schema::table('whatsapp_instances', function (Blueprint $table) {
+                    $table->string('provider', 20)->default('evolution')->after('instance_token');
+                    $table->string('waba_id', 64)->nullable()->after('provider');
+                    $table->string('phone_number_id', 64)->nullable()->index()->after('waba_id');
+                    $table->text('graph_access_token')->nullable()->after('phone_number_id');
+                });
+            }
+
+            if (!Schema::hasTable('social_accounts')) {
+                Schema::create('social_accounts', function (Blueprint $table) {
+                    $table->id();
+                    $table->unsignedBigInteger('cliente_id')->index();
+                    $table->string('platform', 30)->default('facebook');
+                    $table->string('page_id', 100)->index();
+                    $table->string('page_name', 191);
+                    $table->text('page_picture')->nullable();
+                    $table->text('access_token');
+                    $table->timestamp('token_expires_at')->nullable();
+                    $table->string('instagram_business_id', 100)->nullable()->index();
+                    $table->string('instagram_username', 100)->nullable();
+                    $table->boolean('is_active')->default(true);
+                    $table->timestamps();
+
+                    $table->unique(['cliente_id', 'page_id']);
+                });
+            }
+
+            if (!Schema::hasTable('scheduled_posts')) {
+                Schema::create('scheduled_posts', function (Blueprint $table) {
+                    $table->id();
+                    $table->unsignedBigInteger('cliente_id')->index();
+                    $table->unsignedBigInteger('social_account_id')->index();
+                    $table->unsignedBigInteger('user_id')->nullable();
+                    $table->string('platform', 20)->default('both');
+                    $table->string('format', 20)->default('feed');
+                    $table->text('caption')->nullable();
+                    $table->text('media_url')->nullable();
+                    $table->json('media_items')->nullable();
+                    $table->string('media_type', 20)->default('image');
+                    $table->dateTime('scheduled_at')->index();
+                    $table->string('status', 20)->default('pending')->index();
+                    $table->string('facebook_post_id', 120)->nullable();
+                    $table->string('instagram_post_id', 120)->nullable();
+                    $table->text('error_message')->nullable();
+                    $table->timestamps();
+                });
+            }
+
+            if (!Schema::hasTable('facebook_data_deletion_requests')) {
+                Schema::create('facebook_data_deletion_requests', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('facebook_user_id', 100)->index();
+                    $table->string('confirmation_code', 64)->unique();
+                    $table->string('status', 30)->default('completed');
+                    $table->timestamp('completed_at')->nullable();
+                    $table->timestamps();
+                });
+            }
+
+            Cache::forever('nc5_meta_social_schema_v1', true);
+        } catch (\Throwable $e) {
+            // Ignora silenciosamente caso o banco esteja em manutenção
         }
     }
 

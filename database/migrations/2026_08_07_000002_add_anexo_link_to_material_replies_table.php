@@ -8,9 +8,11 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('material_replies', function (Blueprint $table) {
-            $table->string('anexo_link', 2048)->nullable()->after('anexo_path');
-        });
+        if (Schema::hasTable('material_replies') && !Schema::hasColumn('material_replies', 'anexo_link')) {
+            Schema::table('material_replies', function (Blueprint $table) {
+                $table->string('anexo_link', 2048)->nullable()->after('anexo_path');
+            });
+        }
     }
 
     public function down()
