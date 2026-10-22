@@ -337,7 +337,8 @@
                 <div class="p-4 bg-[#F4F5F7] rounded-2xl border border-gray-200 text-xs space-y-2">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-[#0A1128]">URLs para cadastrar no painel Meta Developers (NC5HUBDIGITAL-EMP)</p>
                     <div class="font-mono text-[11px] space-y-1.5 text-slate-700">
-                        <div><span class="font-bold text-[#0A1128]">OAuth Redirect URI (Facebook/Instagram):</span> {{ url('/social/facebook/callback') }}</div>
+                        <div><span class="font-bold text-[#0A1128]">OAuth Redirect URI (Admin Hub NC5):</span> {{ route('admin.hub.social.connect') }}</div>
+                        <div><span class="font-bold text-[#0A1128]">OAuth Redirect URI (Painel Cliente BruceOS):</span> {{ route('customer.social.connect') }}</div>
                         <div><span class="font-bold text-[#0A1128]">Webhook WhatsApp Cloud API:</span> {{ url('/api/whatsapp/cloud-webhook') }}</div>
                         <div><span class="font-bold text-[#0A1128]">Deauthorize Callback URL:</span> {{ url('/social/facebook/deauthorize') }}</div>
                         <div><span class="font-bold text-[#0A1128]">Data Deletion Request URL:</span> {{ url('/social/facebook/data-deletion') }}</div>

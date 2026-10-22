@@ -16,15 +16,22 @@ class MetaSocialAuthService
 
     public function __construct()
     {
-        $this->graphVersion = (string) config('whatsapp.meta_api_version', 'v22.0');
-        $this->appId        = (string) (Configuracao::get('meta_app_id') ?: config('services.meta.app_id', ''));
-        $this->appSecret    = (string) (Configuracao::get('meta_app_secret') ?: config('services.meta.app_secret', ''));
+        $this->graphVersion = trim((string) config('whatsapp.meta_api_version', 'v22.0'));
+        $this->appId        = trim((string) (Configuracao::get('meta_app_id') ?: config('services.meta.app_id', '')));
+        $this->appSecret    = trim((string) (Configuracao::get('meta_app_secret') ?: config('services.meta.app_secret', '')));
         $this->redirectUri  = route('social.facebook.callback');
     }
 
     public function isConfigured(): bool
     {
         return !empty($this->appId) && !empty($this->appSecret);
+    }
+
+    public function getRedirectUriForContext(string $context = 'customer'): string
+    {
+        return $context === 'admin'
+            ? route('admin.hub.social.connect')
+            : route('customer.social.connect');
     }
 
     /**
@@ -42,21 +49,21 @@ class MetaSocialAuthService
             'business_management',
         ]);
 
-        return "https://www.facebook.com/dialog/oauth?" . http_build_query([
+        return "https://www.facebook.com/{$this->graphVersion}/dialog/oauth?" . http_build_query([
             'client_id'     => $this->appId,
-            'redirect_uri'  => $this->redirectUri,
+            'redirect_uri'  => $this->getRedirectUriForContext($context),
             'scope'         => $scopes,
             'response_type' => 'code',
             'state'         => csrf_token() . '|' . $context,
         ]);
     }
 
-    public function exchangeCodeForToken(string $code): ?string
+    public function exchangeCodeForToken(string $code, ?string $redirectUri = null): ?string
     {
         $response = Http::timeout(12)->get("https://graph.facebook.com/{$this->graphVersion}/oauth/access_token", [
             'client_id'     => $this->appId,
             'client_secret' => $this->appSecret,
-            'redirect_uri'  => $this->redirectUri,
+            'redirect_uri'  => $redirectUri ?: $this->redirectUri,
             'code'          => $code,
         ]);
 

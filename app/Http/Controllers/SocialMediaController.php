@@ -113,8 +113,12 @@ class SocialMediaController extends Controller
         ));
     }
 
-    public function connect()
+    public function connect(Request $request)
     {
+        if ($request->has('code') || $request->has('error') || $request->has('error_code')) {
+            return $this->callback($request);
+        }
+
         if (!$this->auth->isConfigured()) {
             return back()->with('error', 'As credenciais do Meta App ainda não foram configuradas em Configurações Globais.');
         }
@@ -130,12 +134,13 @@ class SocialMediaController extends Controller
     public function callback(Request $request)
     {
         $state   = (string) $request->query('state', '');
-        $isAdmin = str_ends_with($state, '|admin') || (Auth::check() && Auth::user()->role === 'admin');
+        $isAdmin = str_ends_with($state, '|admin') || $this->isAdminContext();
         $targetRoute = $isAdmin ? 'admin.hub.social.index' : 'customer.social.index';
 
-        if ($request->has('error')) {
+        if ($request->has('error') || $request->has('error_code')) {
+            $errDesc = $request->query('error_description') ?: $request->query('error_message') ?: 'Autorização cancelada ou negada no Facebook.';
             return redirect()->route($targetRoute)
-                ->with('error', 'Autorização cancelada ou negada no Facebook.');
+                ->with('error', $errDesc);
         }
 
         $code = (string) $request->query('code', '');
@@ -149,7 +154,7 @@ class SocialMediaController extends Controller
             return redirect()->route('dashboard')->with('error', 'Cliente não identificado para vincular conta social.');
         }
 
-        $shortToken = $this->auth->exchangeCodeForToken($code);
+        $shortToken = $this->auth->exchangeCodeForToken($code, $request->url());
         if (!$shortToken) {
             return redirect()->route($targetRoute)
                 ->with('error', 'Falha ao obter token de acesso do Facebook. Verifique a Redirect URI no painel Meta.');
