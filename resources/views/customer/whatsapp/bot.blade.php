@@ -362,6 +362,35 @@
                     </div>
 
                     <div class="mt-5 border-t border-gray-100 pt-5">
+                        <p class="text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">🔔 Notificações do Gestor no WhatsApp</p>
+                        <p class="text-gray-500 text-xs mb-3">Receba no seu celular um aviso sempre que a BruceIA agendar, o cliente confirmar ou cancelar um horário. As notificações também aparecem no sininho do painel.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">WhatsApp do Gestor (com DDD)</label>
+                                <input type="tel" name="manager_notification_phone"
+                                       value="{{ old('manager_notification_phone', $training->manager_notification_phone) }}"
+                                       maxlength="32" placeholder="Ex: 11 99999-8888"
+                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-orange-500">
+                                <p class="text-gray-400 text-xs mt-1">Deixe em branco para receber apenas no painel. Use um número diferente do WhatsApp conectado ao bot.</p>
+                            </div>
+                            <div class="space-y-2 sm:pt-6">
+                                @foreach([
+                                    'notify_manager_on_booking' => '📅 Novo agendamento',
+                                    'notify_manager_on_confirm' => '✅ Cliente confirmou presença',
+                                    'notify_manager_on_cancel'  => '❌ Cliente cancelou (vaga reaberta)',
+                                ] as $nKey => $nLabel)
+                                    <label class="flex items-center gap-2.5 cursor-pointer">
+                                        <input type="hidden" name="{{ $nKey }}" value="0">
+                                        <input type="checkbox" name="{{ $nKey }}" value="1"
+                                               {{ old($nKey, $training->{$nKey} ?? true) ? 'checked' : '' }}
+                                               class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500">
+                                        <span class="text-xs sm:text-sm font-bold text-[#0A1128]">{{ $nLabel }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-5 border-t border-gray-100 pt-5">
                         <p class="text-xs font-bold uppercase tracking-wider text-gray-700 mb-3">Expediente Permitido para Agendamentos</p>
                         @php
                             $horario = old('horario_comercial', $training->horario_comercial ?? []);

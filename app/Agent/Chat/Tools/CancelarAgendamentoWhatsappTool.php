@@ -84,11 +84,14 @@ class CancelarAgendamentoWhatsappTool implements ToolInterface
             'notes' => $notes,
         ]);
 
+        app(\App\Services\AppointmentNotificationService::class)->notifyCancelled($apt, $motivo ?: null);
+
         return [
             'ok' => true,
             'cancelado_id' => $apt->id,
             'data_hora_cancelada' => $apt->scheduled_at->format('d/m/Y H:i'),
-            'mensagem_para_cliente' => "Pronto, cancelei o agendamento de {$apt->scheduled_at->format('d/m H:i')}. Se quiser remarcar, so me avisar.",
+            'horario_liberado' => true,
+            'mensagem_para_cliente' => "Pronto, cancelei o agendamento de {$apt->scheduled_at->format('d/m H:i')} e o horario foi liberado. Quer que eu veja outro horario pra voce remarcar?",
         ];
     }
 }

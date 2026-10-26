@@ -67,11 +67,17 @@
 
             <div class="overflow-y-auto thin-scrollbar flex-1 px-4 py-6">
                 <!-- Logo & Brand -->
-                <div class="h-16 flex items-center px-3 mb-6 border-b border-white/10">
+                <div class="h-16 flex items-center justify-between gap-2 px-3 mb-6 border-b border-white/10">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
                         <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Hub Digital" class="h-8 w-auto">
                         <span class="text-[9px] font-extrabold text-bruce uppercase tracking-widest bg-bruce/10 px-2 py-0.5 rounded-md border border-bruce/20">Admin</span>
                     </a>
+                    @php
+                        try { $bellSysId = \App\Services\SystemCliente::get()?->id; } catch (\Throwable $e) { $bellSysId = null; }
+                    @endphp
+                    @if($bellSysId)
+                        @include('partials.notification-bell', ['bellPrefix' => 'admin.hub.', 'bellClienteId' => $bellSysId, 'bellAgendaRoute' => 'admin.hub.agenda.index'])
+                    @endif
                 </div>
 
                 <div class="space-y-1">

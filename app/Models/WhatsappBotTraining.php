@@ -15,6 +15,10 @@ class WhatsappBotTraining extends Model
 
     protected $casts = [
         'horario_comercial' => 'array',
+        'enable_second_reminder' => 'boolean',
+        'notify_manager_on_booking' => 'boolean',
+        'notify_manager_on_confirm' => 'boolean',
+        'notify_manager_on_cancel' => 'boolean',
     ];
 
     public const DIAS_SEMANA = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];

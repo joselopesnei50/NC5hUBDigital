@@ -85,6 +85,10 @@ class WhatsappBotController extends Controller
             'horario_comercial.*.abre' => ['nullable', 'date_format:H:i'],
             'horario_comercial.*.fecha' => ['nullable', 'date_format:H:i'],
             'resource_label' => ['nullable', 'string', 'max:40'],
+            'manager_notification_phone' => ['nullable', 'string', 'max:32'],
+            'notify_manager_on_booking' => ['nullable', 'boolean'],
+            'notify_manager_on_confirm' => ['nullable', 'boolean'],
+            'notify_manager_on_cancel' => ['nullable', 'boolean'],
         ]);
 
         $horario = [];
@@ -127,6 +131,10 @@ class WhatsappBotController extends Controller
                 'duracao_padrao_atendimento_min' => $validated['duracao_padrao_atendimento_min'] ?? 60,
                 'horario_comercial' => $horario,
                 'resource_label' => trim($validated['resource_label'] ?? '') ?: 'Profissional',
+                'manager_notification_phone' => preg_replace('/\D+/', '', (string) ($validated['manager_notification_phone'] ?? '')) ?: null,
+                'notify_manager_on_booking' => (bool) ($validated['notify_manager_on_booking'] ?? false),
+                'notify_manager_on_confirm' => (bool) ($validated['notify_manager_on_confirm'] ?? false),
+                'notify_manager_on_cancel' => (bool) ($validated['notify_manager_on_cancel'] ?? false),
             ]
         );
 

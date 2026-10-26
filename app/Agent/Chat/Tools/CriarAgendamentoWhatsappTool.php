@@ -182,6 +182,8 @@ class CriarAgendamentoWhatsappTool implements ToolInterface
             'created_via' => 'bot',
         ]);
 
+        app(\App\Services\AppointmentNotificationService::class)->notifyCreated($appointment);
+
         return [
             'ok' => true,
             'agendamento_id' => $appointment->id,

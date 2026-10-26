@@ -72,7 +72,7 @@ class AppServiceProvider extends ServiceProvider
      */
     private function ensureMetaAndSocialSchema(): void
     {
-        if (Cache::get('nc5_meta_social_schema_v1') === true) {
+        if (Cache::get('nc5_meta_social_schema_v2') === true) {
             return;
         }
 
@@ -83,6 +83,21 @@ class AppServiceProvider extends ServiceProvider
                     $table->string('waba_id', 64)->nullable()->after('provider');
                     $table->string('phone_number_id', 64)->nullable()->index()->after('waba_id');
                     $table->text('graph_access_token')->nullable()->after('phone_number_id');
+                });
+            }
+
+            if (Schema::hasTable('whatsapp_bot_training') && !Schema::hasColumn('whatsapp_bot_training', 'manager_notification_phone')) {
+                Schema::table('whatsapp_bot_training', function (Blueprint $table) {
+                    $table->string('manager_notification_phone', 32)->nullable()->after('resource_label');
+                    $table->boolean('notify_manager_on_booking')->default(true)->after('manager_notification_phone');
+                    $table->boolean('notify_manager_on_confirm')->default(true)->after('notify_manager_on_booking');
+                    $table->boolean('notify_manager_on_cancel')->default(true)->after('notify_manager_on_confirm');
+                });
+            }
+
+            if (Schema::hasTable('appointments') && !Schema::hasColumn('appointments', 'confirmed_at')) {
+                Schema::table('appointments', function (Blueprint $table) {
+                    $table->timestamp('confirmed_at')->nullable()->after('reminder_second_sent_at');
                 });
             }
 
@@ -137,7 +152,7 @@ class AppServiceProvider extends ServiceProvider
                 });
             }
 
-            Cache::forever('nc5_meta_social_schema_v1', true);
+            Cache::forever('nc5_meta_social_schema_v2', true);
         } catch (\Throwable $e) {
             // Ignora silenciosamente caso o banco esteja em manutenção
         }

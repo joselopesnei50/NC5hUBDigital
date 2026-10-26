@@ -2,11 +2,14 @@
 
     <div class="overflow-y-auto no-scrollbar flex-1 px-4 py-6">
         <!-- Logo & Client Brand -->
-        <div class="h-16 flex items-center px-3 mb-6 border-b border-white/10">
+        <div class="h-16 flex items-center justify-between gap-2 px-3 mb-6 border-b border-white/10">
             <a href="{{ route('customer.index') }}" class="flex items-center gap-3">
                 <img src="{{ asset('images/logo-claro.svg') }}" alt="NC5 Hub Digital" class="h-8 w-auto">
                 <span class="text-[9px] font-extrabold text-bruce uppercase tracking-widest bg-bruce/10 px-2 py-0.5 rounded-md border border-bruce/20">BruceOS</span>
             </a>
+            @if(Auth::user()?->cliente)
+                @include('partials.notification-bell', ['bellPrefix' => 'customer.', 'bellClienteId' => Auth::user()->cliente->id, 'bellAgendaRoute' => 'customer.agenda.index'])
+            @endif
         </div>
 
         {{--

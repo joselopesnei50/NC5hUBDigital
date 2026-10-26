@@ -98,6 +98,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             });
         });
 
+        // Central de Notificações (sininho) do Hub NC5
+        Route::get('/notificacoes/feed', [\App\Http\Controllers\PanelNotificationController::class, 'feed'])->name('notifications.feed');
+        Route::post('/notificacoes/marcar-lidas', [\App\Http\Controllers\PanelNotificationController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::post('/notificacoes/{alerta}/dispensar', [\App\Http\Controllers\PanelNotificationController::class, 'dismiss'])->name('notifications.dismiss');
+
         // Regenerar token ICS do cliente NC5 Interno
         Route::post('/calendario/regenerate', [\App\Http\Controllers\Admin\Hub\CalendarLinkController::class, 'regenerateCliente'])
             ->name('calendar.cliente.regenerate');
@@ -351,6 +356,14 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('/senha', function () {
         return view('customer.senha');
     })->name('customer.senha');
+
+    // Central de Notificações (sininho) do BruceOS
+    Route::get('notificacoes/feed', [\App\Http\Controllers\PanelNotificationController::class, 'feed'])
+        ->name('customer.notifications.feed');
+    Route::post('notificacoes/marcar-lidas', [\App\Http\Controllers\PanelNotificationController::class, 'markAllRead'])
+        ->name('customer.notifications.read-all');
+    Route::post('notificacoes/{alerta}/dispensar', [\App\Http\Controllers\PanelNotificationController::class, 'dismiss'])
+        ->name('customer.notifications.dismiss');
 
     // Alertas proativos do Bruce
     Route::get('alertas', [\App\Http\Controllers\Customer\AlertsController::class, 'index'])

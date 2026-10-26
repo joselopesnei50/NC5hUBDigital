@@ -130,12 +130,16 @@ class SendAppointmentReminders extends Command
         $data = $apt->scheduled_at->format('d/m');
         $nome = $apt->contato_nome ?: ($apt->clienteFinal?->nome_responsavel ?: 'tudo bem');
         $titulo = $apt->titulo;
-        $prefix = $businessName ? "Oi {$nome}! Aqui e do {$businessName}." : "Oi {$nome}!";
+        $prefix = $businessName ? "Olá, {$nome}! Aqui é do {$businessName}." : "Olá, {$nome}!";
 
-        if ($slot === 'second') {
-            return "{$prefix} So passando pra avisar: temos seu agendamento ({$titulo}) marcado pra {$data} as {$hora}. Qualquer coisa so chamar aqui.";
+        // Já confirmado: apenas lembra, sem pedir nova confirmação
+        if ($apt->status === 'confirmado') {
+            return "{$prefix} Passando pra lembrar do seu horário confirmado: *{$titulo}* em *{$data} às {$hora}*. Até lá! 😊";
         }
 
-        return "{$prefix} Passando pra lembrar: {$titulo} em {$data} as {$hora}. Qualquer coisa so chamar aqui. Ate la!";
+        return "{$prefix} 📅 Passando para confirmar seu agendamento: *{$titulo}* no dia *{$data} às {$hora}*.\n\n"
+            . "Você confirma sua presença?\n"
+            . "Responda *1* ou *SIM* para confirmar ✅\n"
+            . "Responda *2* ou *CANCELAR* para liberar o horário ❌";
     }
 }

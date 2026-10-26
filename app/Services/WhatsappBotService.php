@@ -11,6 +11,7 @@ use App\Agent\Chat\Tools\CriarOrcamentoWhatsappTool;
 use App\Agent\Chat\Tools\ListarMeusAgendamentosWhatsappTool;
 use App\Agent\Chat\Tools\ListarRecursosWhatsappTool;
 use App\Models\AppointmentResource;
+use App\Services\AppointmentNotificationService;
 use App\Agent\DTOs\PromptPayload;
 use App\Agent\LlmManager;
 use App\Models\AgentKnowledge;
@@ -44,6 +45,7 @@ class WhatsappBotService
         $this->tools->register(new ConsultarAgendaWhatsappTool());
         $this->tools->register(new ListarMeusAgendamentosWhatsappTool());
         $this->tools->register(new CancelarAgendamentoWhatsappTool());
+        $this->tools->register(new \App\Agent\Chat\Tools\ConfirmarAgendamentoWhatsappTool());
         $this->tools->register(new ListarRecursosWhatsappTool());
         $this->tools->register(new ConsultarCatalogoWhatsappTool());
         $this->tools->register(new CriarOrcamentoWhatsappTool());
@@ -51,6 +53,14 @@ class WhatsappBotService
 
     public function generateReply(WhatsappChat $chat, string $inboundText, ?string $inboundMessageId = null): ?string
     {
+        // Atalho determinístico: resposta direta ao lembrete de confirmação (SIM / CANCELAR)
+        if (!$chat->is_group) {
+            $quick = $this->handleReminderQuickReply($chat, $inboundText);
+            if ($quick !== null) {
+                return $quick;
+            }
+        }
+
         if (!$this->shouldReply($chat)) {
             return null;
         }
@@ -126,6 +136,76 @@ class WhatsappBotService
 
     protected ?array $pendingInteraction = null;
     protected array $pendingToolErrors = [];
+
+    /**
+     * Se o cliente respondeu "SIM"/"1" ou "CANCELAR"/"2" a um lembrete de confirmação enviado
+     * nas últimas 48h, confirma ou cancela o agendamento imediatamente (sem depender da IA).
+     * Retorna a mensagem de resposta, ou null se não se aplica.
+     */
+    protected function handleReminderQuickReply(WhatsappChat $chat, string $inboundText): ?string
+    {
+        $normalized = mb_strtolower(trim(Str::ascii($inboundText)));
+        $normalized = trim(preg_replace('/[^a-z0-9 ]+/', ' ', $normalized));
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+        if ($normalized === '' || mb_strlen($normalized) > 40) {
+            return null;
+        }
+
+        $confirmWords = ['sim', 's', '1', 'confirmo', 'confirmado', 'confirmar', 'sim confirmo', 'ok', 'okay', 'pode confirmar', 'estarei la', 'vou sim', 'sim vou', 'claro', 'com certeza', 'sim pode confirmar'];
+        $cancelWords = ['2', 'cancelar', 'cancela', 'cancelo', 'nao', 'n', 'nao vou', 'nao vou poder', 'nao posso', 'desmarcar', 'desmarca', 'quero cancelar', 'pode cancelar'];
+
+        $isConfirm = in_array($normalized, $confirmWords, true);
+        $isCancel = in_array($normalized, $cancelWords, true);
+        if (!$isConfirm && !$isCancel) {
+            return null;
+        }
+
+        $apt = \App\Models\Appointment::where('cliente_id', $chat->cliente_id)
+            ->whereIn('status', ['agendado', 'confirmado'])
+            ->where('scheduled_at', '>=', now()->subHours(1))
+            ->where(function ($q) {
+                $q->where('reminder_sent_at', '>=', now()->subHours(48))
+                    ->orWhere('reminder_second_sent_at', '>=', now()->subHours(48));
+            })
+            ->where(function ($q) use ($chat) {
+                $q->where('chat_id', $chat->id);
+                if ($chat->cliente_final_id) {
+                    $q->orWhere('cliente_final_id', $chat->cliente_final_id);
+                }
+            })
+            ->orderBy('scheduled_at')
+            ->first();
+
+        if (!$apt) {
+            return null;
+        }
+
+        $data = $apt->scheduled_at->format('d/m');
+        $hora = $apt->scheduled_at->format('H:i');
+        $notifier = app(AppointmentNotificationService::class);
+
+        try {
+            if ($isConfirm) {
+                if ($apt->status !== 'confirmado') {
+                    $apt->update(['status' => 'confirmado', 'confirmed_at' => now()]);
+                    $notifier->notifyConfirmed($apt);
+                }
+                return "Perfeito! ✅ Sua presença em {$data} às {$hora} ({$apt->titulo}) está confirmada. Até lá!";
+            }
+
+            $apt->update([
+                'status' => 'cancelado',
+                'cancelled_at' => now(),
+                'notes' => trim(($apt->notes ?: '') . "\n[cancelado via resposta ao lembrete] " . $inboundText),
+            ]);
+            $notifier->notifyCancelled($apt, 'Cliente respondeu ao lembrete: "' . mb_substr($inboundText, 0, 60) . '"');
+
+            return "Tudo bem, cancelei seu horário de {$data} às {$hora} e ele já foi liberado. Quer que eu veja outro dia e horário pra você remarcar?";
+        } catch (Throwable $e) {
+            Log::warning('WhatsappBot: falha no atalho de confirmacao', ['apt' => $apt->id, 'msg' => $e->getMessage()]);
+            return null;
+        }
+    }
 
     public function registerOutbound(?string $outboundMessageId, bool $sendFailed = false): void
     {
@@ -377,7 +457,7 @@ class WhatsappBotService
             . "- Sempre que o cliente perguntar sobre produtos, servicos, cardapio ou valores, chame consultar_catalogo para informar os precos oficiais cadastrados no BruceOS.\n"
             . "- Se o cliente quiser receber um orcamento formal, proposta ou fechar um pedido com itens especificos, chame criar_orcamento_pedido passando os itens e quantidades, e envie para ele o link_proposta retornado pela ferramenta.\n\n"
             . "AGENDAMENTOS (FERRAMENTAS DISPONIVEIS):\n"
-            . "- Tools: consultar_agenda, criar_agendamento, listar_meus_agendamentos, cancelar_agendamento, listar_recursos.\n"
+            . "- Tools: consultar_agenda, criar_agendamento, listar_meus_agendamentos, cancelar_agendamento, confirmar_agendamento, listar_recursos.\n"
             . "- NUNCA proponha ou agende horario fora do horario_comercial do snapshot. Se o cliente pedir fora, informe o horario de funcionamento e sugira o proximo horario valido.\n"
             . "- RECURSOS (profissionais/cadeiras/salas conforme resource_label): veja a lista em recursos do snapshot.\n"
             . "  * Se recursos tem 0 itens: ignore totalmente, agende sem perguntar.\n"
@@ -397,6 +477,10 @@ class WhatsappBotService
             . "  3. CONFIRME: \"Vou cancelar o agendamento de X dia Y, confirma?\". ESPERE o SIM.\n"
             . "  4. Chame cancelar_agendamento com o appointment_id.\n"
             . "  5. Se for remarcacao, apos cancelar siga o fluxo pra MARCAR com o novo horario.\n"
+            . "- Fluxo de RESPOSTA AO LEMBRETE DE CONFIRMACAO (o sistema envia automaticamente antes do horario pedindo SIM ou CANCELAR):\n"
+            . "  * Se a ultima mensagem enviada por nos foi um lembrete pedindo confirmacao e o cliente responder algo como 'sim', 'confirmo', '1', 'ok', 'estarei la', 'pode confirmar': chame IMEDIATAMENTE confirmar_agendamento (sem pedir nova confirmacao) e agradeca de forma curta.\n"
+            . "  * Se responder 'cancelar', '2', 'nao vou poder', 'desmarca': chame listar_meus_agendamentos, e entao cancelar_agendamento com o id do agendamento lembrado (a resposta ao lembrete ja vale como confirmacao do cancelamento). Depois informe que o horario foi liberado e OFERECA remarcar.\n"
+            . "  * Se pedir pra remarcar: cancele o atual e siga o fluxo pra MARCAR.\n"
             . "- Interprete datas relativas (\"amanha\", \"sexta\", \"dia 15\") pra YYYY-MM-DD baseando-se em hoje do snapshot.";
 
         $parts[] = "REGRAS GERAIS:\n"
