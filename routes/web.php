@@ -47,6 +47,11 @@ Route::get('/contrato-prestador/{token}', [\App\Http\Controllers\PublicContratoP
 Route::post('/contrato-prestador/{token}/assinar', [\App\Http\Controllers\PublicContratoPrestadorController::class, 'sign'])->middleware('throttle:5,1')->name('public.contrato-prestador.sign');
 Route::get('/contrato-prestador/{token}/pdf', [\App\Http\Controllers\PublicContratoPrestadorController::class, 'downloadPdf'])->name('public.contrato-prestador.pdf');
 
+// Assinatura pública de Termo de Uso de Imagem e Voz (link por token)
+Route::get('/termo-imagem/{token}', [\App\Http\Controllers\PublicTermoImagemController::class, 'show'])->name('public.termo-imagem.show');
+Route::post('/termo-imagem/{token}/assinar', [\App\Http\Controllers\PublicTermoImagemController::class, 'sign'])->middleware('throttle:5,1')->name('public.termo-imagem.sign');
+Route::get('/termo-imagem/{token}/pdf', [\App\Http\Controllers\PublicTermoImagemController::class, 'downloadPdf'])->name('public.termo-imagem.pdf');
+
 // Páginas legais
 Route::view('/privacidade', 'public.privacidade')->name('privacidade');
 Route::view('/termos', 'public.termos')->name('termos');
@@ -181,6 +186,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('contratos-prestadores/{contrato}/enviar-email', [\App\Http\Controllers\Admin\ContratoPrestadorController::class, 'enviarEmail'])->name('contratos-prestadores.enviar-email');
     Route::resource('contratos-prestadores', \App\Http\Controllers\Admin\ContratoPrestadorController::class)
         ->parameters(['contratos-prestadores' => 'contrato']);
+
+    // Termos de Autorização de Uso de Imagem e Voz
+    Route::get('termos-imagem/{termo}/pdf', [\App\Http\Controllers\Admin\TermoImagemController::class, 'downloadPdf'])->name('termos-imagem.pdf');
+    Route::post('termos-imagem/{termo}/enviar-email', [\App\Http\Controllers\Admin\TermoImagemController::class, 'enviarEmail'])->name('termos-imagem.enviar-email');
+    Route::post('termos-imagem/{termo}/cancelar', [\App\Http\Controllers\Admin\TermoImagemController::class, 'cancelar'])->name('termos-imagem.cancelar');
+    Route::resource('termos-imagem', \App\Http\Controllers\Admin\TermoImagemController::class)
+        ->parameters(['termos-imagem' => 'termo']);
     Route::resource('faturas', \App\Http\Controllers\Admin\FaturaController::class);
     Route::post('faturas/{id}/enviar-email', [\App\Http\Controllers\Admin\FaturaController::class, 'enviarEmail'])->name('faturas.enviar_email');
     Route::resource('materiais', \App\Http\Controllers\Admin\MaterialController::class);
@@ -252,6 +264,8 @@ Route::middleware(['auth', 'role:cliente'])->prefix('area-cliente')->group(funct
     Route::get('/contratos', [CustomerController::class, 'contracts'])->name('customer.contracts');
     Route::post('/contratos/{id}/assinar', [CustomerController::class, 'signContract'])->name('customer.contracts.sign');
     Route::get('/contratos/{id}/pdf', [CustomerController::class, 'downloadContract'])->name('customer.contracts.pdf');
+    Route::get('/termos-imagem', [CustomerController::class, 'termosImagem'])->name('customer.termos-imagem');
+    Route::get('/termos-imagem/{id}/pdf', [CustomerController::class, 'downloadTermoImagem'])->name('customer.termos-imagem.pdf');
     Route::get('/faturas', [CustomerController::class, 'invoices'])->name('customer.invoices');
     Route::get('/faturas/{id}', [CustomerController::class, 'showInvoice'])->name('customer.invoices.show');
     Route::post('/faturas/{id}/comprovante', [CustomerController::class, 'uploadComprovante'])->name('customer.invoices.comprovante');
