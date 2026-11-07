@@ -366,4 +366,28 @@ class CustomerController extends Controller
 
         return back()->with('success', 'Sua avaliação e observações foram enviadas com sucesso para a equipe NC5 Hub!');
     }
+
+    public function termosImagem()
+    {
+        $cliente = Auth::user()->cliente;
+        if (!$cliente) {
+            abort(403, 'Acesso negado. Sua conta não está vinculada a um cliente.');
+        }
+
+        $termos = $cliente->termosImagem()->latest()->get();
+        return view('customer.termos_imagem', compact('termos'));
+    }
+
+    public function downloadTermoImagem($id)
+    {
+        $cliente = Auth::user()->cliente;
+        if (!$cliente) {
+            abort(403, 'Acesso negado. Sua conta não está vinculada a um cliente.');
+        }
+
+        $termo = $cliente->termosImagem()->with('cliente')->findOrFail($id);
+
+        $pdf = Pdf::loadView('admin.termos-imagem.pdf', compact('termo'))->setPaper('a4');
+        return $pdf->download("termo-imagem-{$termo->id}.pdf");
+    }
 }
