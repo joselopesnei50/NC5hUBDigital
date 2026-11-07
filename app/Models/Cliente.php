@@ -87,4 +87,9 @@ class Cliente extends Model
     {
         return $this->hasMany(LandingPage::class);
     }
+
+    public function termosImagem()
+    {
+        return $this->hasMany(TermoImagem::class);
+    }
 }
